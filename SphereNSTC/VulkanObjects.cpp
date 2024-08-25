@@ -2,7 +2,6 @@
 
 #include "Utils.h"
 #include "VulkanUtils.h"
-#include "shaderc/shaderc.hpp"
 
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
@@ -390,7 +389,7 @@ Device::~Device() {
   vkDestroyDevice(handle, nullptr);
 }
 
-void Device::waitIdle() {
+void Device::waitIdle() const {
   VK_CHECK(vkDeviceWaitIdle(handle));
 }
 
@@ -521,7 +520,7 @@ void CommandBuffer::end() const {
   VK_CHECK(vkEndCommandBuffer(handle));
 }
 
-void CommandBuffer::submitToQueue(Queue* queue, Fence* fence) {
+void CommandBuffer::submitToQueue(Queue* queue, Fence* fence) const {
   VkCommandBufferSubmitInfo info{};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
   //info.pNext = nullptr;
@@ -832,7 +831,7 @@ VmaAllocationCreateInfo& Buffer::getAllocationCreateInfo(VmaMemoryUsage usage) {
   return info;
 }
 
-VkBufferDeviceAddressInfo& Buffer::getDeviceAddressInfo() {
+VkBufferDeviceAddressInfo& Buffer::getDeviceAddressInfo() const {
   VkBufferDeviceAddressInfo info{};
   info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
   info.pNext = nullptr;
@@ -966,7 +965,7 @@ BLAS::BLAS(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmi
   _geometry.geometry.triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
   _geometry.geometry.triangles.vertexData.deviceAddress = _vertices->address;
   _geometry.geometry.triangles.vertexStride = sizeof(Vertex);
-  _geometry.geometry.triangles.maxVertex = vertices.size() - 1;
+  _geometry.geometry.triangles.maxVertex = static_cast<uint32_t>(vertices.size() - 1);
   _geometry.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32;
   _geometry.geometry.triangles.indexData.deviceAddress = _indices->address;
   //_geometry.geometry.triangles.transformData; //TODO: implement transforms
@@ -983,7 +982,7 @@ BLAS::BLAS(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmi
   //_buildGeometryInfo.ppGeometries;
 
   // --- BUILD SIZES ---
-  uint32_t primitiveCount = vertices.size() / 3;
+  uint32_t primitiveCount = static_cast<uint32_t>(vertices.size() / 3);
 
   _buildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
   vkGetAccelerationStructureBuildSizesKHR(device->handle, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
@@ -1072,12 +1071,12 @@ TLAS::TLAS(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmi
   _buildGeometryInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
   _buildGeometryInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
   //_buildGeometryInfo.srcAccelerationStructure;
-  _buildGeometryInfo.geometryCount = instances.size();
+  _buildGeometryInfo.geometryCount = static_cast<uint32_t>(instances.size());
   _buildGeometryInfo.pGeometries = &_geometry;
   //_buildGeometryInfo.ppGeometries;
 
   // --- BUILD SIZES ---
-  uint32_t primitiveCount = instances.size();
+  uint32_t primitiveCount = static_cast<uint32_t>(instances.size());
 
   _buildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
   vkGetAccelerationStructureBuildSizesKHR(device->handle, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
@@ -1122,13 +1121,7 @@ Shader::Shader(Device* device, const char* path, VkShaderStageFlagBits stage) {
   _devicePtr = &device->handle;
   _stage = stage;
 
-  std::string text = readFileText(path);
-
-  shaderc::Compiler compiler;
-  shaderc::CompileOptions options;
-  shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(text, shaderc_glsl_raygen_shader, nullptr);
-  std::vector<uint32_t> data;
-  data.assign(result.cbegin(), result.cend());
+  std::vector<uint32_t> data = readFileBytes(path);
 
   VkShaderModuleCreateInfo moduleCreateInfo{};
   moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

@@ -1,5 +1,5 @@
 @echo on
-"%~dp0\glslc.exe" uncompiled\rayGenShader.rgen -o rayGenShader.spv
-"%~dp0\glslc.exe" uncompiled\rayChitShader.rchit -o rayChitShader.spv
-"%~dp0\glslc.exe" uncompiled\rayMissShader.rmiss -o rayMissShader.spv
+"%~dp0glslc.exe" uncompiled\rayGenShader.rgen --target-env=vulkan1.3 -o rayGenShader.spv
+"%~dp0glslc.exe" uncompiled\rayChitShader.rchit --target-env=vulkan1.3 -o rayChitShader.spv
+"%~dp0glslc.exe" uncompiled\rayMissShader.rmiss --target-env=vulkan1.3 -o rayMissShader.spv
 pause

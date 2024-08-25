@@ -101,9 +101,9 @@ struct Core {
 
     worldTLAS = new TLAS(device, allocator, immediateSubmit, { triangleBLAS->getInstance(glm::mat4(1.0f)) });
 
-    Shader* rayGen = new Shader(device, "resources/shaders/rayGenShader.rgen", VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-    Shader* rayChit = new Shader(device, "resources/shaders/rayChitShader.rchit", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-    Shader* rayMiss = new Shader(device, "resources/shaders/rayMissShader.rmiss", VK_SHADER_STAGE_MISS_BIT_KHR);
+    Shader* rayGen = new Shader(device, "resources/shaders/rayGenShader.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+    Shader* rayChit = new Shader(device, "resources/shaders/rayChitShader.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+    Shader* rayMiss = new Shader(device, "resources/shaders/rayMissShader.spv", VK_SHADER_STAGE_MISS_BIT_KHR);
   }
 
   ~Core() {

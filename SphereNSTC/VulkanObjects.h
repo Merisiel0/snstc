@@ -96,7 +96,7 @@ public:
   Device(PhysicalDevice* physicalDevice, std::vector<const char*> extensions);
   ~Device();
 
-  void waitIdle();
+  void waitIdle() const;
 };
 
 class Queue {
@@ -181,7 +181,7 @@ public:
   void reset() const;
   void begin() const;
   void end() const;
-  void submitToQueue(Queue* queue, Fence* fence);
+  void submitToQueue(Queue* queue, Fence* fence) const;
 };
 
 class Frame {
@@ -269,7 +269,7 @@ public:
 
   VkBufferCreateInfo& getCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage);
   VmaAllocationCreateInfo& getAllocationCreateInfo(VmaMemoryUsage usage);
-  VkBufferDeviceAddressInfo& getDeviceAddressInfo();
+  VkBufferDeviceAddressInfo& getDeviceAddressInfo() const;
 
   Buffer() {}
 
