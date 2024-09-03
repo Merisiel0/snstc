@@ -104,9 +104,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\SphereNSTC;$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\stb\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,7 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\SphereNSTC;$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -137,26 +137,85 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ECS.cpp" />
-    <ClCompile Include="EventHandler.cpp" />
-    <ClCompile Include="FunctionQueue.cpp" />
-    <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="VulkanObjects.cpp" />
-    <ClCompile Include="VulkanUtils.cpp" />
+    <ClCompile Include="_ECS\Components\Camera.cpp" />
+    <ClCompile Include="_ECS\GameObject.cpp" />
+    <ClCompile Include="_ECS\Components\Transform.cpp" />
+    <ClCompile Include="_ECS\World.cpp" />
+    <ClCompile Include="_events\EventHandler.cpp" />
+    <ClCompile Include="_graphics\Allocator.cpp" />
+    <ClCompile Include="_graphics\BLAS.cpp" />
+    <ClCompile Include="_graphics\Buffer.cpp" />
+    <ClCompile Include="_graphics\CommandBuffer.cpp" />
+    <ClCompile Include="_graphics\CommandPool.cpp" />
+    <ClCompile Include="_graphics\DebugUtilsMessenger.cpp" />
+    <ClCompile Include="_graphics\Device.cpp" />
+    <ClCompile Include="_graphics\Fence.cpp" />
+    <ClCompile Include="_graphics\Frame.cpp" />
+    <ClCompile Include="_graphics\Geometry.cpp" />
+    <ClCompile Include="_graphics\GraphicsHandler.cpp" />
+    <ClCompile Include="_graphics\GraphicsPipeline.cpp" />
+    <ClCompile Include="_graphics\IAccelerationStructure.cpp" />
+    <ClCompile Include="_graphics\Image.cpp" />
+    <ClCompile Include="_graphics\ImmediateSubmit.cpp" />
+    <ClCompile Include="_graphics\Instance.cpp" />
+    <ClCompile Include="_graphics\PhysicalDevice.cpp" />
+    <ClCompile Include="_graphics\Pipeline.cpp" />
+    <ClCompile Include="_graphics\Queue.cpp" />
+    <ClCompile Include="_graphics\RayTracingPipeline.cpp" />
+    <ClCompile Include="_graphics\Semaphore.cpp" />
+    <ClCompile Include="_graphics\Shader.cpp" />
+    <ClCompile Include="_graphics\Swapchain.cpp" />
+    <ClCompile Include="_graphics\TLAS.cpp" />
+    <ClCompile Include="_graphics\VulkanUtils.cpp" />
+    <ClCompile Include="_graphics\Window.cpp" />
+    <ClCompile Include="_inputs\InputHandler.cpp" />
+    <ClCompile Include="_resources\Material.cpp" />
+    <ClCompile Include="_resources\Mesh.cpp" />
+    <ClCompile Include="_utils\FunctionQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AudioHandler.h" />
-    <ClInclude Include="ECS.h" />
-    <ClInclude Include="EventHandler.h" />
-    <ClInclude Include="FunctionQueue.h" />
-    <ClInclude Include="Graphics.h" />
-    <ClInclude Include="InputHandler.h" />
-    <ClInclude Include="Resources.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="VulkanObjects.h" />
-    <ClInclude Include="VulkanUtils.h" />
+    <ClInclude Include="_resources\Material.h" />
+    <ClInclude Include="_resources\Mesh.h" />
+    <ClInclude Include="_audio\AudioHandler.h" />
+    <ClInclude Include="_ECS\Components\BaseComponent.h" />
+    <ClInclude Include="_ECS\Components\Camera.h" />
+    <ClInclude Include="_ECS\Components\MeshRenderer.h" />
+    <ClInclude Include="_ECS\ECS.h" />
+    <ClInclude Include="_ECS\GameObject.h" />
+    <ClInclude Include="_ECS\Components\Transform.h" />
+    <ClInclude Include="_ECS\World.h" />
+    <ClInclude Include="_events\EventHandler.h" />
+    <ClInclude Include="_graphics\Allocator.h" />
+    <ClInclude Include="_graphics\BLAS.h" />
+    <ClInclude Include="_graphics\Buffer.h" />
+    <ClInclude Include="_graphics\CommandBuffer.h" />
+    <ClInclude Include="_graphics\CommandPool.h" />
+    <ClInclude Include="_graphics\DebugUtilsMessenger.h" />
+    <ClInclude Include="_graphics\Device.h" />
+    <ClInclude Include="_graphics\Fence.h" />
+    <ClInclude Include="_graphics\Frame.h" />
+    <ClInclude Include="_graphics\Geometry.h" />
+    <ClInclude Include="_graphics\GraphicsHandler.h" />
+    <ClInclude Include="_graphics\GraphicsPipeline.h" />
+    <ClInclude Include="_graphics\IAccelerationStructure.h" />
+    <ClInclude Include="_graphics\Image.h" />
+    <ClInclude Include="_graphics\ImmediateSubmit.h" />
+    <ClInclude Include="_graphics\Instance.h" />
+    <ClInclude Include="_graphics\PhysicalDevice.h" />
+    <ClInclude Include="_graphics\Pipeline.h" />
+    <ClInclude Include="_graphics\Queue.h" />
+    <ClInclude Include="_graphics\RayTracingPipeline.h" />
+    <ClInclude Include="_graphics\Semaphore.h" />
+    <ClInclude Include="_graphics\Shader.h" />
+    <ClInclude Include="_graphics\Swapchain.h" />
+    <ClInclude Include="_graphics\TLAS.h" />
+    <ClInclude Include="_graphics\VulkanUtils.h" />
+    <ClInclude Include="_graphics\Window.h" />
+    <ClInclude Include="_inputs\InputHandler.h" />
+    <ClInclude Include="_utils\FunctionQueue.h" />
+    <ClInclude Include="_utils\Math.h" />
+    <ClInclude Include="_utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\uncompiled\rayChitShader.rchit" />

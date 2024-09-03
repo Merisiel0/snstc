@@ -1,12 +1,13 @@
 #define SDL_MAIN_HANDLED
 
-#include "Utils.h"
-#include "Graphics.h"
-#include "ECS.h"
-#include "EventHandler.h"
+#include "_utils/Utils.h"
+#include "_events/EventHandler.h"
+#include "_graphics/GraphicsHandler.h"
+#include "_ECS/ECS.h"
 
 #include <windows.h>
 
+GraphicsHandler* graphicsHandler{ nullptr };
 bool quit{ false };
 
 int main() {
@@ -19,21 +20,19 @@ int main() {
 	initInfo.applicationVersion = 0;
 	initInfo.engineName = "SphereNSTC Engine";
 	initInfo.engineVersion = 0;
-	initGraphics(initInfo);
+	graphicsHandler = new GraphicsHandler(initInfo);
 
 	// --- Game Initialization ---
 	GameObject cameraObj = GameObject();
 	cameraObj.addComponent<Transform>(vec3{ 0,0,-10 }, identity<quat>(), vec3{ 1,1,1 });
-	Camera& cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
-	cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
+	Camera* cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
+	cam->updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
 
 	GameObject cubeObj = GameObject();
 	cubeObj.addComponent<Transform>(vec3{ 0,0,0 }, identity<quat>(), vec3{ 1,1,1 });
 	cubeObj.addComponent<MeshRenderer>(generateCubeMesh());
 
-	World world = World();
-	world.addChild(cameraObj);
-	world.addChild(cubeObj);
+	World world = World({cameraObj, cubeObj});
 
 	// --- Game Loop ---
 	while (!quit) {

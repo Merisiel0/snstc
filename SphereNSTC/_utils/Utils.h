@@ -1,9 +1,6 @@
 #pragma once
 
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "glm/glm.hpp"
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "Math.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -25,8 +22,6 @@
 		}															        																					\
 	}while(0)
 
-using namespace glm;
-
 class Exception : public std::exception {
 private:
 	const char* message;
@@ -40,6 +35,8 @@ public:
 };
 
 typedef glm::uvec4 Color;
+
+typedef uint32_t Index;
 
 struct Vertex {
 	Color color;

@@ -1,5 +1,9 @@
 #include "VulkanUtils.h"
 
+#define VMA_VULKAN_VERSION 1003000
+#define VMA_IMPLEMENTATION
+#include "vma/vk_mem_alloc.h"
+
 const char* vkResultToString(VkResult result) {
 	switch (result) {
 	case VK_SUCCESS:

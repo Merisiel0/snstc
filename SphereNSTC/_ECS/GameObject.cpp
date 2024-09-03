@@ -1,40 +1,6 @@
-#include "ECS.h"
+#include "GameObject.h"
 
 using namespace ECS;
-
-mat4 Transform::getModelMatrix() {
-	mat4 matrix = mat4(1.0f);
-	matrix = translate(matrix, position);
-	matrix = glm::rotate(matrix, angle(rotation), axis(rotation));
-	matrix = glm::scale(matrix, scale);
-	return matrix;
-}
-
-void Transform::rotate(vec3 angles) {
-	rotation = glm::rotate(rotation, angles.x, { 1,0,0 });
-	rotation = glm::rotate(rotation, angles.y, { 0,1,0 });
-	rotation = glm::rotate(rotation, angles.z, { 0,0,1 });
-}
-
-Camera::Camera() {
-	transform = &gameObject->getComponent<Transform>();
-	updateView();
-}
-
-void Camera::updateView() {
-	view = glm::inverse(transform->getModelMatrix());
-}
-
-void Camera::updateProjectionPerspective(float fovY, float aspect, float zNear, float zFar) {
-	projectionType = PERSPECTIVE;
-	projection = glm::perspective(fovY, aspect, zNear, zFar);
-	projection[1][1] *= -1;
-}
-
-void Camera::updateProjectionOrthographic(float left, float right, float bottom, float top, float zNear, float zFar) {
-	projectionType = ORTHOGRAPHIC;
-	projection = glm::ortho(left, right, bottom, top, zNear, zFar);
-}
 
 GameObject::GameObject() {
 	_id = _registry.create();
@@ -81,7 +47,7 @@ GameObject::~GameObject() {
 	_registry.destroy(_id);
 }
 
-bool GameObject::hasTag(const char* tag) {
+bool GameObject::hasTag(const char* tag) const {
 	const ObjectData& data = _registry.get<ObjectData>(_id);
 
 	if (data.tags.size() == 0) return false;
@@ -90,13 +56,13 @@ bool GameObject::hasTag(const char* tag) {
 	return it != data.tags.end();
 }
 
-void GameObject::addTag(const char* tag) {
+void GameObject::addTag(const char* tag) const {
 	if (!hasTag(tag)) {
 		_registry.get<ObjectData>(_id).tags.push_back(tag);
 	}
 }
 
-void GameObject::removeTag(const char* tag) {
+void GameObject::removeTag(const char* tag) const {
 	if (!hasTag(tag)) return;
 
 	ObjectData& data = _registry.get<ObjectData>(_id);
@@ -107,11 +73,11 @@ void GameObject::removeTag(const char* tag) {
 	}
 }
 
-bool GameObject::isActive() {
+bool GameObject::isActive() const {
 	return _registry.get<ObjectData>(_id).isActive;
 }
 
-void GameObject::setActive(bool isActive) {
+void GameObject::setActive(bool isActive) const {
 	_registry.get<ObjectData>(_id).isActive = isActive;
 }
 
@@ -119,25 +85,25 @@ entt::entity GameObject::getId() const {
 	return _id;
 }
 
-bool GameObject::hasParent() {
+bool GameObject::hasParent() const {
 	const ObjectData& data = _registry.get<ObjectData>(_id);
 	return data.parent != data.rootParent && data.parent != entt::null;
 }
 
-void GameObject::setParent(GameObject& parent) {
+void GameObject::setParent(const GameObject& parent) const {
 	_registry.get<ObjectData>(_id).parent = parent._id;
 }
 
-void GameObject::removeParent() {
+void GameObject::removeParent() const {
 	ObjectData& data = _registry.get<ObjectData>(_id);
 	data.parent = data.rootParent;
 }
 
-int GameObject::getChildrenCount() {
+int GameObject::getChildrenCount() const {
 	return (int)_registry.get<ObjectData>(_id).childCount;
 }
 
-bool GameObject::isChild(GameObject& object) {
+bool GameObject::isChild(const GameObject& object) const {
 	const ObjectData& data = _registry.get<ObjectData>(_id);
 
 	if (data.childCount == 0) return false;
@@ -145,7 +111,7 @@ bool GameObject::isChild(GameObject& object) {
 	return _registry.get<ObjectData>(object._id).parent == _id;
 }
 
-void GameObject::addChild(GameObject& child) {
+void GameObject::addChild(const GameObject& child) const {
 	if (!isChild(child)) {
 		ObjectData& data = _registry.get<ObjectData>(_id);
 
@@ -170,7 +136,7 @@ void GameObject::addChild(GameObject& child) {
 	}
 }
 
-void GameObject::removeChild(GameObject& child) {
+void GameObject::removeChild(const GameObject& child) const {
 	if (!isChild(child)) {
 		ObjectData& data = _registry.get<ObjectData>(_id);
 
@@ -192,12 +158,4 @@ void GameObject::removeChild(GameObject& child) {
 
 		data.childCount--;
 	}
-}
-
-void World::addChild(GameObject& child) {
-	if (child.hasComponent<Camera>()) {
-		camera = &child.getComponent<Camera>();
-	}
-
-	GameObject::addChild(child);
 }

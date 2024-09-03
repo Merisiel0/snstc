@@ -1,6 +1,6 @@
 #include "EventHandler.h"
 
-#include "InputHandler.h"
+#include "_inputs/InputHandler.h"
 #include "SDL.h"
 
 void HandleEvents() {
