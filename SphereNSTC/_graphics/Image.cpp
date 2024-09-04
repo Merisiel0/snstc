@@ -3,6 +3,7 @@
 #include "Device.h"
 #include "Allocator.h"
 #include "CommandBuffer.h"
+#include "Buffer.h"
 
 #include "stb/stb_image.h"
 
@@ -18,7 +19,7 @@ Image::Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
 
   VmaAllocationCreateInfo allocCreateInfo = getAllocationInfo();
 
-  VK_CHECK(vmaCreateImage(_allocatorPtr, &createInfo, &allocCreateInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(*_allocatorPtr, &createInfo, &allocCreateInfo, &handle, &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo{};
   viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -37,7 +38,7 @@ Image::Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
   //viewCreateInfo.subresourceRange.baseArrayLayer = 0;
   viewCreateInfo.subresourceRange.layerCount = 1;
 
-  VK_CHECK(vkCreateImageView(_devicePtr, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(*_devicePtr, &viewCreateInfo, nullptr, &view));
 }
 
 Image::Image(const char* path) {
@@ -53,25 +54,44 @@ Image::Image(const char* path) {
 
   format = VK_FORMAT_R8G8B8A8_SRGB;
 
-  VkImageCreateInfo createInfo = getCreateInfo();
+  size_t imageSize = static_cast<size_t>(width * height * 4);
+  Buffer* staging = new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+  void* data;
+  vmaMapMemory(*_allocatorPtr, _allocation, &data);
+  memcpy(data, pixels, imageSize);
+  vmaUnmapMemory(*_allocatorPtr, _allocation);
+
+  stbi_image_free(pixels);
+
+  VkImageCreateInfo createInfo = getCreateInfo(VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
 
-  VK_CHECK(vmaCreateImage(_allocatorPtr, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(*_allocatorPtr, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
+
+  _immediateSubmitPtr->submit([&](CommandBuffer* cmd) {
+    this->transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    staging->copyToImage(cmd, this);
+    this->transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    });
+
+  delete staging;
 }
 
 Image::~Image() {
-  vkDestroyImageView(_devicePtr, view, nullptr);
+  vkDestroyImageView(*_devicePtr, view, nullptr);
 
   if (_allocatorPtr == nullptr) {
-    vkDestroyImage(_devicePtr, handle, nullptr);
+    vkDestroyImage(*_devicePtr, handle, nullptr);
   }
   else {
-    vmaDestroyImage(_allocatorPtr, handle, _allocation);
+    vmaDestroyImage(*_allocatorPtr, handle, _allocation);
   }
 }
 
-void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout) const {
+void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout) {
+  _layout = newLayout;
+
   VkImageMemoryBarrier2 imageBarrier{};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
   //imageBarrier.pNext = nullptr;
@@ -170,9 +190,10 @@ VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(VkClearValue* clear)
   return colorAttachment;
 }
 
-void Image::init(Device* device, Allocator* allocator) {
-  _devicePtr = device->handle;
-  _allocatorPtr = allocator->handle;
+void Image::init(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit) {
+  _devicePtr = &device->handle;
+  _allocatorPtr = &allocator->handle;
+  _immediateSubmitPtr = immediateSubmit;
 }
 
 VkRenderingInfo Image::getRenderingInfo(VkClearValue* clear) const {

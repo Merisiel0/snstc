@@ -1,12 +1,18 @@
 #pragma once
 
 #include "_utils/Utils.h"
+
 #include <vector>
+
+class Buffer;
 
 class Mesh {
 public:
-	std::vector<Vertex> vertices;
-	std::vector<Index> indices;
+	Buffer* vertices;
+	Buffer* indices;
 
-	static Mesh generateCube();
+	Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
+	~Mesh();
+
+	static Mesh* generateCube();
 };

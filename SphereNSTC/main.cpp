@@ -4,6 +4,8 @@
 #include "_events/EventHandler.h"
 #include "_graphics/GraphicsHandler.h"
 #include "_ECS/ECS.h"
+#include "_resources/Mesh.h"
+#include "_resources/Material.h"
 
 #include <windows.h>
 
@@ -30,7 +32,7 @@ int main() {
 
 	GameObject cubeObj = GameObject();
 	cubeObj.addComponent<Transform>(vec3{ 0,0,0 }, identity<quat>(), vec3{ 1,1,1 });
-	cubeObj.addComponent<MeshRenderer>(generateCubeMesh());
+	cubeObj.addComponent<MeshRenderer>(Mesh::generateCube(), Material::load(graphicsHandler->defaultPipeline, "checkered_wood_4k"));
 
 	World world = World({cameraObj, cubeObj});
 
@@ -44,13 +46,11 @@ int main() {
 			}
 		}
 
-		/*std::vector<MeshRenderer*> renderers = world.getComponentsInChildren<MeshRenderer>();
-		recordVertices(renderers[0]);*/
-		//render();
+		graphicsHandler->Render(&world);
 	}
 
 	// --- Engine Cleanup ---
-	terminateGraphics();
+	delete graphicsHandler;
 	SDL_Quit();
 
 	return 0;

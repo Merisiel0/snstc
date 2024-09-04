@@ -21,5 +21,5 @@ public:
   ImmediateSubmit(Device* device);
   ~ImmediateSubmit();
 
-  void submit(std::function<void(VkCommandBuffer cmd)>&& function);
+  void submit(std::function<void(CommandBuffer* cmd)>&& function);
 };

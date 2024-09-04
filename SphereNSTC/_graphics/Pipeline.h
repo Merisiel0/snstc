@@ -14,4 +14,6 @@ public:
 
   IPipeline(Device* device);
   ~IPipeline();
+
+  VkPipelineLayout layout() const { return _layout; }
 };

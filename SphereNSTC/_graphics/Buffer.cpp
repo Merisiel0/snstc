@@ -2,10 +2,16 @@
 
 #include "Device.h"
 #include "Allocator.h"
+#include "Image.h"
+#include "CommandBuffer.h"
 
-Buffer::Buffer(Device* device, Allocator* allocator, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
+void Buffer::init(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit) {
+  _devicePtr = &device->handle;
   _allocatorPtr = &allocator->handle;
+  _immediateSubmitPtr = immediateSubmit;
+}
 
+Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
   usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
   VkBufferCreateInfo createInfo{};
@@ -28,10 +34,10 @@ Buffer::Buffer(Device* device, Allocator* allocator, VkDeviceSize size, VkBuffer
   //vmaInfo.pUserData = nullptr;
   //vmaInfo.priority = 0;
 
-  VK_CHECK(vmaCreateBuffer(allocator->handle, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateBuffer(*_allocatorPtr, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
 
   VkBufferDeviceAddressInfo deviceAdressInfo = getDeviceAddressInfo();
-  address = vkGetBufferDeviceAddress(device->handle, &deviceAdressInfo);
+  address = vkGetBufferDeviceAddress(*_devicePtr, &deviceAdressInfo);
 }
 
 Buffer::~Buffer() {
@@ -45,4 +51,22 @@ VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {
   info.buffer = handle;
 
   return info;
+}
+
+void Buffer::copyToImage(CommandBuffer* commandBuffer, Image* image) const {
+  VkBufferImageCopy copyRegion = {};
+  //copyRegion.bufferOffset = 0;
+  //copyRegion.bufferRowLength = 0;
+  //copyRegion.bufferImageHeight = 0;
+
+  copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  //copyRegion.imageSubresource.mipLevel = 0;
+  //copyRegion.imageSubresource.baseArrayLayer = 0;
+  copyRegion.imageSubresource.layerCount = 1;
+  copyRegion.imageExtent.width = image->extent.width;
+  copyRegion.imageExtent.height = image->extent.height;
+  copyRegion.imageExtent.depth = 1;
+
+  //copy the buffer into the image
+  vkCmdCopyBufferToImage(commandBuffer->handle, handle, image->handle, image->layout(), 1, &copyRegion);
 }

@@ -15,5 +15,5 @@ struct PushConstants {
 class GraphicsPipeline : public IPipeline {
 public:
   GraphicsPipeline(Device* device, VkFormat colorAttachmentFormat,
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos, VkPrimitiveTopology primitiveTopolog);
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos, VkPrimitiveTopology primitiveTopology);
 };

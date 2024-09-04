@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="_ECS\Components\Camera.cpp" />
+    <ClCompile Include="_ECS\Components\MeshRenderer.cpp" />
     <ClCompile Include="_ECS\GameObject.cpp" />
     <ClCompile Include="_ECS\Components\Transform.cpp" />
     <ClCompile Include="_ECS\World.cpp" />
@@ -218,6 +219,8 @@
     <ClInclude Include="_utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\uncompiled\defaultTriangleFragShader.frag" />
+    <None Include="resources\shaders\uncompiled\defaultTriangleVertShader.vert" />
     <None Include="resources\shaders\uncompiled\rayChitShader.rchit" />
     <None Include="resources\shaders\uncompiled\rayGenShader.rgen" />
     <None Include="resources\shaders\uncompiled\rayMissShader.rmiss" />

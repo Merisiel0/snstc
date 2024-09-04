@@ -12,6 +12,7 @@ class Allocator;
 class Window;
 class Swapchain;
 class Image;
+class GraphicsPipeline;
 
 class World;
 
@@ -56,6 +57,8 @@ private:
 public:
   GraphicsHandler(GraphicsInitInfo initInfo);
   ~GraphicsHandler();
+
+  GraphicsPipeline* defaultPipeline{ nullptr };
 
   void Render(World* world);
 };

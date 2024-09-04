@@ -6,6 +6,8 @@
 #include "Semaphore.h"
 #include "Fence.h"
 #include "Image.h"
+#include "GraphicsPipeline.h"
+#include "Buffer.h"
 
 VkCommandBufferAllocateInfo& CommandBuffer::getAllocateInfo(VkCommandPool commandPool) {
   VkCommandBufferAllocateInfo info{};
@@ -51,6 +53,18 @@ void CommandBuffer::endRendering() const {
 
 void CommandBuffer::end() const {
   VK_CHECK(vkEndCommandBuffer(handle));
+}
+
+void CommandBuffer::bindPipeline(GraphicsPipeline* pipeline) const {
+  vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->handle);
+}
+
+void CommandBuffer::pushConstants(PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const {
+  vkCmdPushConstants(handle, layout, stage, 0, sizeof(PushConstants), &constants);
+}
+
+void CommandBuffer::bindIndexBuffer(Buffer* buffer) const {
+  vkCmdBindIndexBuffer(handle, buffer->handle, 0, VK_INDEX_TYPE_UINT32);
 }
 
 void CommandBuffer::submitToQueue(Queue* queue, Fence* fence, Semaphore* wait, Semaphore* signal) const {

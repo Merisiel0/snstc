@@ -126,6 +126,9 @@
     <ClCompile Include="_resources\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="_ECS\Components\MeshRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_resources\Mesh.h">
@@ -262,5 +265,7 @@
     <None Include="resources\shaders\uncompiled\rayMissShader.rmiss">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="resources\shaders\uncompiled\defaultTriangleFragShader.frag" />
+    <None Include="resources\shaders\uncompiled\defaultTriangleVertShader.vert" />
   </ItemGroup>
 </Project>

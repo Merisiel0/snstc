@@ -15,10 +15,15 @@
 #include "CommandBuffer.h"
 #include "Semaphore.h"
 #include "Fence.h"
+#include "Buffer.h"
 #include "Image.h"
 #include "Shader.h"
+#include "GraphicsPipeline.h"
 //#include "BLAS.h"
 //#include "TLAS.h"
+
+#include "_ECS/ECS.h";
+#include "_resources/Material.h"
 
 #include <vector>
 #include <optional>
@@ -117,7 +122,8 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
   _device = new Device(_physicalDevice, deviceExtensions);
   _allocator = new Allocator(_instance, _physicalDevice, _device);
 
-  Image::init(_device, _allocator);
+  Buffer::init(_device, _allocator, _immediateSubmit);
+  Image::init(_device, _allocator, _immediateSubmit);
 
   _immediateSubmit = new ImmediateSubmit(_device);
 
@@ -126,6 +132,14 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
   _drawImage = new Image(_swapchain->imageFormat,
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
     _swapchain->extent, VK_IMAGE_ASPECT_COLOR_BIT);
+
+  Shader* defaultVert = new Shader(_device, "resources/shaders/defaultTriangleVertShader.spv", VK_SHADER_STAGE_VERTEX_BIT);
+  Shader* defaultFrag = new Shader(_device, "resources/shaders/defaultTriangleFragShader.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+
+  defaultPipeline = new GraphicsPipeline(_device, _swapchain->imageFormat, {
+    defaultVert->getStageCreateInfo(),
+    defaultFrag->getStageCreateInfo()
+    }, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
   // --- Temporary Code ---
 
@@ -169,5 +183,26 @@ GraphicsHandler::~GraphicsHandler() {
 
 void GraphicsHandler::Render(World* world) {
   beginDrawing();
+
+  Frame* currentFrame = _swapchain->getCurrentFrame();
+
+  std::vector<MeshRenderer*> renderers = world->getComponentsInChildren<MeshRenderer>();
+
+  GraphicsPipeline* currentPipeline{ nullptr };
+
+  // TODO: optimize the shit out of this piece of garbage
+  for (auto renderer : renderers) {
+    /*if (currentPipeline != renderer->material->pipeline) {
+      currentPipeline = renderer->material->pipeline;
+      currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
+    }*/
+    currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
+
+    currentFrame->commandBuffer->pushConstants(renderer->getPushConstants(), renderer->material->pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+
+    currentFrame->commandBuffer->bindIndexBuffer(renderer->mesh->indices);
+
+  }
+
   endDrawing();
 }

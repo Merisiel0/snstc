@@ -19,13 +19,13 @@ ImmediateSubmit::~ImmediateSubmit() {
   delete _fence;
 }
 
-void ImmediateSubmit::submit(std::function<void(VkCommandBuffer cmd)>&& function) {
+void ImmediateSubmit::submit(std::function<void(CommandBuffer* cmd)>&& function) {
   _fence->reset();
   _commandBuffer->reset();
 
   _commandBuffer->begin();
 
-  function(_commandBuffer->handle);
+  function(_commandBuffer);
 
   _commandBuffer->end();
 
