@@ -12,9 +12,11 @@ private:
   static VmaAllocator _allocatorPtr;
 
   VmaAllocation _allocation{ VK_NULL_HANDLE };
+  VmaAllocationInfo _info{};
   VkImageLayout _layout{ VK_IMAGE_LAYOUT_UNDEFINED };
 
-  VkImageCreateInfo getCreateInfo(VkImageUsageFlags usage);
+  VkImageCreateInfo getCreateInfo(VkImageUsageFlags usage = 0) const;
+  VmaAllocationCreateInfo getAllocationInfo() const;
   VkRenderingAttachmentInfo getRenderingAttachmentInfo(VkClearValue* clear) const;
 
 public:

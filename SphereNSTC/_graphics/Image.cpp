@@ -14,38 +14,11 @@ Image::Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
   };
   this->format = format;
 
-  VkImageCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-  //createInfo.pNext = nullptr;
-  //createInfo.flags = 0;
-  createInfo.imageType = VK_IMAGE_TYPE_2D;
-  createInfo.format = format;
-  createInfo.extent = {
-    extent.width,
-    extent.height,
-    1
-  };
-  createInfo.mipLevels = 1;
-  createInfo.arrayLayers = 1;
-  createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-  createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  createInfo.usage = usageFlags;
-  createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  //createInfo.queueFamilyIndexCount = 0;
-  //createInfo.pQueueFamilyIndices = nullptr;
-  createInfo.initialLayout = _layout = layout;
+  VkImageCreateInfo createInfo = getCreateInfo(usageFlags);
 
-  VmaAllocationCreateInfo allocCreateInfo{};
-  //allocCreateInfo.flags = 0;
-  allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-  allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-  //allocCreateInfo.preferredFlags = 0;
-  //allocCreateInfo.memoryTypeBits = 0;
-  allocCreateInfo.pool = VK_NULL_HANDLE;
-  //allocCreateInfo.pUserData = nullptr;
-  //allocCreateInfo.priority = 0;
+  VmaAllocationCreateInfo allocCreateInfo = getAllocationInfo();
 
-  VK_CHECK(vmaCreateImage(_allocatorPtr, &createInfo, &allocCreateInfo, &handle, &_allocation, nullptr));
+  VK_CHECK(vmaCreateImage(_allocatorPtr, &createInfo, &allocCreateInfo, &handle, &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo{};
   viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -82,7 +55,9 @@ Image::Image(const char* path) {
 
   VkImageCreateInfo createInfo = getCreateInfo();
 
-  vmaCreateImage(_allocatorPtr, &createInfo, )
+  VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
+
+  VK_CHECK(vmaCreateImage(_allocatorPtr, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
 }
 
 Image::~Image() {
@@ -90,7 +65,8 @@ Image::~Image() {
 
   if (_allocatorPtr == nullptr) {
     vkDestroyImage(_devicePtr, handle, nullptr);
-  } else {
+  }
+  else {
     vmaDestroyImage(_allocatorPtr, handle, _allocation);
   }
 }
@@ -135,7 +111,7 @@ void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayo
   vkCmdPipelineBarrier2(commandBuffer->handle, &depInfo);
 }
 
-VkImageCreateInfo Image::getCreateInfo(VkImageUsageFlags usage) {
+VkImageCreateInfo Image::getCreateInfo(VkImageUsageFlags usage) const {
   VkImageCreateInfo info{};
   info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   //info.pNext = nullptr;
@@ -157,7 +133,20 @@ VkImageCreateInfo Image::getCreateInfo(VkImageUsageFlags usage) {
   //info.pQueueFamilyIndices = nullptr;
   info.initialLayout = _layout;
 
-  return info
+  return info;
+}
+
+VmaAllocationCreateInfo Image::getAllocationInfo() const {
+  VmaAllocationCreateInfo info{};
+  //info.flags = 0;
+  info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+  info.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+  //info.preferredFlags = 0;
+  //info.memoryTypeBits = 0;
+  info.pool = VK_NULL_HANDLE;
+  //info.pUserData = nullptr;
+  //info.priority = 0;
+  return info;
 }
 
 VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(VkClearValue* clear) const {
