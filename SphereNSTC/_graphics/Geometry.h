@@ -15,7 +15,7 @@ public:
   VkAccelerationStructureGeometryKHR handle{};
   VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
 
-  Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit, std::vector<Vertex> vertices, std::vector<Index> indices);
-  Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit, std::vector<VkAccelerationStructureInstanceKHR> instances, Buffer*& out);
+  Geometry(std::vector<Vertex> vertices, std::vector<Index> indices);
+  Geometry(std::vector<VkAccelerationStructureInstanceKHR> instances, Buffer*& out);
   ~Geometry();
 };

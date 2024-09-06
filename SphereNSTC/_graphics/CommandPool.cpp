@@ -2,7 +2,7 @@
 
 #include "Device.h"
 
-VkCommandPoolCreateInfo& CommandPool::getCreateInfo(VkDevice device, uint32_t queueFamily) {
+VkCommandPoolCreateInfo CommandPool::getCreateInfo(VkDevice device, uint32_t queueFamily) {
   VkCommandPoolCreateInfo info{};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   //info.pNext = nullptr;

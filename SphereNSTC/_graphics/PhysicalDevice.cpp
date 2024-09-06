@@ -3,7 +3,7 @@
 #include "Instance.h"
 #include <map>
 
-PhysicalDeviceQueueFamilyIndexes& PhysicalDevice::findQueueFamilyIndexes(const VkPhysicalDevice& physicalDevice) {
+PhysicalDeviceQueueFamilyIndexes PhysicalDevice::findQueueFamilyIndexes(const VkPhysicalDevice& physicalDevice) {
   uint32_t queueFamilyPropertyCount;
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertyCount, nullptr);
   std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
@@ -52,17 +52,17 @@ int PhysicalDevice::rate(VkPhysicalDevice physicalDevice, std::vector<const char
     return 0;
   }
 
-  VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
-  rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+  //VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
+  //rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
   //rayTracingPipelineFeatures.pNext = nullptr;
 
-  VkPhysicalDeviceAccelerationStructureFeaturesKHR accelStructFeatures{};
-  accelStructFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-  accelStructFeatures.pNext = &rayTracingPipelineFeatures;
+  //VkPhysicalDeviceAccelerationStructureFeaturesKHR accelStructFeatures{};
+  //accelStructFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+  //accelStructFeatures.pNext = &rayTracingPipelineFeatures;
 
   VkPhysicalDeviceVulkan13Features vk13Features{};
   vk13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-  vk13Features.pNext = &accelStructFeatures;
+  //vk13Features.pNext = &accelStructFeatures;
 
   VkPhysicalDeviceVulkan12Features vk12Features{};
   vk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -74,11 +74,12 @@ int PhysicalDevice::rate(VkPhysicalDevice physicalDevice, std::vector<const char
 
   vkGetPhysicalDeviceFeatures2KHR(physicalDevice, &features);
 
-  if (vk12Features.bufferDeviceAddress == VK_FALSE
+  if (features.features.logicOp == VK_FALSE
+    || vk12Features.bufferDeviceAddress == VK_FALSE
     || vk13Features.dynamicRendering == VK_FALSE
     || vk13Features.synchronization2 == VK_FALSE
-    || accelStructFeatures.accelerationStructure == VK_FALSE
-    || rayTracingPipelineFeatures.rayTracingPipeline == VK_FALSE) return 0;
+    /*|| accelStructFeatures.accelerationStructure == VK_FALSE
+    || rayTracingPipelineFeatures.rayTracingPipeline == VK_FALSE*/) return 0;
 
   PhysicalDeviceQueueFamilyIndexes queueFamilyIndexes = findQueueFamilyIndexes(physicalDevice);
   if (!queueFamilyIndexes.isComplete()) return 0;
@@ -122,13 +123,13 @@ PhysicalDevice::PhysicalDevice(Instance* instance, std::vector<const char*> requ
     handle = candidates.rbegin()->second;
     queueFamilies = findQueueFamilyIndexes(handle);
 
-    rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-    accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
-    accelerationStructureProperties.pNext = &rayTracingPipelineProperties;
+    //rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+    //accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+    //accelerationStructureProperties.pNext = &rayTracingPipelineProperties;
 
     VkPhysicalDeviceProperties2 physicalDeviceProperties{};
     physicalDeviceProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    physicalDeviceProperties.pNext = &accelerationStructureProperties;
+    //physicalDeviceProperties.pNext = &accelerationStructureProperties;
     //physicalDeviceProperties.properties;
 
     vkGetPhysicalDeviceProperties2(handle, &physicalDeviceProperties);

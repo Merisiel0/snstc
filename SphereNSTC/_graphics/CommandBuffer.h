@@ -14,8 +14,8 @@ struct PushConstants;
 
 class CommandBuffer {
 private:
-  VkCommandBufferAllocateInfo& getAllocateInfo(VkCommandPool commandPool);
-  VkCommandBufferBeginInfo& getBeginInfo(VkCommandBufferUsageFlags flags) const;
+  VkCommandBufferAllocateInfo getAllocateInfo(VkCommandPool commandPool);
+  VkCommandBufferBeginInfo getBeginInfo(VkCommandBufferUsageFlags flags) const;
 
 public:
   VkCommandBuffer handle{ VK_NULL_HANDLE };
@@ -32,8 +32,13 @@ public:
   void end() const;
 
   void bindPipeline(GraphicsPipeline* pipeline) const;
+  void setViewport(VkViewport* viewport) const;
+  void setScissor(VkRect2D* scissor) const;
+  void setLineWidth(float lineWidth) const;
+  void setCullMode(VkCullModeFlags cullMode) const;
   void pushConstants(PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const;
   void bindIndexBuffer(Buffer* buffer) const;
+  void drawIndexed(uint32_t indexCount) const;
 
   void submitToQueue(Queue* queue, Fence* fence, Semaphore* wait = nullptr, Semaphore* signal = nullptr) const;
 };

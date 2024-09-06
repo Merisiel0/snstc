@@ -19,7 +19,7 @@ private:
 
   VkImageCreateInfo getCreateInfo(VkImageUsageFlags usage = 0) const;
   VmaAllocationCreateInfo getAllocationInfo() const;
-  VkRenderingAttachmentInfo getRenderingAttachmentInfo(VkClearValue* clear) const;
+  VkRenderingAttachmentInfo* getRenderingAttachmentInfo(VkClearValue* clear) const;
 
 public:
   VkImage handle{ VK_NULL_HANDLE };
@@ -31,8 +31,7 @@ public:
 
   Image() {}
   Image(VkImage image, VkImageView view)
-    : handle{ image }, view{ view } {
-  }
+    : handle{ image }, view{ view } {}
   Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
     VkImageAspectFlags aspectFlags, VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
   Image(const char* path);

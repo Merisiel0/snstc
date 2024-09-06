@@ -58,6 +58,7 @@ Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> extensio
   VkPhysicalDeviceFeatures2 features{};
   features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
   features.pNext = &vk12Features;
+  features.features.logicOp = VK_TRUE;
 
   VkDeviceCreateInfo createInfo = getCreateInfo(features, queueCreateInfos, extensions);
 

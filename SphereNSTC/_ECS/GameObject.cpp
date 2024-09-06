@@ -7,16 +7,26 @@ GameObject::GameObject() {
 	addComponent<ObjectData>();
 }
 
+void GameObject::deleteChildren(entt::entity id) {
+	const ObjectData& data = _registry.get<ObjectData>(id);
+
+	if (data.childCount > 0) {
+		entt::entity previousChild{ entt::null };
+		entt::entity currentChild = data.first;
+		for (uint32_t i = 0; i < data.childCount; i++) {
+			deleteChildren(currentChild);
+
+			previousChild = currentChild;
+			currentChild = _registry.get<ObjectData>(currentChild).next;
+			_registry.destroy(previousChild);
+		}
+	}
+}
+
 GameObject::~GameObject() {
 	const ObjectData& data = _registry.get<ObjectData>(_id);
 
-	if (data.childCount > 0) {
-		entt::entity currentChild = data.first;
-		for (uint32_t i = 0; i < data.childCount; i++) {
-			_registry.get<ObjectData>(currentChild).parent = data.parent;
-			currentChild = _registry.get<ObjectData>(currentChild).next;
-		}
-	}
+	deleteChildren(_id);
 
 	if (data.prev != entt::null) {
 		_registry.get<ObjectData>(data.prev).next = data.next;
@@ -27,21 +37,14 @@ GameObject::~GameObject() {
 
 	if (data.parent != entt::null) {
 		ObjectData& parentData = _registry.get<ObjectData>(data.parent);
-		if (parentData.childCount == 1) {
+
+		parentData.childCount--;
+		if (parentData.childCount == 0) {
 			parentData.first = entt::null;
 		}
-		else {
-			entt::entity currentSibling = parentData.first;
-			for (uint32_t i = 0; i < parentData.childCount; i++) {
-				ObjectData& currentSiblingData = _registry.get<ObjectData>(currentSibling);
-				if (currentSiblingData.next == _id) {
-					currentSiblingData.next = _registry.get<ObjectData>(currentSiblingData.next).next;
-					break;
-				}
-				currentSibling = _registry.get<ObjectData>(currentSibling).next;
-			}
+		else if (parentData.first == _id) {
+			parentData.first == data.next;
 		}
-		parentData.childCount--;
 	}
 
 	_registry.destroy(_id);

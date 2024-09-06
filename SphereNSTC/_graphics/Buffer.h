@@ -4,9 +4,9 @@
 
 #include "Allocator.h"
 #include "ImmediateSubmit.h"
+#include "CommandBuffer.h"
 
 class Device;
-class CommandBuffer;
 class Image;
 
 class Buffer {
@@ -21,6 +21,7 @@ private:
 public:
   VkBuffer handle{ VK_NULL_HANDLE };
   VkDeviceAddress address{};
+  uint32_t count{ 0 };
 
   static void init(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit);
 
@@ -30,11 +31,13 @@ public:
 
   template<typename T>
   Buffer(std::vector<T> data, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
-    : Buffer(device, allocator, data.size() * sizeof(T), usage, memoryUsage) {
-    const size_t bufferSize = data.size() * sizeof(T);
-    Buffer* staging = new Buffer(device, allocator, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+    : Buffer(data.size() * sizeof(T), usage, memoryUsage) {
+    count = static_cast<uint32_t>(data.size());
 
-    VK_CHECK(vmaMapMemory(allocator->handle, _allocation, &staging->_info.pMappedData));
+    const size_t bufferSize = static_cast<size_t>(data.size() * sizeof(T));
+    Buffer* staging = new Buffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+
+    VK_CHECK(vmaMapMemory(*_allocatorPtr, staging->_allocation, &staging->_info.pMappedData));
     memcpy(staging->_info.pMappedData, data.data(), bufferSize);
 
     _immediateSubmitPtr->submit([&](CommandBuffer* cmd) {
@@ -46,6 +49,7 @@ public:
       vkCmdCopyBuffer(cmd->handle, staging->handle, handle, 1, &copy);
       });
 
+    vmaUnmapMemory(*_allocatorPtr, staging->_allocation);
     delete staging;
   }
 

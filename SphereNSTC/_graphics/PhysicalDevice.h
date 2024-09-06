@@ -26,7 +26,7 @@ struct PhysicalDeviceQueueFamilyIndexes {
 class PhysicalDevice {
 private:
   int rate(VkPhysicalDevice physicalDevice, std::vector<const char*> requiredExtensions);
-  PhysicalDeviceQueueFamilyIndexes& findQueueFamilyIndexes(const VkPhysicalDevice& physicalDevice);
+  PhysicalDeviceQueueFamilyIndexes findQueueFamilyIndexes(const VkPhysicalDevice& physicalDevice);
 
 public:
   VkPhysicalDevice handle{ VK_NULL_HANDLE };

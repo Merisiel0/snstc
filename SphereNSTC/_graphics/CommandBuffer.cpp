@@ -9,7 +9,7 @@
 #include "GraphicsPipeline.h"
 #include "Buffer.h"
 
-VkCommandBufferAllocateInfo& CommandBuffer::getAllocateInfo(VkCommandPool commandPool) {
+VkCommandBufferAllocateInfo CommandBuffer::getAllocateInfo(VkCommandPool commandPool) {
   VkCommandBufferAllocateInfo info{};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   //info.pNext = nullptr;
@@ -20,7 +20,7 @@ VkCommandBufferAllocateInfo& CommandBuffer::getAllocateInfo(VkCommandPool comman
   return info;
 }
 
-VkCommandBufferBeginInfo& CommandBuffer::getBeginInfo(VkCommandBufferUsageFlags flags) const {
+VkCommandBufferBeginInfo CommandBuffer::getBeginInfo(VkCommandBufferUsageFlags flags) const {
   VkCommandBufferBeginInfo info{};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   //info.pNext = nullptr;
@@ -40,11 +40,13 @@ void CommandBuffer::reset() const {
 }
 
 void CommandBuffer::begin() const {
-  VK_CHECK(vkBeginCommandBuffer(handle, &getBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)));
+  VkCommandBufferBeginInfo beginInfo = getBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+  VK_CHECK(vkBeginCommandBuffer(handle, &beginInfo));
 }
 
 void CommandBuffer::beginRendering(Image* image) const {
-  vkCmdBeginRendering(handle, &image->getRenderingInfo());
+  VkRenderingInfo renderingInfo = image->getRenderingInfo();
+  vkCmdBeginRendering(handle, &renderingInfo);
 }
 
 void CommandBuffer::endRendering() const {
@@ -59,12 +61,32 @@ void CommandBuffer::bindPipeline(GraphicsPipeline* pipeline) const {
   vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->handle);
 }
 
+void CommandBuffer::setViewport(VkViewport* viewport) const {
+  vkCmdSetViewportWithCount(handle, 1, viewport);
+}
+
+void CommandBuffer::setScissor(VkRect2D* scissor) const {
+  vkCmdSetScissorWithCount(handle, 1, scissor);
+}
+
+void CommandBuffer::setLineWidth(float lineWidth) const {
+  vkCmdSetLineWidth(handle, lineWidth);
+}
+
+void CommandBuffer::setCullMode(VkCullModeFlags cullMode) const {
+  vkCmdSetCullMode(handle, cullMode);
+}
+
 void CommandBuffer::pushConstants(PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const {
   vkCmdPushConstants(handle, layout, stage, 0, sizeof(PushConstants), &constants);
 }
 
 void CommandBuffer::bindIndexBuffer(Buffer* buffer) const {
   vkCmdBindIndexBuffer(handle, buffer->handle, 0, VK_INDEX_TYPE_UINT32);
+}
+
+void CommandBuffer::drawIndexed(uint32_t indexCount) const {
+  vkCmdDrawIndexed(handle, indexCount, 1, 0, 0, 0);
 }
 
 void CommandBuffer::submitToQueue(Queue* queue, Fence* fence, Semaphore* wait, Semaphore* signal) const {
@@ -81,12 +103,14 @@ void CommandBuffer::submitToQueue(Queue* queue, Fence* fence, Semaphore* wait, S
   
   if (wait != nullptr) {
     info2.waitSemaphoreInfoCount = 1;
-    info2.pWaitSemaphoreInfos = &wait->getSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
+    VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo = wait->getSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
+    info2.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
   }
   
   if (signal != nullptr) {
     info2.signalSemaphoreInfoCount = 1;
-    info2.pSignalSemaphoreInfos = &signal->getSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+    VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo = signal->getSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+    info2.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
   }
 
   info2.commandBufferInfoCount = 1;

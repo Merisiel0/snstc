@@ -13,7 +13,7 @@ Frame::Frame(Device* device) {
 
   swapchainSemaphore = new Semaphore(device);
   renderSemaphore = new Semaphore(device);
-  renderFence = new Fence(device);
+  renderFence = new Fence(device, true);
 }
 
 Frame::~Frame() {

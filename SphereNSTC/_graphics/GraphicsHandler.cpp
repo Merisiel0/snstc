@@ -22,7 +22,7 @@
 //#include "BLAS.h"
 //#include "TLAS.h"
 
-#include "_ECS/ECS.h";
+#include "_ECS/ECS.h"
 #include "_resources/Material.h"
 
 #include <vector>
@@ -114,18 +114,18 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
 
   std::vector<const char*> deviceExtensions{
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-    VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-    VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME
+    //VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+    //VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+    //VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME
   };
   _physicalDevice = new PhysicalDevice(_instance, deviceExtensions);
   _device = new Device(_physicalDevice, deviceExtensions);
   _allocator = new Allocator(_instance, _physicalDevice, _device);
 
+  _immediateSubmit = new ImmediateSubmit(_device);
+
   Buffer::init(_device, _allocator, _immediateSubmit);
   Image::init(_device, _allocator, _immediateSubmit);
-
-  _immediateSubmit = new ImmediateSubmit(_device);
 
   _swapchain = new Swapchain(_window, _instance, _physicalDevice, _device);
 
@@ -188,20 +188,41 @@ void GraphicsHandler::Render(World* world) {
 
   std::vector<MeshRenderer*> renderers = world->getComponentsInChildren<MeshRenderer>();
 
-  GraphicsPipeline* currentPipeline{ nullptr };
+  //GraphicsPipeline* currentPipeline{ nullptr };
+
+  VkViewport viewport{};
+  viewport.x = static_cast<float>(_window->position.x);
+  viewport.y = static_cast<float>(_window->position.y);
+  viewport.width = static_cast<float>(_window->extent.x);
+  viewport.height = static_cast<float>(_window->extent.y);
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+
+  VkRect2D scissor{};
+  scissor.offset.x = _window->position.x;
+  scissor.offset.y = _window->position.y;
+  scissor.extent.width = _window->extent.x;
+  scissor.extent.height = _window->extent.y;
 
   // TODO: optimize the shit out of this piece of garbage
   for (auto renderer : renderers) {
+
     /*if (currentPipeline != renderer->material->pipeline) {
       currentPipeline = renderer->material->pipeline;
       currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
     }*/
     currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
 
+    currentFrame->commandBuffer->setViewport(&viewport);
+    currentFrame->commandBuffer->setScissor(&scissor);
+    currentFrame->commandBuffer->setLineWidth(1.0f);
+    currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
+
     currentFrame->commandBuffer->pushConstants(renderer->getPushConstants(), renderer->material->pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
     currentFrame->commandBuffer->bindIndexBuffer(renderer->mesh->indices);
 
+    currentFrame->commandBuffer->drawIndexed(renderer->mesh->indices->count);
   }
 
   endDrawing();

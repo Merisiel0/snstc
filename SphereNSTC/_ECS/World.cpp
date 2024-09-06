@@ -12,9 +12,9 @@ void World::updateGraphics() {
 
 }
 
-World::World(std::vector<GameObject> gameObjects) {
+World::World(std::vector<GameObject*> gameObjects) {
 	for (const auto& child : gameObjects) {
-		addChild(child);
+		addChild(*child);
 	}
 
 	_camera = getComponentInChildren<Camera>();

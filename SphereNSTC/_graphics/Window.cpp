@@ -3,6 +3,7 @@
 Window::Window(const char* title) {
   SDL_DisplayMode dm;
   SDL_GetCurrentDisplayMode(0, &dm);
+  extent = { dm.w, dm.h };
 
   handle = SDL_CreateWindow(
     title,
@@ -11,6 +12,10 @@ Window::Window(const char* title) {
     dm.w,
     dm.h,
     SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI);
+
+  int x, y;
+  SDL_GetWindowPosition(handle, &x, &y);
+  position = { x, y };
 }
 
 Window::~Window() {

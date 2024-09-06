@@ -2,16 +2,16 @@
 
 #include "Buffer.h"
 
-Geometry::Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit, std::vector<Vertex> vertices, std::vector<Index> indices) {
+Geometry::Geometry(std::vector<Vertex> vertices, std::vector<Index> indices) {
   handle.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
   //_geometry.pNext;
   handle.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
   handle.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 
-  _buffers.push_back(new Buffer(device, allocator, immediateSubmit, vertices,
+  _buffers.push_back(new Buffer(vertices,
     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
     VMA_MEMORY_USAGE_GPU_ONLY));
-  _buffers.push_back(new Buffer(device, allocator, immediateSubmit, indices,
+  _buffers.push_back(new Buffer(indices,
     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
     VMA_MEMORY_USAGE_GPU_ONLY));
 
@@ -37,7 +37,7 @@ Geometry::Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immedi
   //buildInfo.scratchData;
 }
 
-Geometry::Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit, std::vector<VkAccelerationStructureInstanceKHR> instances, Buffer*& out) {
+Geometry::Geometry(std::vector<VkAccelerationStructureInstanceKHR> instances, Buffer*& out) {
   handle.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
   //handle.pNext;
   handle.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
@@ -47,12 +47,12 @@ Geometry::Geometry(Device* device, Allocator* allocator, ImmediateSubmit* immedi
   std::vector<VkDeviceAddress> addresses(instances.size());
   for (size_t i = 0; i < instances.size(); i++) {
     std::vector<VkAccelerationStructureInstanceKHR> instance = { instances[i] };
-    _buffers[i] = new Buffer(device, allocator, immediateSubmit, instance,
+    _buffers[i] = new Buffer(instance,
       VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
       VMA_MEMORY_USAGE_GPU_ONLY);
     addresses[i] = _buffers[i]->address;
   }
-  out = new Buffer(device, allocator, immediateSubmit, _buffers,
+  out = new Buffer(_buffers,
     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
     VMA_MEMORY_USAGE_GPU_ONLY);
 

@@ -5,6 +5,7 @@
 #include "CommandBuffer.h"
 #include "Buffer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
 Image::Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
@@ -14,6 +15,7 @@ Image::Image(VkFormat format, VkImageUsageFlags usageFlags, VkExtent2D extent,
     extent.height
   };
   this->format = format;
+  this->_layout = layout;
 
   VkImageCreateInfo createInfo = getCreateInfo(usageFlags);
 
@@ -63,6 +65,7 @@ Image::Image(const char* path) {
 
   stbi_image_free(pixels);
 
+  this->_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   VkImageCreateInfo createInfo = getCreateInfo(VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
@@ -90,8 +93,6 @@ Image::~Image() {
 }
 
 void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout) {
-  _layout = newLayout;
-
   VkImageMemoryBarrier2 imageBarrier{};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
   //imageBarrier.pNext = nullptr;
@@ -103,6 +104,7 @@ void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayo
 
   imageBarrier.oldLayout = _layout;
   imageBarrier.newLayout = newLayout;
+  _layout = newLayout;
 
   //imageBarrier.srcQueueFamilyIndex = 0;
   //imageBarrier.dstQueueFamilyIndex = 0;
@@ -110,9 +112,9 @@ void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayo
   imageBarrier.image = handle;
   imageBarrier.subresourceRange.aspectMask = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
   //imageBarrier.subresourceRange.baseMipLevel = 0;
-  imageBarrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+  imageBarrier.subresourceRange.levelCount = 1; //VK_REMAINING_MIP_LEVELS;
   //imageBarrier.subresourceRange.baseArrayLayer = 0;
-  imageBarrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+  imageBarrier.subresourceRange.layerCount = 1; //VK_REMAINING_ARRAY_LAYERS;
 
   VkDependencyInfo depInfo{};
   depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -169,22 +171,22 @@ VmaAllocationCreateInfo Image::getAllocationInfo() const {
   return info;
 }
 
-VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(VkClearValue* clear) const {
-  VkRenderingAttachmentInfo colorAttachment{};
-  colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+VkRenderingAttachmentInfo* Image::getRenderingAttachmentInfo(VkClearValue* clear) const {
+  VkRenderingAttachmentInfo* colorAttachment = new VkRenderingAttachmentInfo();
+  colorAttachment->sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
   //colorAttachment.pNext = nullptr;
 
-  colorAttachment.imageView = view;
-  colorAttachment.imageLayout = _layout;
+  colorAttachment->imageView = view;
+  colorAttachment->imageLayout = _layout;
 
-  colorAttachment.resolveMode = VK_RESOLVE_MODE_NONE;
-  colorAttachment.resolveImageView = VK_NULL_HANDLE;
-  colorAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  colorAttachment->resolveMode = VK_RESOLVE_MODE_NONE;
+  colorAttachment->resolveImageView = VK_NULL_HANDLE;
+  colorAttachment->resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-  colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-  colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  colorAttachment->loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+  colorAttachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
   if (clear) {
-    colorAttachment.clearValue = *clear;
+    colorAttachment->clearValue = *clear;
   }
 
   return colorAttachment;
@@ -206,7 +208,7 @@ VkRenderingInfo Image::getRenderingInfo(VkClearValue* clear) const {
   renderInfo.layerCount = 1;
   //renderInfo.viewMask = 0;
   renderInfo.colorAttachmentCount = 1;
-  renderInfo.pColorAttachments = &getRenderingAttachmentInfo(clear);
+  renderInfo.pColorAttachments = getRenderingAttachmentInfo(clear);
   //renderInfo.pDepthAttachment = nullptr;
   //renderInfo.pStencilAttachment = nullptr;
 

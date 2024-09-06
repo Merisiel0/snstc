@@ -132,7 +132,7 @@ presentModeChosen:
 
     VK_CHECK(vkCreateImageView(device->handle, &createInfo, nullptr, &imageViews[i]));
 
-    _images[i] = new Image(device->handle, vkImages[i], imageViews[i]);
+    _images[i] = new Image(vkImages[i], imageViews[i]);
   }
 }
 

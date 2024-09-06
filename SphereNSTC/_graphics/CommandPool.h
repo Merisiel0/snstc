@@ -8,7 +8,7 @@ class CommandPool {
 private:
   VkDevice* _devicePtr{ nullptr };
 
-  VkCommandPoolCreateInfo& getCreateInfo(VkDevice device, uint32_t queueFamily);
+  VkCommandPoolCreateInfo getCreateInfo(VkDevice device, uint32_t queueFamily);
 
 public:
   VkCommandPool handle{ VK_NULL_HANDLE };

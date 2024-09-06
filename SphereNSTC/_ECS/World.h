@@ -18,7 +18,7 @@ private:
 	void updateGraphics();
 
 public:
-	World(std::vector<GameObject> gameObjects);
+	World(std::vector<GameObject*> gameObjects);
 
 	void addGameObject(GameObject& obj);
 };

@@ -30,6 +30,8 @@ private:
 
   entt::entity _id;
 
+  void deleteChildren(entt::entity id);
+
 public:
   GameObject();
   ~GameObject();
@@ -101,7 +103,7 @@ public:
     view.iterate(_registry.storage<Type>());
 
     for (auto entity : view) {
-      components.push_back(&view.get<Type>(entity));
+      components.push_back(&_registry.get<Type>(entity));
     }
 
     return components;
