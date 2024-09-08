@@ -141,6 +141,8 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
     defaultFrag->getStageCreateInfo()
     }, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
+  _cube = Mesh::generateCube();
+
   // --- Temporary Code ---
 
   //std::vector<Vertex> vertices(3);
@@ -205,25 +207,43 @@ void GraphicsHandler::Render(World* world) {
   scissor.extent.height = _window->extent.y;
 
   // TODO: optimize the shit out of this piece of garbage
-  for (auto renderer : renderers) {
+  //for (auto renderer : renderers) {
+  //  /*if (currentPipeline != renderer->material->pipeline) {
+  //    currentPipeline = renderer->material->pipeline;
+  //    currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
+  //  }*/
+  //  currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
 
-    /*if (currentPipeline != renderer->material->pipeline) {
-      currentPipeline = renderer->material->pipeline;
-      currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
-    }*/
-    currentFrame->commandBuffer->bindPipeline(renderer->material->pipeline);
+  //  currentFrame->commandBuffer->setViewport(&viewport);
+  //  currentFrame->commandBuffer->setScissor(&scissor);
+  //  currentFrame->commandBuffer->setLineWidth(1.0f);
+  //  currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
 
-    currentFrame->commandBuffer->setViewport(&viewport);
-    currentFrame->commandBuffer->setScissor(&scissor);
-    currentFrame->commandBuffer->setLineWidth(1.0f);
-    currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
+  //  PushConstants constants{};
+  //  constants.transform = world->camera()->projection * world->camera()->view * renderer->gameObject->getComponent<Transform>()->getModelMatrix();
+  //  constants.vertexBuffer = renderer->mesh->vertices->address;
+  //  currentFrame->commandBuffer->pushConstants(constants, renderer->material->pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
-    currentFrame->commandBuffer->pushConstants(renderer->getPushConstants(), renderer->material->pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+  //  currentFrame->commandBuffer->bindIndexBuffer(renderer->mesh->indices);
 
-    currentFrame->commandBuffer->bindIndexBuffer(renderer->mesh->indices);
+  //  currentFrame->commandBuffer->drawIndexed(renderer->mesh->indices->count);
+  //}
 
-    currentFrame->commandBuffer->drawIndexed(renderer->mesh->indices->count);
-  }
+  currentFrame->commandBuffer->bindPipeline(defaultPipeline);
+
+  currentFrame->commandBuffer->setViewport(&viewport);
+  currentFrame->commandBuffer->setScissor(&scissor);
+  currentFrame->commandBuffer->setLineWidth(1.0f);
+  currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
+
+  PushConstants constants{};
+  constants.vertexBuffer = _cube->vertices->address;
+  constants.transform = glm::mat4{ 1.0f };
+  currentFrame->commandBuffer->pushConstants(constants, defaultPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+
+  currentFrame->commandBuffer->bindIndexBuffer(_cube->indices);
+
+  currentFrame->commandBuffer->drawIndexed(_cube->indices->count());
 
   endDrawing();
 }

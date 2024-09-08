@@ -15,6 +15,7 @@ class Image;
 class GraphicsPipeline;
 
 class World;
+class Mesh; // temporary, for debug
 
 struct GraphicsInitInfo {
 	const char* applicationName{ nullptr };
@@ -46,6 +47,8 @@ private:
   Window* _window;
   Swapchain* _swapchain;
   Image* _drawImage;
+
+  Mesh* _cube;
 
   /* BLAS* triangleBLAS;
    TLAS* worldTLAS;*/

@@ -21,4 +21,6 @@ public:
 	World(std::vector<GameObject*> gameObjects);
 
 	void addGameObject(GameObject& obj);
+
+	Camera* camera() const { return _camera; }
 };
