@@ -52,6 +52,7 @@ Swapchain::Swapchain(Window* window, Instance* instance, PhysicalDevice* physica
       }
     }
   }
+  throw new Exception("No prefered surface format available.");
 surfaceFormatChosen:
 
   uint32_t presentModeCount = 0;
@@ -74,6 +75,7 @@ surfaceFormatChosen:
       }
     }
   }
+  throw new Exception("No preferred present mode available.");
 presentModeChosen:
 
   uint32_t imageCount = capabilities.minImageCount + 1;

@@ -141,7 +141,15 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
     defaultFrag->getStageCreateInfo()
     }, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
-  _cube = Mesh::generateCube();
+  std::vector<Vertex> vertices(3);
+  vertices[0].position = { -1,1,0 };
+  vertices[1].position = { 0,-1,0 };
+  vertices[2].position = { 1,1,0 };
+  vertices[0].color = { 1,1,1,1 };
+  vertices[1].color = { 1,1,1,1 };
+  vertices[2].color = { 1,1,1,1 };
+
+  _cube = new Mesh(vertices, { 0,1,2 });  //Mesh::generateCube();
 
   // --- Temporary Code ---
 
@@ -188,7 +196,7 @@ void GraphicsHandler::Render(World* world) {
 
   Frame* currentFrame = _swapchain->getCurrentFrame();
 
-  std::vector<MeshRenderer*> renderers = world->getComponentsInChildren<MeshRenderer>();
+  //std::vector<MeshRenderer*> renderers = world->getComponentsInChildren<MeshRenderer>();
 
   //GraphicsPipeline* currentPipeline{ nullptr };
 
@@ -229,21 +237,24 @@ void GraphicsHandler::Render(World* world) {
   //  currentFrame->commandBuffer->drawIndexed(renderer->mesh->indices->count);
   //}
 
-  currentFrame->commandBuffer->bindPipeline(defaultPipeline);
-
   currentFrame->commandBuffer->setViewport(&viewport);
   currentFrame->commandBuffer->setScissor(&scissor);
   currentFrame->commandBuffer->setLineWidth(1.0f);
-  currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
+  currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_BACK_BIT);
 
-  PushConstants constants{};
+  currentFrame->commandBuffer->bindPipeline(defaultPipeline);
+
+  /*PushConstants constants{};
   constants.vertexBuffer = _cube->vertices->address;
   constants.transform = glm::mat4{ 1.0f };
   currentFrame->commandBuffer->pushConstants(constants, defaultPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
   currentFrame->commandBuffer->bindIndexBuffer(_cube->indices);
 
-  currentFrame->commandBuffer->drawIndexed(_cube->indices->count());
+  currentFrame->commandBuffer->drawIndexed(_cube->indices->count());*/
+
+
+  vkCmdDraw(currentFrame->commandBuffer->handle, 3, 1, 0, 0);
 
   endDrawing();
 }

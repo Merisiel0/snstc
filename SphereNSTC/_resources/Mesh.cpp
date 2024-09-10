@@ -22,9 +22,9 @@ Mesh::~Mesh() {
 
 Mesh* Mesh::generateCube() {
   std::vector<Vertex> vertices;
-  for (float i = -0.5f; i < 0.5f; i++) {
-    for (float j = -0.5f; j < 0.5f; j++) {
-      for (float k = -0.5f; k < 0.5f; k++) {
+  for (float i = -0.5f; i <= 0.5f; i++) {
+    for (float j = -0.5f; j <= 0.5f; j++) {
+      for (float k = -0.5f; k <= 0.5f; k++) {
         Vertex v{};
         v.position = { i, j, k };
         v.color = { 1,1,1,1 };
@@ -33,15 +33,14 @@ Mesh* Mesh::generateCube() {
     }
   }
 
-  std::vector<Index> indices;
-  indices.insert(indices.end(), {
+  std::vector<Index> indices = {
     0,1,2,2,1,3,
     1,5,3,3,5,7,
     5,4,7,7,4,6,
     4,0,6,6,0,2,
     5,1,4,4,1,0,
     6,2,7,7,2,3
-    });
+  };
 
   return new Mesh(vertices, indices);
 }
