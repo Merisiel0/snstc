@@ -13,6 +13,10 @@ Window::Window(const char* title) {
     dm.h,
     SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI);
 
+  if (!handle) {
+    std::clog << SDL_GetError();
+  }
+
   int x, y;
   SDL_GetWindowPosition(handle, &x, &y);
   position = { x, y };

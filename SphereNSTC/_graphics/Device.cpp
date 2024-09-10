@@ -34,19 +34,19 @@ Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> extensio
     queueCreateInfos.push_back(createInfo);
   }
 
-  VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
-  rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-  //rayTracingPipelineFeatures.pNext = nullptr;
-  rayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
+  //VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
+  //rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+  ////rayTracingPipelineFeatures.pNext = nullptr;
+  //rayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
 
-  VkPhysicalDeviceAccelerationStructureFeaturesKHR accelStructFeatures{};
-  accelStructFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-  accelStructFeatures.pNext = &rayTracingPipelineFeatures;
-  accelStructFeatures.accelerationStructure = VK_TRUE;
+  //VkPhysicalDeviceAccelerationStructureFeaturesKHR accelStructFeatures{};
+  //accelStructFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+  //accelStructFeatures.pNext = &rayTracingPipelineFeatures;
+  //accelStructFeatures.accelerationStructure = VK_TRUE;
 
   VkPhysicalDeviceVulkan13Features vk13Features{};
   vk13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-  vk13Features.pNext = &accelStructFeatures;
+  //vk13Features.pNext = &accelStructFeatures;
   vk13Features.synchronization2 = VK_TRUE;
   vk13Features.dynamicRendering = VK_TRUE;
 

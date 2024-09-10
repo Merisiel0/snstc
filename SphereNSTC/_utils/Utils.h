@@ -39,7 +39,7 @@ typedef glm::uvec4 Color;
 typedef uint32_t Index;
 
 struct Vertex {
-	Color color;
+	glm::vec3 color;
 	glm::vec3 normal;
 	glm::vec3 position;
 	glm::vec2 uv;

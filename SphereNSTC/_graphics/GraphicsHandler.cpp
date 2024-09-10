@@ -141,13 +141,16 @@ GraphicsHandler::GraphicsHandler(GraphicsInitInfo initInfo) {
     defaultFrag->getStageCreateInfo()
     }, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
+  delete defaultVert;
+  delete defaultFrag;
+
   std::vector<Vertex> vertices(3);
   vertices[0].position = { -1,1,0 };
   vertices[1].position = { 0,-1,0 };
   vertices[2].position = { 1,1,0 };
-  vertices[0].color = { 1,1,1,1 };
-  vertices[1].color = { 1,1,1,1 };
-  vertices[2].color = { 1,1,1,1 };
+  vertices[0].color = { 1,1,1 };
+  vertices[1].color = { 1,1,1 };
+  vertices[2].color = { 1,1,1 };
 
   _cube = new Mesh(vertices, { 0,1,2 });  //Mesh::generateCube();
 
@@ -174,6 +177,8 @@ GraphicsHandler::~GraphicsHandler() {
 
   /*delete worldTLAS;
   delete triangleBLAS;*/
+
+  delete defaultPipeline;
 
   delete _drawImage;
   delete _swapchain;
@@ -244,17 +249,16 @@ void GraphicsHandler::Render(World* world) {
 
   currentFrame->commandBuffer->bindPipeline(defaultPipeline);
 
-  /*PushConstants constants{};
+  PushConstants constants{};
   constants.vertexBuffer = _cube->vertices->address;
   constants.transform = glm::mat4{ 1.0f };
   currentFrame->commandBuffer->pushConstants(constants, defaultPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
   currentFrame->commandBuffer->bindIndexBuffer(_cube->indices);
 
-  currentFrame->commandBuffer->drawIndexed(_cube->indices->count());*/
+  currentFrame->commandBuffer->drawIndexed(_cube->indices->count());
 
-
-  vkCmdDraw(currentFrame->commandBuffer->handle, 3, 1, 0, 0);
+  //vkCmdDraw(currentFrame->commandBuffer->handle, 4, 1, 0, 0);
 
   endDrawing();
 }

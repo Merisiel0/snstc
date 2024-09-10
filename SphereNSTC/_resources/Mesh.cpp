@@ -27,7 +27,7 @@ Mesh* Mesh::generateCube() {
       for (float k = -0.5f; k <= 0.5f; k++) {
         Vertex v{};
         v.position = { i, j, k };
-        v.color = { 1,1,1,1 };
+        v.color = { 1,1,1 };
         vertices.push_back(v);
       }
     }
