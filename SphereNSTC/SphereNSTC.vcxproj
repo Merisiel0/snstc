@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -104,15 +104,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\SphereNSTC;$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\stb\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include;$(SolutionDir)\SphereNSTC</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\vulkan\lib;$(SolutionDir)\dependencies\sdl2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\libs\sdl3;$(SolutionDir)\dependencies\libs\vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\SphereNSTC;$(SolutionDir)\dependencies\sdl2\include;$(SolutionDir)\dependencies\glm\include;$(SolutionDir)\dependencies\entt\include;$(SolutionDir)\dependencies\vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include;$(SolutionDir)\SphereNSTC</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -132,50 +132,59 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\vulkan\lib;$(SolutionDir)\dependencies\sdl2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\libs\sdl3;$(SolutionDir)\dependencies\libs\vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="_ECS\Components\Camera.cpp" />
+    <ClCompile Include="_ECS\Components\DirectionArrows.cpp" />
     <ClCompile Include="_ECS\Components\MeshRenderer.cpp" />
+    <ClCompile Include="_ECS\Components\PlayerController.cpp" />
     <ClCompile Include="_ECS\GameObject.cpp" />
     <ClCompile Include="_ECS\Components\Transform.cpp" />
     <ClCompile Include="_ECS\World.cpp" />
     <ClCompile Include="_events\EventHandler.cpp" />
-    <ClCompile Include="_graphics\Allocator.cpp" />
-    <ClCompile Include="_graphics\BLAS.cpp" />
-    <ClCompile Include="_graphics\Buffer.cpp" />
-    <ClCompile Include="_graphics\CommandBuffer.cpp" />
-    <ClCompile Include="_graphics\CommandPool.cpp" />
-    <ClCompile Include="_graphics\DebugUtilsMessenger.cpp" />
-    <ClCompile Include="_graphics\Device.cpp" />
-    <ClCompile Include="_graphics\Fence.cpp" />
-    <ClCompile Include="_graphics\Frame.cpp" />
-    <ClCompile Include="_graphics\Geometry.cpp" />
-    <ClCompile Include="_graphics\GraphicsHandler.cpp" />
-    <ClCompile Include="_graphics\GraphicsPipeline.cpp" />
-    <ClCompile Include="_graphics\IAccelerationStructure.cpp" />
-    <ClCompile Include="_graphics\Image.cpp" />
-    <ClCompile Include="_graphics\ImmediateSubmit.cpp" />
-    <ClCompile Include="_graphics\Instance.cpp" />
-    <ClCompile Include="_graphics\PhysicalDevice.cpp" />
-    <ClCompile Include="_graphics\Pipeline.cpp" />
-    <ClCompile Include="_graphics\Queue.cpp" />
-    <ClCompile Include="_graphics\RayTracingPipeline.cpp" />
-    <ClCompile Include="_graphics\Semaphore.cpp" />
-    <ClCompile Include="_graphics\Shader.cpp" />
-    <ClCompile Include="_graphics\Swapchain.cpp" />
-    <ClCompile Include="_graphics\TLAS.cpp" />
-    <ClCompile Include="_graphics\VulkanUtils.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Allocator.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Buffer.cpp" />
+    <ClCompile Include="_graphics\_vulkan\CommandBuffer.cpp" />
+    <ClCompile Include="_graphics\_vulkan\CommandPool.cpp" />
+    <ClCompile Include="_graphics\_vulkan\DebugUtilsMessenger.cpp" />
+    <ClCompile Include="_graphics\_vulkan\DescriptorPool.cpp" />
+    <ClCompile Include="_graphics\_vulkan\DescriptorSet.cpp" />
+    <ClCompile Include="_graphics\_vulkan\DescriptorSetLayout.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Device.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Fence.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Frame.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Sampler.cpp" />
+    <ClCompile Include="_graphics\_vulkan\VulkanHandler.cpp" />
+    <ClCompile Include="_graphics\_vulkan\GraphicsPipeline.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Image.cpp" />
+    <ClCompile Include="_graphics\_vulkan\ImmediateSubmit.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Instance.cpp" />
+    <ClCompile Include="_graphics\_vulkan\PhysicalDevice.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Pipeline.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Queue.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Semaphore.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Shader.cpp" />
+    <ClCompile Include="_graphics\_vulkan\Swapchain.cpp" />
+    <ClCompile Include="_graphics\_vulkan\VulkanUtils.cpp" />
     <ClCompile Include="_graphics\Window.cpp" />
     <ClCompile Include="_inputs\InputHandler.cpp" />
     <ClCompile Include="_resources\Material.cpp" />
     <ClCompile Include="_resources\Mesh.cpp" />
     <ClCompile Include="_utils\FunctionQueue.cpp" />
+    <ClCompile Include="_utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="_ECS\Components\DirectionArrows.h" />
+    <ClInclude Include="_ECS\Components\Light.h" />
+    <ClInclude Include="_ECS\Components\PlayerController.h" />
+    <ClInclude Include="_graphics\_vulkan\DescriptorPool.h" />
+    <ClInclude Include="_graphics\_vulkan\DescriptorSet.h" />
+    <ClInclude Include="_graphics\_vulkan\DescriptorSetLayout.h" />
+    <ClInclude Include="_graphics\_vulkan\Sampler.h" />
     <ClInclude Include="_resources\Material.h" />
     <ClInclude Include="_resources\Mesh.h" />
     <ClInclude Include="_audio\AudioHandler.h" />
@@ -187,40 +196,39 @@
     <ClInclude Include="_ECS\Components\Transform.h" />
     <ClInclude Include="_ECS\World.h" />
     <ClInclude Include="_events\EventHandler.h" />
-    <ClInclude Include="_graphics\Allocator.h" />
-    <ClInclude Include="_graphics\BLAS.h" />
-    <ClInclude Include="_graphics\Buffer.h" />
-    <ClInclude Include="_graphics\CommandBuffer.h" />
-    <ClInclude Include="_graphics\CommandPool.h" />
-    <ClInclude Include="_graphics\DebugUtilsMessenger.h" />
-    <ClInclude Include="_graphics\Device.h" />
-    <ClInclude Include="_graphics\Fence.h" />
-    <ClInclude Include="_graphics\Frame.h" />
-    <ClInclude Include="_graphics\Geometry.h" />
-    <ClInclude Include="_graphics\GraphicsHandler.h" />
-    <ClInclude Include="_graphics\GraphicsPipeline.h" />
-    <ClInclude Include="_graphics\IAccelerationStructure.h" />
-    <ClInclude Include="_graphics\Image.h" />
-    <ClInclude Include="_graphics\ImmediateSubmit.h" />
-    <ClInclude Include="_graphics\Instance.h" />
-    <ClInclude Include="_graphics\PhysicalDevice.h" />
-    <ClInclude Include="_graphics\Pipeline.h" />
-    <ClInclude Include="_graphics\Queue.h" />
-    <ClInclude Include="_graphics\RayTracingPipeline.h" />
-    <ClInclude Include="_graphics\Semaphore.h" />
-    <ClInclude Include="_graphics\Shader.h" />
-    <ClInclude Include="_graphics\Swapchain.h" />
-    <ClInclude Include="_graphics\TLAS.h" />
-    <ClInclude Include="_graphics\VulkanUtils.h" />
+    <ClInclude Include="_graphics\_vulkan\Allocator.h" />
+    <ClInclude Include="_graphics\_vulkan\Buffer.h" />
+    <ClInclude Include="_graphics\_vulkan\CommandBuffer.h" />
+    <ClInclude Include="_graphics\_vulkan\CommandPool.h" />
+    <ClInclude Include="_graphics\_vulkan\DebugUtilsMessenger.h" />
+    <ClInclude Include="_graphics\_vulkan\Device.h" />
+    <ClInclude Include="_graphics\_vulkan\Fence.h" />
+    <ClInclude Include="_graphics\_vulkan\Frame.h" />
+    <ClInclude Include="_graphics\_vulkan\VulkanHandler.h" />
+    <ClInclude Include="_graphics\_vulkan\GraphicsPipeline.h" />
+    <ClInclude Include="_graphics\_vulkan\Image.h" />
+    <ClInclude Include="_graphics\_vulkan\ImmediateSubmit.h" />
+    <ClInclude Include="_graphics\_vulkan\Instance.h" />
+    <ClInclude Include="_graphics\_vulkan\PhysicalDevice.h" />
+    <ClInclude Include="_graphics\_vulkan\Pipeline.h" />
+    <ClInclude Include="_graphics\_vulkan\Queue.h" />
+    <ClInclude Include="_graphics\_vulkan\Semaphore.h" />
+    <ClInclude Include="_graphics\_vulkan\Shader.h" />
+    <ClInclude Include="_graphics\_vulkan\Swapchain.h" />
+    <ClInclude Include="_graphics\_vulkan\VulkanUtils.h" />
     <ClInclude Include="_graphics\Window.h" />
     <ClInclude Include="_inputs\InputHandler.h" />
     <ClInclude Include="_utils\FunctionQueue.h" />
     <ClInclude Include="_utils\Math.h" />
+    <ClInclude Include="_utils\Time.h" />
     <ClInclude Include="_utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shaders\uncompiled\defaultTriangleFragShader.frag" />
-    <None Include="resources\shaders\uncompiled\defaultTriangleVertShader.vert" />
+    <None Include="resources\shaders\uncompiled\color_material.frag" />
+    <None Include="resources\shaders\uncompiled\color_material.vert" />
+    <None Include="resources\shaders\uncompiled\gradientComputeShader.comp" />
+    <None Include="resources\shaders\uncompiled\PBR_material.frag" />
+    <None Include="resources\shaders\uncompiled\PBR_material.vert" />
     <None Include="resources\shaders\uncompiled\rayChitShader.rchit" />
     <None Include="resources\shaders\uncompiled\rayGenShader.rgen" />
     <None Include="resources\shaders\uncompiled\rayMissShader.rmiss" />

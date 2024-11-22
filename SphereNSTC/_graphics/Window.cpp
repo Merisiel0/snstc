@@ -1,17 +1,20 @@
 #include "Window.h"
 
-Window::Window(const char* title) {
-  SDL_DisplayMode dm;
-  SDL_GetCurrentDisplayMode(0, &dm);
-  extent = { dm.w, dm.h };
+#include "_vulkan/Instance.h"
+
+Window::Window(const char* title, Instance* instance) {
+  _instancePtr = instance;
+
+  SDL_DisplayID* displays = SDL_GetDisplays(nullptr);
+  const SDL_DisplayMode* dm = SDL_GetCurrentDisplayMode(displays[0]);
+  extent = { dm->w, dm->h };
+  //extent = { dm->w * .8f, dm->h * .8f };
 
   handle = SDL_CreateWindow(
     title,
-    SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOWPOS_UNDEFINED,
-    dm.w,
-    dm.h,
-    SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI);
+    extent.x,
+    extent.y,
+    SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
   if (!handle) {
     std::clog << SDL_GetError();
@@ -20,8 +23,14 @@ Window::Window(const char* title) {
   int x, y;
   SDL_GetWindowPosition(handle, &x, &y);
   position = { x, y };
+
+  //delete dm;
+  SDL_free(displays);
+
+  SDL_CHECK(SDL_Vulkan_CreateSurface(handle, instance->handle, nullptr, &surface));
 }
 
 Window::~Window() {
+  vkDestroySurfaceKHR(_instancePtr->handle, surface, nullptr);
   SDL_DestroyWindow(handle);
 }

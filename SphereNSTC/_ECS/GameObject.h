@@ -1,26 +1,28 @@
 #pragma once
 
-#include "entt.hpp"
+#include "entt/entt.hpp"
 #include "_utils/Utils.h"
 #include "Components/BaseComponent.h"
 
 #include <vector>
+
+class GameObject;
 
 namespace ECS {
   struct ObjectData : public BaseComponent {
     std::vector<const char*> tags;
     bool isActive{ true };
 
-    uint32_t childCount{};
+    uint32_t childCount{0};
     // First child
-    entt::entity first{ entt::null };
+    GameObject* first{ nullptr };
     // Previous sibling
-    entt::entity prev{ entt::null };
+    GameObject* prev{ nullptr };
     // Next sibling
-    entt::entity next{ entt::null };
-    entt::entity parent{ entt::null };
+    GameObject* next{ nullptr };
+    GameObject* parent{ nullptr };
 
-    entt::entity rootParent{ entt::null };
+    GameObject* rootParent{ nullptr };
   };
 }
 
@@ -29,8 +31,6 @@ private:
   static inline entt::registry _registry;
 
   entt::entity _id;
-
-  void deleteChildren(entt::entity id);
 
 public:
   GameObject();
@@ -57,46 +57,24 @@ public:
   void removeComponent() const {
     _registry.remove<Type>(_id);
   }
-
+  
   template<typename Type>
   Type* getComponentInChildren() {
     ECS::ObjectData& data = _registry.get<ECS::ObjectData>(_id);
 
-    entt::entity currentChild = data.first;
+    entt::entity currentChild = data.first->_id;
     for (std::uint32_t i = 0; i < data.childCount; ++i) {
       if (_registry.all_of<Type>(currentChild)) {
         return &_registry.get<Type>(currentChild);
       }
-      currentChild = _registry.get<ECS::ObjectData>(currentChild).next;
+      currentChild = _registry.get<ECS::ObjectData>(currentChild).next->_id;
     }
 
-    throw Exception("No children have the necessary component.");
+    return nullptr;
   }
 
   template<typename Type>
   std::vector<Type*> getComponentsInChildren() {
-    /*ECS::ObjectData& data = _registry.get<ECS::ObjectData>(_id);
-
-    std::vector<Type*> components{};
-
-    entt::entity currentChild = data.first;
-    for (std::uint32_t i = 0; i < data.childCount; ++i) {
-      if (_registry.all_of<Type>(currentChild)) {
-        components.push_back(&_registry.get<Type>(currentChild));
-      }
-
-      std::vector<Type*> childComponents = getComponentsInChildren(currentChild);
-      components.insert(components.end(), childComponents.begin(), childComponents.end());
-
-      currentChild = _registry.get<ECS::ObjectData>(currentChild).next;
-    }*/
-
-    /*int size = (int)components.size();
-    std::vector<Type*> componentsResult(size);
-    for (int i = 0; i < size; i++) {
-      componentsResult[i] = &components[i];
-    }*/
-
     std::vector<Type*> components{};
 
     entt::runtime_view view{};
@@ -113,15 +91,11 @@ public:
   Type* getComponentInParent() {
     ECS::ObjectData& data = _registry.get<ECS::ObjectData>(_id);
 
-    if (data.parent == entt::null) {
-      throw Exception("This GameObject doesn't have any parent.");
-    }
-
-    if (_registry.all_of<Type>(data.parent)) {
+    if (data.parent != entt::null && _registry.all_of<Type>(data.parent)) {
       return &_registry.get<Type>(data.parent);
     }
 
-    throw Exception("This GameObject's parent doesn't have the necessary component.");
+    return nullptr;
   }
 
   bool hasTag(const char* tag) const;
@@ -134,13 +108,14 @@ public:
   entt::entity getId() const;
 
   bool hasParent() const;
-  void setParent(const GameObject& parent) const;
+  void setParent(GameObject* parent) const;
   void removeParent() const;
 
   int getChildrenCount() const;
-  bool isChild(const GameObject& object) const;
-  void addChild(const GameObject& child) const;
-  void removeChild(const GameObject& child) const;
+  bool isChild(const GameObject* object) const;
+  void addChild(GameObject* child) const;
+  void removeChild(const GameObject* child) const;
+  GameObject* getChild(uint32_t index) const;
 
   /*void getComponentAtIndex();
   void getComponentIndex();
@@ -149,4 +124,7 @@ public:
   static GameObject find();
   static GameObject findWithTag();
   static std::vector<GameObject> findGameObjectsWithTag();*/
+
+  bool operator==(const GameObject* obj) const { return _id == obj->_id; }
+  bool operator!=(const GameObject* obj) const { return !(*this == obj); }
 };

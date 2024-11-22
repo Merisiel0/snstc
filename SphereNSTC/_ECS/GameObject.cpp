@@ -1,164 +1,168 @@
 #include "GameObject.h"
 
+#include "Components/MeshRenderer.h"
+#include "_resources/Material.h"
+#include "Components/Transform.h"
+
 using namespace ECS;
 
 GameObject::GameObject() {
-	_id = _registry.create();
-	addComponent<ObjectData>();
-}
-
-void GameObject::deleteChildren(entt::entity id) {
-	const ObjectData& data = _registry.get<ObjectData>(id);
-
-	if (data.childCount > 0) {
-		entt::entity previousChild{ entt::null };
-		entt::entity currentChild = data.first;
-		for (uint32_t i = 0; i < data.childCount; i++) {
-			deleteChildren(currentChild);
-
-			previousChild = currentChild;
-			currentChild = _registry.get<ObjectData>(currentChild).next;
-			_registry.destroy(previousChild);
-		}
-	}
+  _id = _registry.create();
+  addComponent<ObjectData>();
+  addComponent<Transform>();
 }
 
 GameObject::~GameObject() {
-	const ObjectData& data = _registry.get<ObjectData>(_id);
+  const ObjectData& data = _registry.get<ObjectData>(_id);
 
-	deleteChildren(_id);
+  // destroy all components with allocated resources
+  if (_registry.all_of<MeshRenderer>(_id)) {
+    _registry.get<MeshRenderer>(_id).~MeshRenderer();
+  }
 
-	if (data.prev != entt::null) {
-		_registry.get<ObjectData>(data.prev).next = data.next;
-	}
-	if (data.next != entt::null) {
-		_registry.get<ObjectData>(data.next).prev = data.prev;
-	}
+  // recur through children
+  GameObject* currentChild = data.first;
+  GameObject* nextChild{ nullptr };
+  for (uint32_t i = 0; i < data.childCount; i++) {
+    nextChild = _registry.get<ObjectData>(currentChild->_id).next;
 
-	if (data.parent != entt::null) {
-		ObjectData& parentData = _registry.get<ObjectData>(data.parent);
+    currentChild->~GameObject();
 
-		parentData.childCount--;
-		if (parentData.childCount == 0) {
-			parentData.first = entt::null;
-		}
-		else if (parentData.first == _id) {
-			parentData.first == data.next;
-		}
-	}
+    currentChild = nextChild;
+  }
 
-	_registry.destroy(_id);
+  // free id
+  _registry.destroy(_id);
 }
 
 bool GameObject::hasTag(const char* tag) const {
-	const ObjectData& data = _registry.get<ObjectData>(_id);
+  const ObjectData& data = _registry.get<ObjectData>(_id);
 
-	if (data.tags.size() == 0) return false;
+  if (data.tags.size() == 0) return false;
 
-	auto it = std::find(data.tags.begin(), data.tags.end(), tag);
-	return it != data.tags.end();
+  auto it = std::find(data.tags.begin(), data.tags.end(), tag);
+  return it != data.tags.end();
 }
 
 void GameObject::addTag(const char* tag) const {
-	if (!hasTag(tag)) {
-		_registry.get<ObjectData>(_id).tags.push_back(tag);
-	}
+  if (!hasTag(tag)) {
+    _registry.get<ObjectData>(_id).tags.push_back(tag);
+  }
 }
 
 void GameObject::removeTag(const char* tag) const {
-	if (!hasTag(tag)) return;
+  if (!hasTag(tag)) return;
 
-	ObjectData& data = _registry.get<ObjectData>(_id);
+  ObjectData& data = _registry.get<ObjectData>(_id);
 
-	auto it = std::find(data.tags.begin(), data.tags.end(), tag);
-	if (it != data.tags.end()) {
-		data.tags.erase(it);
-	}
+  auto it = std::find(data.tags.begin(), data.tags.end(), tag);
+  if (it != data.tags.end()) {
+    data.tags.erase(it);
+  }
 }
 
 bool GameObject::isActive() const {
-	return _registry.get<ObjectData>(_id).isActive;
+  return _registry.get<ObjectData>(_id).isActive;
 }
 
 void GameObject::setActive(bool isActive) const {
-	_registry.get<ObjectData>(_id).isActive = isActive;
+  _registry.get<ObjectData>(_id).isActive = isActive;
 }
 
 entt::entity GameObject::getId() const {
-	return _id;
+  return _id;
 }
 
 bool GameObject::hasParent() const {
-	const ObjectData& data = _registry.get<ObjectData>(_id);
-	return data.parent != data.rootParent && data.parent != entt::null;
+  const ObjectData& data = _registry.get<ObjectData>(_id);
+  return data.parent != data.rootParent && data.parent != nullptr;
 }
 
-void GameObject::setParent(const GameObject& parent) const {
-	_registry.get<ObjectData>(_id).parent = parent._id;
+void GameObject::setParent(GameObject* parent) const {
+  _registry.get<ObjectData>(_id).parent = parent;
 }
 
 void GameObject::removeParent() const {
-	ObjectData& data = _registry.get<ObjectData>(_id);
-	data.parent = data.rootParent;
+  ObjectData data = _registry.get<ObjectData>(_id);
+  data.parent = data.rootParent;
 }
 
 int GameObject::getChildrenCount() const {
-	return (int)_registry.get<ObjectData>(_id).childCount;
+  return (int)_registry.get<ObjectData>(_id).childCount;
 }
 
-bool GameObject::isChild(const GameObject& object) const {
-	const ObjectData& data = _registry.get<ObjectData>(_id);
+bool GameObject::isChild(const GameObject* object) const {
+  const ObjectData& data = _registry.get<ObjectData>(_id);
 
-	if (data.childCount == 0) return false;
+  if (data.childCount == 0) return false;
 
-	return _registry.get<ObjectData>(object._id).parent == _id;
+  const ObjectData& objData = _registry.get<ObjectData>(object->_id);
+
+  if (objData.parent)
+    return objData.parent->operator==(this);
+
+  return false;
 }
 
-void GameObject::addChild(const GameObject& child) const {
-	if (!isChild(child)) {
-		ObjectData& data = _registry.get<ObjectData>(_id);
+void GameObject::addChild(GameObject* child) const {
+  if (isChild(child)) return;
 
-		ObjectData& childData = _registry.get<ObjectData>(child._id);
-		childData.parent = _id;
-		childData.rootParent = data.rootParent == entt::null ? _id : data.rootParent;
+  ObjectData& data = _registry.get<ObjectData>(_id);
 
-		if (data.childCount == 0) {
-			data.first = child._id;
-		}
-		else {
-			entt::entity currentChild = data.first;
-			for (std::uint32_t i = 0; i < data.childCount - 1; i++) {
-				currentChild = _registry.get<ObjectData>(currentChild).next;
-			}
+  ObjectData& childData = _registry.get<ObjectData>(child->_id);
+  childData.parent = (GameObject*)this;
+  childData.rootParent = data.rootParent == nullptr ? (GameObject*)this : data.rootParent;
 
-			_registry.get<ObjectData>(currentChild).next = child._id;
-			_registry.get<ObjectData>(child._id).prev = currentChild;
-		}
+  if (data.childCount == 0) {
+    data.first = child;
+  }
+  else {
+    GameObject* currentChild = data.first;
+    for (std::uint32_t i = 0; i < data.childCount - 1; i++) {
+      currentChild = _registry.get<ObjectData>(currentChild->_id).next;
+    }
 
-		data.childCount++;
-	}
+    _registry.get<ObjectData>(currentChild->_id).next = (GameObject*)child;
+    _registry.get<ObjectData>(child->_id).prev = currentChild;
+  }
+
+  data.childCount++;
 }
 
-void GameObject::removeChild(const GameObject& child) const {
-	if (!isChild(child)) {
-		ObjectData& data = _registry.get<ObjectData>(_id);
+void GameObject::removeChild(const GameObject* child) const {
+  if (isChild(child)) return;
 
-		if (child._id == data.first) {
-			data.first = _registry.get<ObjectData>(child._id).next;
-			return;
-		}
+  ObjectData& data = _registry.get<ObjectData>(_id);
 
-		entt::entity currentChild = data.first;
-		entt::entity nextChild = _registry.get<ObjectData>(currentChild).next;
-		for (uint32_t i = 0; i < data.childCount; ++i) {
-			if (nextChild == child._id) {
-				_registry.get<ObjectData>(currentChild).next = _registry.get<ObjectData>(nextChild).next;
-				return;
-			}
-			currentChild = _registry.get<ObjectData>(currentChild).next;
-			nextChild = _registry.get<ObjectData>(currentChild).next;
-		}
+  if (child->operator==(data.first)) {
+    data.first = _registry.get<ObjectData>(child->_id).next;
+    return;
+  }
 
-		data.childCount--;
-	}
+  GameObject* currentChild = data.first;
+  GameObject* nextChild = _registry.get<ObjectData>(currentChild->_id).next;
+  for (uint32_t i = 0; i < data.childCount; ++i) {
+    if (nextChild->operator==(child)) {
+      _registry.get<ObjectData>(currentChild->_id).next = _registry.get<ObjectData>(nextChild->_id).next;
+      return;
+    }
+    currentChild = _registry.get<ObjectData>(currentChild->_id).next;
+    nextChild = _registry.get<ObjectData>(currentChild->_id).next;
+  }
+
+  data.childCount--;
+}
+
+GameObject* GameObject::getChild(uint32_t index) const {
+  ObjectData& data = _registry.get<ObjectData>(_id);
+
+  if (index > data.childCount - 1) return nullptr;
+
+  data = _registry.get<ObjectData>(data.first->_id);
+
+  for (uint32_t i = 0; i < index - 1; i++) {
+    data = _registry.get<ObjectData>(data.next->_id);
+  }
+
+  return data.next;
 }

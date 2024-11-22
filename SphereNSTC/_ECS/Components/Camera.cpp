@@ -9,7 +9,7 @@ Camera::Camera() {
 }
 
 void Camera::updateView() {
-	view = glm::inverse(transform->getModelMatrix());
+	view = glm::inverse(transform->modelMatrix());
 }
 
 void Camera::updateProjectionPerspective(float fovY, float aspect, float zNear, float zFar) {

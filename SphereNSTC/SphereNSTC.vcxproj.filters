@@ -24,82 +24,67 @@
     <ClCompile Include="_ECS\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Allocator.cpp">
+    <ClCompile Include="_graphics\_vulkan\Allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\BLAS.cpp">
+    <ClCompile Include="_graphics\_vulkan\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Buffer.cpp">
+    <ClCompile Include="_graphics\_vulkan\CommandBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\CommandBuffer.cpp">
+    <ClCompile Include="_graphics\_vulkan\CommandPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\CommandPool.cpp">
+    <ClCompile Include="_graphics\_vulkan\DebugUtilsMessenger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\DebugUtilsMessenger.cpp">
+    <ClCompile Include="_graphics\_vulkan\Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Device.cpp">
+    <ClCompile Include="_graphics\_vulkan\Fence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Fence.cpp">
+    <ClCompile Include="_graphics\_vulkan\Frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Frame.cpp">
+    <ClCompile Include="_graphics\_vulkan\VulkanHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\GraphicsHandler.cpp">
+    <ClCompile Include="_graphics\_vulkan\Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\IAccelerationStructure.cpp">
+    <ClCompile Include="_graphics\_vulkan\ImmediateSubmit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Image.cpp">
+    <ClCompile Include="_graphics\_vulkan\Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\ImmediateSubmit.cpp">
+    <ClCompile Include="_graphics\_vulkan\PhysicalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Instance.cpp">
+    <ClCompile Include="_graphics\_vulkan\Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\PhysicalDevice.cpp">
+    <ClCompile Include="_graphics\_vulkan\Semaphore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Queue.cpp">
+    <ClCompile Include="_graphics\_vulkan\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Semaphore.cpp">
+    <ClCompile Include="_graphics\_vulkan\Swapchain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_graphics\Swapchain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_graphics\TLAS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_graphics\VulkanUtils.cpp">
+    <ClCompile Include="_graphics\_vulkan\VulkanUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_graphics\Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_inputs\InputHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_utils\FunctionQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_events\EventHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_graphics\RayTracingPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_ECS\Components\Transform.cpp">
@@ -111,22 +96,43 @@
     <ClCompile Include="_ECS\World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\Geometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_graphics\Pipeline.cpp">
+    <ClCompile Include="_graphics\_vulkan\Pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_resources\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_graphics\GraphicsPipeline.cpp">
+    <ClCompile Include="_graphics\_vulkan\GraphicsPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_resources\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="_ECS\Components\MeshRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_graphics\_vulkan\DescriptorPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_utils\Time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_ECS\Components\PlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_inputs\InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_graphics\_vulkan\Sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_graphics\_vulkan\DescriptorSetLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_graphics\_vulkan\DescriptorSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_ECS\Components\DirectionArrows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,67 +149,58 @@
     <ClInclude Include="_graphics\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Allocator.h">
+    <ClInclude Include="_graphics\_vulkan\Allocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\BLAS.h">
+    <ClInclude Include="_graphics\_vulkan\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Buffer.h">
+    <ClInclude Include="_graphics\_vulkan\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\CommandBuffer.h">
+    <ClInclude Include="_graphics\_vulkan\CommandPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\CommandPool.h">
+    <ClInclude Include="_graphics\_vulkan\DebugUtilsMessenger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\DebugUtilsMessenger.h">
+    <ClInclude Include="_graphics\_vulkan\Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Device.h">
+    <ClInclude Include="_graphics\_vulkan\Fence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Fence.h">
+    <ClInclude Include="_graphics\_vulkan\Frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Frame.h">
+    <ClInclude Include="_graphics\_vulkan\VulkanHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\GraphicsHandler.h">
+    <ClInclude Include="_graphics\_vulkan\Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\IAccelerationStructure.h">
+    <ClInclude Include="_graphics\_vulkan\ImmediateSubmit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Image.h">
+    <ClInclude Include="_graphics\_vulkan\Instance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\ImmediateSubmit.h">
+    <ClInclude Include="_graphics\_vulkan\PhysicalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Instance.h">
+    <ClInclude Include="_graphics\_vulkan\Queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\PhysicalDevice.h">
+    <ClInclude Include="_graphics\_vulkan\Semaphore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Queue.h">
+    <ClInclude Include="_graphics\_vulkan\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Semaphore.h">
+    <ClInclude Include="_graphics\_vulkan\Swapchain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_graphics\Swapchain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_graphics\TLAS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_graphics\VulkanUtils.h">
+    <ClInclude Include="_graphics\_vulkan\VulkanUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_inputs\InputHandler.h">
@@ -216,9 +213,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_events\EventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_graphics\RayTracingPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_ECS\Components\BaseComponent.h">
@@ -242,16 +236,37 @@
     <ClInclude Include="_ECS\ECS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\Geometry.h">
+    <ClInclude Include="_graphics\_vulkan\GraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_graphics\GraphicsPipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_graphics\Pipeline.h">
+    <ClInclude Include="_graphics\_vulkan\Pipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_resources\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_graphics\_vulkan\DescriptorPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_utils\Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_ECS\Components\PlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_graphics\_vulkan\Sampler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_graphics\_vulkan\DescriptorSetLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_graphics\_vulkan\DescriptorSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_ECS\Components\DirectionArrows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_ECS\Components\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -265,7 +280,10 @@
     <None Include="resources\shaders\uncompiled\rayMissShader.rmiss">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="resources\shaders\uncompiled\defaultTriangleFragShader.frag" />
-    <None Include="resources\shaders\uncompiled\defaultTriangleVertShader.vert" />
+    <None Include="resources\shaders\uncompiled\gradientComputeShader.comp" />
+    <None Include="resources\shaders\uncompiled\PBR_material.frag" />
+    <None Include="resources\shaders\uncompiled\PBR_material.vert" />
+    <None Include="resources\shaders\uncompiled\color_material.vert" />
+    <None Include="resources\shaders\uncompiled\color_material.frag" />
   </ItemGroup>
 </Project>

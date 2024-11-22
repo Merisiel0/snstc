@@ -5,6 +5,10 @@
 
 struct Transform;
 
+struct CameraBuffer {
+	mat4 projView;
+};
+
 enum CameraProjections {
 	PERSPECTIVE, ORTHOGRAPHIC
 };

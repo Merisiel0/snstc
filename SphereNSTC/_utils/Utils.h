@@ -1,55 +1,38 @@
 #pragma once
 
+#include "sdl3/SDL.h"
 #include "Math.h"
+#include "Time.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 #define SDL_CHECK(x)												        																\
-	do{																        																				\
-		int err = x;												        																		\
-		if (err != 0) {												        																	\
-			std::cerr << "Detected SDL error: " << SDL_GetError() << std::endl;						\
-		}															        																					\
-	}while(0)
-
-#define SDL_BCHECK(x)												        																\
 	do{				    											        																			\
-		SDL_bool err = x;											        																	\
-		if (err == SDL_FALSE) {																													\
+		if (!(bool)x) {																																	\
 			std::cerr << "Detected SDL error: " << SDL_GetError() << std::endl;						\
 		}															        																					\
 	}while(0)
 
-class Exception : public std::exception {
-private:
-	const char* message;
+typedef glm::vec4 Color;
 
-public:
-	Exception(const char* msg) : message(msg) {}
-
-	const char* what() {
-		return message;
-	}
-};
-
-typedef glm::uvec4 Color;
-
-typedef uint32_t Index;
+typedef int Index;
 
 struct Vertex {
-	glm::vec3 color;
-	glm::vec3 normal;
 	glm::vec3 position;
-	glm::vec2 uv;
+	float u;
+	glm::vec3 normal;
+	float v;
+	Color color;
 };
 
 static inline std::string readFileText(const char* path) {
 	std::ifstream file(path, std::ios::ate | std::ios::in);
 
 	if (!file.is_open()) {
-		throw Exception("Failed to read file bytes.");
+		throw std::runtime_error("Failed to read file bytes.");
 	}
 	
 	size_t fileSize = (size_t)file.tellg();
@@ -66,7 +49,7 @@ static inline std::vector<uint32_t> readFileBytes(const char* path) {
 	std::ifstream file(path, std::ios::ate | std::ios::in | std::ios::binary);
 
 	if (!file.is_open()) {
-		throw Exception("Failed to read file bytes.");
+		throw std::runtime_error("Failed to read file bytes.");
 	}
 
 	size_t fileSize = (size_t)file.tellg();
@@ -77,4 +60,24 @@ static inline std::vector<uint32_t> readFileBytes(const char* path) {
 	file.close();
 
 	return fileBytes;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
+	os << "(" << v.x << "," << v.y << "," << v.z << ")";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v) {
+	os << "(" << v.x << "," << v.y << ")";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::mat4& m) {
+	for (int i = 0; i < m.length(); i++) {
+		for (int j = 0; j < m[i].length(); j++) {
+			os << m[i][j] << " ";
+		}
+		os << "\n";
+	}
+	return os;
 }

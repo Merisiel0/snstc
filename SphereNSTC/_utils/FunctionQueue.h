@@ -3,8 +3,7 @@
 #include <deque>
 #include <functional>
 
-class FunctionQueue
-{
+class FunctionQueue {
 	std::deque<std::function<void()>> functions;
 
 	void pushFunction(std::function<void()>&& function);

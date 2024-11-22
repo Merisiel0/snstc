@@ -1,14 +1,19 @@
 #pragma once
 
-#include "VulkanUtils.h"
+#include "_vulkan/VulkanUtils.h"
+
+class Instance;
 
 class Window {
-public:
-  SDL_Window* handle{ nullptr };
-  glm::uvec2 position{};
-  glm::uvec2 extent{};
+private:
+  Instance* _instancePtr;
 
-  Window() {}
-  Window(const char* title);
+public:
+  SDL_Window* handle;
+  glm::vec2 position;
+  glm::uvec2 extent;
+  VkSurfaceKHR surface;
+
+  Window(const char* title, Instance* instance);
   ~Window();
 };
