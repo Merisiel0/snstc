@@ -1,0 +1,22 @@
+Architecture:
+
+GPUManager:
+- init connection
+  - instance
+  - debug messenger
+  - physical device
+  - device
+  - fetch all queues that support bits graphics, compute and transfer
+- close connection
+
+- keeps track of which queues are free
+- when command function is called:
+  - submits it with everything it can when first queue of bit is free
+
+ResourceManager:
+- allocated resources on gpu ram
+- allocateResources(std::vector<byte> resources, std::vector<uint32_t> offsets)
+  - allocates resources in buffer
+  - returns buffer
+  - if new buffer, then offsets unchanged
+  - if used existing buffer, offsets changed
