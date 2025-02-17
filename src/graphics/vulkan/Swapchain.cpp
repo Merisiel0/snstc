@@ -16,8 +16,8 @@ VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t
   //info.flags = 0;
   info.surface = surface;
   info.minImageCount = imageCount;
-  info.imageFormat = Image::colorFormat;
-  info.imageColorSpace = Image::colorSpace;
+  info.imageFormat = _surfaceFormat.format;
+  info.imageColorSpace = _surfaceFormat.colorSpace;
   info.imageExtent = capabilities.currentExtent;
   info.imageArrayLayers = 1;
   info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -45,6 +45,38 @@ Swapchain::Swapchain(Window* window, Device* device, DescriptorPool* descriptorP
   extent.width = window->extent.x;
   extent.height = window->extent.y;
 
+  // find surface format
+  uint32_t surfaceFormatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device->physicalDevice()->handle, window->surface, &surfaceFormatCount, nullptr);
+  std::vector<VkSurfaceFormatKHR> availableSurfaceFormats(surfaceFormatCount);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device->physicalDevice()->handle, window->surface, &surfaceFormatCount, availableSurfaceFormats.data());
+
+  const std::vector<VkFormat> preferredFormats = {
+      VK_FORMAT_R8G8B8A8_UNORM,
+      VK_FORMAT_R8G8B8A8_UINT,
+      VK_FORMAT_B8G8R8A8_SRGB
+  };
+
+  const std::vector<VkColorSpaceKHR> preferredColorSpaces = {
+      VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+  };
+
+  Swapchain::_surfaceFormat.format = VK_FORMAT_UNDEFINED;
+  for (const auto& colorSpace : preferredColorSpaces) {
+    for (const auto& format : preferredFormats) {
+      for (const auto& availableSurfaceFormat : availableSurfaceFormats) {
+        if (availableSurfaceFormat.format == format && availableSurfaceFormat.colorSpace == colorSpace) {
+          Swapchain::_surfaceFormat = availableSurfaceFormat;
+          break;
+        }
+      }
+    }
+  }
+  if (Swapchain::_surfaceFormat.format == VK_FORMAT_UNDEFINED) {
+    throw std::runtime_error("No prefered surface format available.");
+  }
+
+  // find present mode
   uint32_t presentModeCount = 0;
   VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(device->physicalDevice()->handle, window->surface, &presentModeCount, nullptr));
   std::vector<VkPresentModeKHR> availablePresentModes(presentModeCount);
@@ -55,19 +87,19 @@ Swapchain::Swapchain(Window* window, Device* device, DescriptorPool* descriptorP
       VK_PRESENT_MODE_FIFO_KHR,
       VK_PRESENT_MODE_IMMEDIATE_KHR
   };
-  VkPresentModeKHR presentMode{};
+  VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
 
   for (const auto& preferredPresentMode : preferredPresentModes) {
     for (const auto& availablePresentMode : availablePresentModes) {
       if (preferredPresentMode == availablePresentMode) {
         presentMode = preferredPresentMode;
-        goto presentModeChosen;
+        break;
       }
     }
   }
-  throw std::runtime_error("No preferred present mode available.");
-presentModeChosen:
-
+  if (presentMode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
+    throw std::runtime_error("No preferred present mode available.");
+  }
 
   VkSurfaceCapabilitiesKHR capabilities{};
   VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->physicalDevice()->handle, window->surface, &capabilities));
@@ -96,7 +128,7 @@ presentModeChosen:
     //createInfo.flags = 0;
     createInfo.image = vkImages[i];
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format = Image::colorFormat;
+    createInfo.format = _surfaceFormat.format;
     //createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
     //createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
     //createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -129,7 +161,8 @@ Swapchain::~Swapchain() {
 
 uint32_t Swapchain::acquireNextImage() const {
   uint32_t swapchainImageIndex;
-  VK_CHECK(vkAcquireNextImageKHR(*_devicePtr, handle, 9999999999, getCurrentFrame()->swapchainSemaphore->handle, nullptr, &swapchainImageIndex));
+  VkSemaphore s = getCurrentFrame()->swapchainSemaphore->handle;
+  VK_CHECK(vkAcquireNextImageKHR(*_devicePtr, handle, 9999999999, s, nullptr, &swapchainImageIndex));
   return swapchainImageIndex;
 }
 

@@ -1,7 +1,7 @@
 #version 450
 
 layout(location = 0) in vec2 inUV;
-layout(location = 1) out vec3 inFragPos;
+layout(location = 1) in vec3 inFragPos;
 layout(location = 2) in vec3 inNormal;
 
 layout(set = 0, binding = 1) uniform lightBuf {
@@ -36,7 +36,7 @@ void main()
 	if (diff > 0) {
 		vec3 viewDir = normalize(lights.viewPosition - inFragPos);
 		vec3 reflectDir = reflect(-lightDir, norm);
-		spec = pow(max(dot(viewDir, reflectDir), 0.0), 256); // inver the two
+		spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // inver the two
 	}
 	vec3 specular = spec * lights.color.w * lights.color.xyz / dist;
 

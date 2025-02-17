@@ -18,7 +18,7 @@ VkPresentInfoKHR Queue::getPresentInfo(Swapchain* swapchain, uint32_t imageIndex
   info.pSwapchains = &swapchain->handle;
   info.swapchainCount = 1;
 
-  info.pImageIndices = &imageIndex;
+  info.pImageIndices = new uint32_t(imageIndex);
 
   //info.pResults = nullptr;
 
@@ -31,7 +31,6 @@ Queue::Queue(Device* device, uint32_t familyIndex) {
 }
 
 void Queue::present(Swapchain* swapchain, uint32_t imageIndex, Semaphore* wait) const {
-  
   VkPresentInfoKHR presentInfo = getPresentInfo(swapchain, imageIndex, wait);
   VK_CHECK(vkQueuePresentKHR(handle, &presentInfo));
 }

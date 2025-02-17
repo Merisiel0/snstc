@@ -44,11 +44,13 @@ void VulkanHandler::beginDrawing(World* world) {
   currentFrame->commandBuffer->begin();
 
   // clear image with color - todo: insert skybox here
-  _drawImage->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  _drawImage->clear(currentFrame->commandBuffer, { 1,1,1,1 });
+  _drawImage->transitionLayout(currentFrame->commandBuffer,
+    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  _drawImage->clear(currentFrame->commandBuffer, { 1, 1, 1, 1 });
 
   // transition image into writeable mode before rendering
-  _drawImage->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+  _drawImage->transitionLayout(currentFrame->commandBuffer,
+    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
   // update camera information
   world->updateCamera(currentFrame->commandBuffer);
@@ -66,8 +68,10 @@ void VulkanHandler::beginDrawing(World* world) {
   viewport.maxDepth = 1.0f;
 
   VkRect2D scissor{};
-  scissor.offset.x = _window->position.x >= 0 ? (int32_t)_window->position.x : 0;
-  scissor.offset.y = _window->position.y >= 0 ? (int32_t)_window->position.y : 0;
+  scissor.offset.x =
+    _window->position.x >= 0 ? (int32_t)_window->position.x : 0;
+  scissor.offset.y =
+    _window->position.y >= 0 ? (int32_t)_window->position.y : 0;
   scissor.extent.width = _window->extent.x;
   scissor.extent.height = _window->extent.y;
 
@@ -77,7 +81,8 @@ void VulkanHandler::beginDrawing(World* world) {
   // write camera descriptor set
   currentFrame->camDescSet->write(0, world->camBuffer);
   currentFrame->camDescSet->write(1, world->lightsBuffer);
-  currentFrame->commandBuffer->bindDescriptorSet(currentFrame->camDescSet, 0, _pipelineColor);
+  currentFrame->commandBuffer->bindDescriptorSet(currentFrame->camDescSet, 0,
+    _pipelineColor);
 }
 
 void VulkanHandler::endDrawing() {
@@ -88,53 +93,65 @@ void VulkanHandler::endDrawing() {
   // request an image from the swapchain
   uint32_t swapchainImageIndex = _swapchain->acquireNextImage();
 
-  // transition the draw image and the swapchain image into their correct transfer layouts
-  _drawImage->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-  _swapchain->getImage(swapchainImageIndex)->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  // transition the draw image and the swapchain image into their correct
+  // transfer layouts
+  _drawImage->transitionLayout(currentFrame->commandBuffer,
+    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+  _swapchain->getImage(swapchainImageIndex)
+    ->transitionLayout(currentFrame->commandBuffer,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
   // copy drawimage to swapchain image
-  _drawImage->blitTo(currentFrame->commandBuffer, _swapchain->getImage(swapchainImageIndex));
+  _drawImage->blitTo(currentFrame->commandBuffer,
+    _swapchain->getImage(swapchainImageIndex));
 
   // make the swapchain image into presentable mode
-  _swapchain->getImage(swapchainImageIndex)->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+  _swapchain->getImage(swapchainImageIndex)->transitionLayout(currentFrame->commandBuffer,
+    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
   // end the command buffer
   currentFrame->commandBuffer->end();
 
   // submit command buffer to queue and execute it
-  currentFrame->commandBuffer->submitToQueue(_device->graphicsQueue, currentFrame->renderFence, currentFrame->swapchainSemaphore, currentFrame->renderSemaphore);
+  currentFrame->commandBuffer->submitToQueue(
+    _device->graphicsQueue, currentFrame->renderFence,
+    currentFrame->swapchainSemaphore, currentFrame->renderSemaphore); //currentFrame->swapchainSemaphore
 
   // present image to screen
-  _device->graphicsQueue->present(_swapchain, swapchainImageIndex, currentFrame->renderSemaphore);
+  _device->graphicsQueue->present(_swapchain, swapchainImageIndex,
+    currentFrame->renderSemaphore);
 
-  //increase the number of frames drawn
+  // increase the number of frames drawn
   _swapchain->frameNumber++;
 }
 
-VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName, int engineVersion) {
+VulkanHandler::VulkanHandler(const char* applicationName,
+  int applicationVersion, const char* engineName,
+  int engineVersion) {
   // instance
   std::vector<const char*> instanceLayers{
 #ifdef VKDEBUG
-    "VK_LAYER_KHRONOS_validation"
+      "VK_LAYER_KHRONOS_validation"
 #endif
   };
 
   std::vector<const char*> instanceExtensions{
 #ifdef VKDEBUG
-    VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+      VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 #endif
 
-    VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
-  };
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME };
 
   uint32_t sdlExtensionCount;
-  const char* const* sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+  const char* const* sdlExtensions =
+    SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
   SDL_CHECK(sdlExtensions);
   for (uint32_t i = 0; i < sdlExtensionCount; i++) {
     instanceExtensions.push_back(sdlExtensions[i]);
   }
 
-  _instance = new Instance(applicationName, applicationVersion, engineName, engineVersion, instanceLayers, instanceExtensions);
+  _instance = new Instance(applicationName, applicationVersion, engineName,
+    engineVersion, instanceLayers, instanceExtensions);
 
   fetchExtensionFunctionPointers(_instance->handle);
 
@@ -147,9 +164,7 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 #endif
 
   // physical device, device and allocator
-  std::vector<const char*> deviceExtensions{
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
-  };
+  std::vector<const char*> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
   _physicalDevice = new PhysicalDevice(_instance, deviceExtensions);
   _device = new Device(_physicalDevice, deviceExtensions);
   _allocator = new Allocator(_instance, _physicalDevice, _device);
@@ -162,7 +177,8 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   // descriptor pool
   std::vector<VkDescriptorPoolSize> poolSizes;
   VkDescriptorPoolSize poolSize{};
-  poolSize.descriptorCount = Swapchain::FRAME_OVERLAP * 2; // times 2 for cam buffer and light buffer
+  poolSize.descriptorCount =
+    Swapchain::FRAME_OVERLAP * 2;  // times 2 for cam buffer and light buffer
   poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
   poolSizes.push_back(poolSize);
 
@@ -177,12 +193,12 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   VkDescriptorSetLayoutBinding binding{};
   binding.binding = 0;
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // camera buffer
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // camera buffer
   binding.descriptorCount = 1;
   binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   bindings.push_back(binding);
 
-  binding.binding = 1; // lights buffer
+  binding.binding = 1;  // lights buffer
   binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
   bindings.push_back(binding);
 
@@ -190,79 +206,87 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   bindings.clear();
 
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // color texture
+  binding.descriptorType =
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;  // color texture
   binding.binding = 0;
   bindings.push_back(binding);
 
-  binding.binding = 1; // normal texture
+  binding.binding = 1;  // normal texture
   bindings.push_back(binding);
 
-  binding.binding = 2; // rougness texture
+  binding.binding = 2;  // rougness texture
   bindings.push_back(binding);
 
-  binding.binding = 3; // metalness texture
+  binding.binding = 3;  // metalness texture
   bindings.push_back(binding);
 
-  binding.binding = 4; // height texture
+  binding.binding = 4;  // height texture
   bindings.push_back(binding);
 
-  binding.binding = 5; // ambiant occlusion texture
+  binding.binding = 5;  // ambiant occlusion texture
   bindings.push_back(binding);
 
   _objDescSetLayout = new DescriptorSetLayout(_device, bindings);
 
-  _swapchain = new Swapchain(_window, _device, _descriptorPool, _camDescSetLayout, _objDescSetLayout);
+  _swapchain = new Swapchain(_window, _device, _descriptorPool,
+    _camDescSetLayout, _objDescSetLayout);
 
-  _drawImage = new Image(_swapchain, VK_IMAGE_ASPECT_COLOR_BIT,
-    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+  _drawImage = new Image(
+    _swapchain, COLOR,
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+    VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
-  _depthImage = new Image(_swapchain, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  _depthImage =
+    new Image(_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
   _immediateSubmit->submit([&](CommandBuffer* cmd) {
-    _depthImage->transitionLayout(cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-  });
+    _depthImage->transitionLayout(
+      cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    });
 
   _defaultSampler = new Sampler(_device);
 
   // PBR pipelines
-  Shader* vertexShader = new Shader(_device, "resources/shaders/PBR_material_vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-  Shader* fragmentShader = new Shader(_device, "resources/shaders/PBR_material_frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+  Shader* vertexShader =
+    new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
+      VK_SHADER_STAGE_VERTEX_BIT);
+  Shader* fragmentShader =
+    new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
+      VK_SHADER_STAGE_FRAGMENT_BIT);
 
-  _pipelinePBR = new GraphicsPipeline(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, {
-    vertexShader->getStageCreateInfo(),
-    fragmentShader->getStageCreateInfo()
-    }, {
-      _camDescSetLayout->handle,
-      _objDescSetLayout->handle
-    });
+  _pipelinePBR = new GraphicsPipeline(
+    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+    { vertexShader->getStageCreateInfo(),
+     fragmentShader->getStageCreateInfo() },
+    { _camDescSetLayout->handle, _objDescSetLayout->handle });
 
-  _pipelineLinePBR = new GraphicsPipeline(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, {
-    vertexShader->getStageCreateInfo(),
-    fragmentShader->getStageCreateInfo()
-    }, {
-      _camDescSetLayout->handle,
-      _objDescSetLayout->handle
-    });
+  _pipelineLinePBR = new GraphicsPipeline(
+    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+    { vertexShader->getStageCreateInfo(),
+     fragmentShader->getStageCreateInfo() },
+    { _camDescSetLayout->handle, _objDescSetLayout->handle });
 
   delete vertexShader;
   delete fragmentShader;
 
   // plain color pipelines
-  Shader* vertexShader2 = new Shader(_device, "resources/shaders/color_material_vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-  Shader* fragmentShader2 = new Shader(_device, "resources/shaders/color_material_frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+  Shader* vertexShader2 =
+    new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
+      VK_SHADER_STAGE_VERTEX_BIT);
+  Shader* fragmentShader2 =
+    new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
+      VK_SHADER_STAGE_FRAGMENT_BIT);
 
-  _pipelineColor = new GraphicsPipeline(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, {
-    vertexShader2->getStageCreateInfo(),
-    fragmentShader2->getStageCreateInfo()
-    }, {
-      _camDescSetLayout->handle
-    });
+  _pipelineColor = new GraphicsPipeline(
+    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+    { vertexShader2->getStageCreateInfo(),
+     fragmentShader2->getStageCreateInfo() },
+    { _camDescSetLayout->handle });
 
-  _pipelineLineColor = new GraphicsPipeline(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, {
-    vertexShader2->getStageCreateInfo(),
-    fragmentShader2->getStageCreateInfo()
-    }, {
-      _camDescSetLayout->handle
-    });
+  _pipelineLineColor = new GraphicsPipeline(
+    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+    { vertexShader2->getStageCreateInfo(),
+     fragmentShader2->getStageCreateInfo() },
+    { _camDescSetLayout->handle });
 
   delete vertexShader2;
   delete fragmentShader2;
@@ -293,7 +317,7 @@ VulkanHandler::~VulkanHandler() {
 
 #ifdef VKDEBUG
   delete _debugMessenger;
-#endif // VKDEBUG
+#endif  // VKDEBUG
 
   delete _instance;
   delete _window;
@@ -306,7 +330,8 @@ void VulkanHandler::render(World* world) {
   Frame* currentFrame = _swapchain->getCurrentFrame();
 
   // for each renderers in the scene..
-  std::vector<MeshRenderer*> renderers = world->getComponentsInChildren<MeshRenderer>();
+  std::vector<MeshRenderer*> renderers =
+    world->getComponentsInChildren<MeshRenderer>();
   for (const auto& renderer : renderers) {
     // choose which pipeline to use
     GraphicsPipeline* currentPipeline;
@@ -327,33 +352,43 @@ void VulkanHandler::render(World* world) {
     // write object descriptor set if needed
     if (!renderer->material->plainColor) {
       if (renderer->material->getColor()) {
-        currentFrame->objDescSet->write(0, renderer->material->getColor(), _defaultSampler);
+        currentFrame->objDescSet->write(0, renderer->material->getColor(),
+          _defaultSampler);
       }
       /*if (renderer->material->getNormal()) {
-        currentFrame->objDescSet->write(1, renderer->material->getNormal(), _defaultSampler);
+        currentFrame->objDescSet->write(1, renderer->material->getNormal(),
+      _defaultSampler);
       }
       if (renderer->material->getRoughness()) {
-        currentFrame->objDescSet->write(2, renderer->material->getRoughness(), _defaultSampler);
+        currentFrame->objDescSet->write(2, renderer->material->getRoughness(),
+      _defaultSampler);
       }
       if (renderer->material->getMetalness()) {
-        currentFrame->objDescSet->write(3, renderer->material->getMetalness(), _defaultSampler);
+        currentFrame->objDescSet->write(3, renderer->material->getMetalness(),
+      _defaultSampler);
       }
       if (renderer->material->getHeight()) {
-        currentFrame->objDescSet->write(4, renderer->material->getHeight(), _defaultSampler);
+        currentFrame->objDescSet->write(4, renderer->material->getHeight(),
+      _defaultSampler);
       }
       if (renderer->material->getAO()) {
-        currentFrame->objDescSet->write(5, renderer->material->getAO(), _defaultSampler);
+        currentFrame->objDescSet->write(5, renderer->material->getAO(),
+      _defaultSampler);
       }*/
 
-      currentFrame->commandBuffer->bindDescriptorSet(currentFrame->objDescSet, 1, currentPipeline);
+      currentFrame->commandBuffer->bindDescriptorSet(currentFrame->objDescSet,
+        1, currentPipeline);
     }
 
     // push vertices and model matrix inside pushconstants
     PushConstants constants{};
-    constants.transform = renderer->gameObject->getComponent<Transform>()->modelMatrix();
-    //constants.transform = world->camera()->projection * world->camera()->view * renderer->gameObject->getComponent<Transform>()->modelMatrix();
+    constants.transform =
+      renderer->gameObject->getComponent<Transform>()->modelMatrix();
+    // constants.transform = world->camera()->projection * world->camera()->view
+    // * renderer->gameObject->getComponent<Transform>()->modelMatrix();
     constants.vertexBuffer = renderer->mesh->vertices->address;
-    currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+    currentFrame->commandBuffer->pushConstants(
+      constants, currentPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
     currentFrame->commandBuffer->setLineWidth(renderer->lineWidth);
@@ -368,6 +403,4 @@ void VulkanHandler::render(World* world) {
   endDrawing();
 }
 
-void VulkanHandler::waitForEndOfWork() const {
-  _device->waitIdle();
-}
+void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }

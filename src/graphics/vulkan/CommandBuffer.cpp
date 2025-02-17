@@ -113,17 +113,17 @@ void CommandBuffer::submitToQueue(Queue* queue, Fence* fence, Semaphore* wait, S
   info2.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
   //info2.pNext = nullptr;
   //info2.flags = 0;
-  
+
   if (wait) {
     info2.waitSemaphoreInfoCount = 1;
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo = wait->getSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
-    info2.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
+    info2.pWaitSemaphoreInfos = new VkSemaphoreSubmitInfo(waitSemaphoreSubmitInfo);
   }
-  
+
   if (signal) {
     info2.signalSemaphoreInfoCount = 1;
     VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo = signal->getSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
-    info2.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
+    info2.pSignalSemaphoreInfos = new VkSemaphoreSubmitInfo(signalSemaphoreSubmitInfo);
   }
 
   info2.commandBufferInfoCount = 1;

@@ -19,6 +19,8 @@ private:
   Image** _images;
   uint32_t* _imageCount;
 
+  VkSurfaceFormatKHR _surfaceFormat;
+
   VkSwapchainCreateInfoKHR getCreateInfo(VkSurfaceKHR suface, uint32_t imageCount,
     VkSurfaceCapabilitiesKHR capabilities, VkPresentModeKHR presentMode) const;
 

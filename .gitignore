@@ -11,6 +11,7 @@
 # Built Visual Studio Code Extensions
 *.vsix
 
+.ignore
 CMakeUserPresets.json
 build/*
 vcpkg_installed/*

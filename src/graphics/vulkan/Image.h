@@ -10,6 +10,10 @@ class CommandBuffer;
 class Buffer;
 class Swapchain;
 
+enum ImageType{
+  COLOR, DEPTH
+};
+
 class Image {
 private:
   static inline Device* _devicePtr;
@@ -35,7 +39,9 @@ private:
 public:
   static inline VkColorSpaceKHR colorSpace;
   static inline VkFormat colorFormat;
+  static inline VkImageAspectFlags colorAspect;
   static inline VkFormat depthFormat;
+  static inline VkImageAspectFlags depthAspect;
 
   VkImage handle;
   VkImageView view;
@@ -45,7 +51,7 @@ public:
   static void init(Window* window, Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit);
 
   Image(VkImage image, VkImageView view, VkExtent2D extent);
-  Image(Swapchain* swapchain, VkImageAspectFlags aspectFlags, VkImageUsageFlags usageFlags);
+  Image(Swapchain* swapchain, ImageType type, VkImageUsageFlags usageFlags);
   Image(const char* path);
   ~Image();
 

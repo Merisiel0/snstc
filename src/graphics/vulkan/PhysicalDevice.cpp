@@ -39,17 +39,17 @@ int PhysicalDevice::rate(VkPhysicalDevice physicalDevice, std::vector<const char
   if (VK_VERSION_MINOR(properties.apiVersion) < 3) return 0;
 
   switch (properties.deviceType) {
-  case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-    score += 100;
-    break;
-  case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-    score += 10;
-    break;
-  case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-    score += 1;
-    break;
-  default:
-    return 0;
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+      score += 100;
+      break;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+      score += 10;
+      break;
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+      score += 1;
+      break;
+    default:
+      return 0;
   }
 
   //VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
@@ -75,6 +75,7 @@ int PhysicalDevice::rate(VkPhysicalDevice physicalDevice, std::vector<const char
   vkGetPhysicalDeviceFeatures2KHR(physicalDevice, &features);
 
   if (features.features.logicOp == VK_FALSE
+    || features.features.fillModeNonSolid == VK_FALSE
     || vk12Features.bufferDeviceAddress == VK_FALSE
     || vk13Features.dynamicRendering == VK_FALSE
     || vk13Features.synchronization2 == VK_FALSE
@@ -134,7 +135,8 @@ PhysicalDevice::PhysicalDevice(Instance* instance, std::vector<const char*> requ
 
     vkGetPhysicalDeviceProperties2(handle, &physicalDeviceProperties);
     properties = physicalDeviceProperties.properties;
-  } else {
+  }
+  else {
     throw std::runtime_error("Failed to find a suitable GPU.");
   }
 }
