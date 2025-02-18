@@ -5,10 +5,11 @@
 class Instance;
 
 class Window {
-private:
+  private:
   Instance* _instancePtr;
+  SDL_Surface* _iconSurface;
 
-public:
+  public:
   SDL_Window* handle;
   glm::vec2 position;
   glm::uvec2 extent;
@@ -16,4 +17,6 @@ public:
 
   Window(const char* title, Instance* instance);
   ~Window();
+
+  void setIcon(const char* path);
 };

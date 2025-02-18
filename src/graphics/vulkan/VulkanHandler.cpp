@@ -157,6 +157,7 @@ VulkanHandler::VulkanHandler(const char* applicationName,
 
   // window
   _window = new Window("SphereNSTC", _instance);
+  _window->setIcon("../src/assets/sprites/icon.png");
 
   // debug messenger
 #ifdef VKDEBUG

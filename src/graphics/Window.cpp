@@ -1,9 +1,11 @@
 #include "Window.h"
 
 #include "vulkan/Instance.h"
+#include "stb_image.h"
 
 Window::Window(const char* title, Instance* instance) {
   _instancePtr = instance;
+  _iconSurface = nullptr;
 
   SDL_DisplayID* displays = SDL_GetDisplays(nullptr);
   const SDL_DisplayMode* dm = SDL_GetCurrentDisplayMode(displays[0]);
@@ -32,5 +34,26 @@ Window::Window(const char* title, Instance* instance) {
 
 Window::~Window() {
   vkDestroySurfaceKHR(_instancePtr->handle, surface, nullptr);
+
   SDL_DestroyWindow(handle);
+
+  SDL_DestroySurface(_iconSurface);
+}
+
+void Window::setIcon(const char* path) {
+  int width, height, channels;
+  unsigned char* data = stbi_load(path, &width, &height, &channels, 4);
+
+  if (!data) {
+    std::cerr << "Failed to load image: " << path << std::endl;
+    return;
+  }
+
+  SDL_DestroySurface(_iconSurface);
+
+  _iconSurface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA8888, data, 0);
+
+  SDL_SetWindowIcon(handle, _iconSurface);
+
+  stbi_image_free(data);
 }
