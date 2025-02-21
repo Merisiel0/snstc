@@ -28,3 +28,9 @@ target_include_directories(Sphere PRIVATE ${CMAKE_SOURCE_DIR}/build/vcpkg_instal
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)
 endif()
+
+if(WIN32)
+    set(VCPKG_MANIFEST_FEATURES "vulkan")
+else()
+    set(VCPKG_MANIFEST_FEATURES "vulkan;x11")
+endif()
