@@ -1,6 +1,6 @@
 # Sphere (name subject to change)
 
-snstc's a game engine developped during my studies. It's currently only a rendering engines with plans for ray tracing and physics simulation.
+snstc's a game engine developped during my studies. It's currently only a rendering engine with plans for ray tracing and physics simulation.
 
 ## Tech used:
 
