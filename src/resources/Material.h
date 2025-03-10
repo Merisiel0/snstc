@@ -12,7 +12,7 @@ enum MapIndex {
   ROUGHNESS = 2,
   METALNESS = 3,
   HEIGHT = 4,
-  AMBIANT_OCCLUSION = 5,
+  AMBIENT_OCCLUSION = 5,
   MAP_COUNT = 6
 };
 
