@@ -41,7 +41,7 @@ VkCommandBufferSubmitInfo CommandBuffer::getSubmitInfo() const {
   return info;
 }
 
-CommandBuffer::CommandBuffer(Device* device, CommandPool* commandPool) {
+CommandBuffer::CommandBuffer(std::shared_ptr<Device> device, CommandPool* commandPool) {
   VkCommandBufferAllocateInfo allocationInfo = getAllocateInfo(commandPool->handle);
   VK_CHECK(vkAllocateCommandBuffers(device->handle, &allocationInfo, &handle));
 }
@@ -55,7 +55,7 @@ void CommandBuffer::begin() const {
   VK_CHECK(vkBeginCommandBuffer(handle, &beginInfo));
 }
 
-void CommandBuffer::beginRendering(Image* colorImage, Image* depthImage) const {
+void CommandBuffer::beginRendering(const Image& colorImage, const Image& depthImage) const {
   VkRenderingInfo renderingInfo = Image::getRenderingInfo(colorImage, depthImage);
   vkCmdBeginRendering(handle, &renderingInfo);
 }
@@ -68,12 +68,12 @@ void CommandBuffer::end() const {
   VK_CHECK(vkEndCommandBuffer(handle));
 }
 
-void CommandBuffer::bindPipeline(GraphicsPipeline* pipeline) const {
-  vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->handle);
+void CommandBuffer::bindPipeline(const GraphicsPipeline& pipeline) const {
+  vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 }
 
-void CommandBuffer::bindDescriptorSet(DescriptorSet* set, uint32_t setNb, IPipeline* pipeline) const {
-  vkCmdBindDescriptorSets(handle, pipeline->type(), pipeline->layout(), setNb, 1, &set->handle, 0, nullptr);
+void CommandBuffer::bindDescriptorSet(DescriptorSet* set, uint32_t setNb, const IPipeline& pipeline) const {
+  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &set->handle, 0, nullptr);
 }
 
 void CommandBuffer::setViewport(VkViewport* viewport) const {

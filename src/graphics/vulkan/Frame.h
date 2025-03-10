@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 class Device;
 class CommandPool;
 class CommandBuffer;
@@ -10,7 +12,7 @@ class DescriptorSetLayout;
 class DescriptorSet;
 
 class Frame {
-public:
+ public:
   CommandPool* commandPool;
   CommandBuffer* commandBuffer;
 
@@ -21,6 +23,8 @@ public:
   DescriptorSet* camDescSet;
   DescriptorSet* objDescSet;
 
-  Frame(Device* device, DescriptorPool* pool, DescriptorSetLayout* camDescSetLayout, DescriptorSetLayout* objDescSetLayout);
+  Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
+        const DescriptorSetLayout& camDescSetLayout,
+        const DescriptorSetLayout& objDescSetLayout);
   ~Frame();
 };

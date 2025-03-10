@@ -5,7 +5,6 @@
 #include "CommandBuffer.h"
 #include "Buffer.h"
 #include "Swapchain.h"
-#include "../Window.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -15,10 +14,10 @@
 #define STB_IMAGE_RESIZE2_IMPLEMENTATION
 #include "stb_image_resize2.h"
 
-void Image::init(Window* window, Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit) {
-  _devicePtr = device;
-  _allocatorPtr = &allocator->handle;
-  _immediateSubmitPtr = immediateSubmit;
+void Image::init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator, std::weak_ptr<ImmediateSubmit> immediateSubmit) {
+  _device = device;
+  _allocator = allocator;
+  _immediateSubmit = immediateSubmit;
 
   // find color format
   const std::vector<VkFormat> preferredColorFormats = {
@@ -93,10 +92,13 @@ Image::Image(VkImage image, VkImageView view, VkExtent2D extent) {
   _usage = 0;
 }
 
-Image::Image(Swapchain* swapchain, ImageType type, VkImageUsageFlags usageFlags) {
+Image::Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usageFlags) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+
   _extent = {
-      swapchain->extent.width,
-      swapchain->extent.height
+      swapchain.extent.width,
+      swapchain.extent.height
   };
   _usage = usageFlags;
 
@@ -124,13 +126,17 @@ Image::Image(Swapchain* swapchain, ImageType type, VkImageUsageFlags usageFlags)
 
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(*_allocatorPtr, &createInfo, &allocCreateInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocCreateInfo, &handle, &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(vkCreateImageView(_devicePtr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
 Image::Image(const char* path) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
+
   int width, height;
   stbi_uc* pixels = stbi_load(path, &width, &height, &_channelAmount, STBI_rgb_alpha);
   _channelAmount = 4;
@@ -154,34 +160,37 @@ Image::Image(const char* path) {
   size_t imageSize = static_cast<size_t>(_extent.width * _extent.height * _channelAmount);
   Buffer* stagingBuffer = new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
   void* data;
-  vmaMapMemory(*_allocatorPtr, stagingBuffer->allocation(), &data);
+  vmaMapMemory(allocatorSptr->handle, stagingBuffer->allocation(), &data);
   memcpy(data, pixels, imageSize);
-  vmaUnmapMemory(*_allocatorPtr, stagingBuffer->allocation());
+  vmaUnmapMemory(allocatorSptr->handle, stagingBuffer->allocation());
 
   stbi_image_free(pixels);
 
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(*_allocatorPtr, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
 
-  _immediateSubmitPtr->submit([&stagingBuffer, this](CommandBuffer* commandBuffer) {
+  immediateSubmitSptr->submit([&stagingBuffer, this](CommandBuffer* commandBuffer) {
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     stagingBuffer->copyToImage(commandBuffer, this);
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL); });
   delete stagingBuffer;
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(vkCreateImageView(_devicePtr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
 Image::~Image() {
-  vkDestroyImageView(_devicePtr->handle, view, nullptr);
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+
+  vkDestroyImageView(deviceSptr->handle, view, nullptr);
 
   if (_info.deviceMemory == VK_NULL_HANDLE) {
-    vkDestroyImage(_devicePtr->handle, handle, nullptr);
+    vkDestroyImage(deviceSptr->handle, handle, nullptr);
   }
   else {
-    vmaDestroyImage(*_allocatorPtr, handle, _allocation);
+    vmaDestroyImage(allocatorSptr->handle, handle, _allocation);
   }
 }
 
@@ -223,22 +232,26 @@ void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayo
 }
 
 void Image::transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
+
   Image* stagingImg = new Image(*this);
   VkImageLayout layout = _layout;
   _layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-  vkDestroyImageView(_devicePtr->handle, view, nullptr);
-  vmaDestroyImage(*_allocatorPtr, handle, _allocation);
+  vkDestroyImageView(deviceSptr->handle, view, nullptr);
+  vmaDestroyImage(allocatorSptr->handle, handle, _allocation);
 
   _format = newFormat;
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(*_allocatorPtr, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle, &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(vkCreateImageView(_devicePtr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 
-  _immediateSubmitPtr->submit([&layout, &stagingImg, this](CommandBuffer* commandBuffer) {
+  immediateSubmitSptr->submit([&layout, &stagingImg, this](CommandBuffer* commandBuffer) {
     this->transitionLayout(commandBuffer, layout);
     stagingImg->blitTo(commandBuffer, this); });
 
@@ -300,7 +313,7 @@ VmaAllocationCreateInfo Image::getAllocationInfo() const {
   return info;
 }
 
-VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(VkClearValue* clear) const {
+VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(const VkClearValue& clear, bool doClear) const {
   VkRenderingAttachmentInfo attachmentInfo{};
   attachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
   // colorAttachment.pNext = nullptr;
@@ -312,28 +325,29 @@ VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(VkClearValue* clear)
   attachmentInfo.resolveImageView = VK_NULL_HANDLE;
   attachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-  attachmentInfo.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+  attachmentInfo.loadOp = doClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
   attachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-  if (clear) {
-    attachmentInfo.clearValue = *clear;
+  if (doClear) {
+    attachmentInfo.clearValue = clear;
   }
+
+  //delete clear;
 
   return attachmentInfo;
 }
 
-VkRenderingInfo Image::getRenderingInfo(Image* color, Image* depth, VkClearValue* clear) {
+VkRenderingInfo Image::getRenderingInfo(const Image& color, const Image& depth, const VkClearValue& clear, bool doClear) {
   VkRenderingInfo renderInfo{};
   renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
   // renderInfo.pNext = nullptr;
   // renderInfo.flags = 0;
-  renderInfo.renderArea.extent = color->_extent;
+  renderInfo.renderArea.extent = color._extent;
   renderInfo.renderArea.offset = { 0, 0 };
   renderInfo.layerCount = 1;
   // renderInfo.viewMask = 0;
   renderInfo.colorAttachmentCount = 1;
-  renderInfo.pColorAttachments = new VkRenderingAttachmentInfo(color->getRenderingAttachmentInfo(clear));
-  VkClearValue depthClear = { 1.0f, 0 };
-  renderInfo.pDepthAttachment = new VkRenderingAttachmentInfo(depth->getRenderingAttachmentInfo(&depthClear));
+  renderInfo.pColorAttachments = new VkRenderingAttachmentInfo(color.getRenderingAttachmentInfo(clear, true));
+  renderInfo.pDepthAttachment = new VkRenderingAttachmentInfo(depth.getRenderingAttachmentInfo(VkClearValue{ 1.0f, 0 }, true));
   // renderInfo.pStencilAttachment = nullptr;
 
   return renderInfo;
@@ -424,13 +438,16 @@ void Image::copyToBuffer(CommandBuffer* commandBuffer, Buffer* buffer) const {
 }
 
 void Image::save(const char* path) {
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
+
   uint32_t imageSize = _extent.width * _extent.height * _channelAmount;
   if (_format != VK_FORMAT_R8G8B8A8_SRGB)
     imageSize *= 2;
   imageSize += 1;
   Buffer* staging = new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 
-  _immediateSubmitPtr->submit([&staging, this](CommandBuffer* cmd) {
+  immediateSubmitSptr->submit([&staging, this](CommandBuffer* cmd) {
     VkImageLayout oldLayout = this->layout();
     if (oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
       this->transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -441,7 +458,8 @@ void Image::save(const char* path) {
       this->transitionLayout(cmd, oldLayout); });
 
   void* data;
-  vmaMapMemory(*_allocatorPtr, staging->allocation(), &data);
+  vmaMapMemory(allocatorSptr->handle, staging->allocation(), &data);
+  delete staging;
 
   if (stbi_write_png(path, _extent.height, _extent.width, _channelAmount, data, _extent.width * _channelAmount) == 0) {
     throw std::runtime_error("Failed to save image.");

@@ -15,13 +15,13 @@ VkDescriptorSetLayoutCreateInfo DescriptorSetLayout::getCreateInfo(std::vector<V
   return info;
 }
 
-DescriptorSetLayout::DescriptorSetLayout(Device* device, std::vector<VkDescriptorSetLayoutBinding> bindings) {
-  _devicePtr = device;
+DescriptorSetLayout::DescriptorSetLayout(std::shared_ptr<Device> device, std::vector<VkDescriptorSetLayoutBinding> bindings) {
+  _device = device;
 
   VkDescriptorSetLayoutCreateInfo createInfo = getCreateInfo(bindings);
   VK_CHECK(vkCreateDescriptorSetLayout(device->handle, &createInfo, nullptr, &handle));
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-  vkDestroyDescriptorSetLayout(_devicePtr->handle, handle, nullptr);
+  vkDestroyDescriptorSetLayout(_device->handle, handle, nullptr);
 }

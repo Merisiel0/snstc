@@ -6,7 +6,7 @@
 #include "Fence.h"
 #include "Queue.h"
 
-ImmediateSubmit::ImmediateSubmit(Device* device) {
+ImmediateSubmit::ImmediateSubmit(std::shared_ptr<Device> device) {
   _commandPool = new CommandPool(device, device->graphicsQueue->familyIndex);
   _commandBuffer = new CommandBuffer(device, _commandPool);
   _fence = new Fence(device);

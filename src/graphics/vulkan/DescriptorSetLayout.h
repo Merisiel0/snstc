@@ -5,14 +5,14 @@
 class Device;
 
 class DescriptorSetLayout {
-private:
-  Device* _devicePtr;
-  
+  private:
+  std::shared_ptr<Device> _device;
+
   VkDescriptorSetLayoutCreateInfo getCreateInfo(std::vector<VkDescriptorSetLayoutBinding> bindings) const;
 
-public:
+  public:
   VkDescriptorSetLayout handle;
 
-  DescriptorSetLayout(Device* device, std::vector<VkDescriptorSetLayoutBinding> bindings);
+  DescriptorSetLayout(std::shared_ptr<Device> device, std::vector<VkDescriptorSetLayoutBinding> bindings);
   ~DescriptorSetLayout();
 };

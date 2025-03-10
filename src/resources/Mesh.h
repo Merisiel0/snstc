@@ -1,24 +1,34 @@
 #pragma once
 
-#include "utils/Utils.h"
-
 #include <vector>
 
+#include "utils/Utils.h"
+
 class Buffer;
+class ResourceManager;
 
 class Mesh {
-public:
-	Buffer* vertices;
-	Buffer* indices;
+ private:
+  Mesh(const char* path) {}
 
-	Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
-	~Mesh();
+	friend class ResourceManager;
 
-	static Mesh* generateCube(Color color = { 0,0,0,1 });
-	static Mesh* generatePlane(vec2 dimensions, vec2 vertexAmounts, Color color = { 0,0,0,1 });
-	static Mesh* generateCone(float radius, float height, int resolution, Color color = { 0,0,0,1 });
-	static Mesh* generateCylinder(float radius, float height, int resolution, Color color = { 0,0,0,1 });
+ public:
+  Buffer* vertices;
+  Buffer* indices;
 
-	static Mesh* generateUVSphere(int nbSlices, int nbStacks, Color color = { 0,0,0,1 });
-	static Mesh* generateIcoSphere(int nbDivisions, Color color = { 0,0,0,1 });
+  Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
+  ~Mesh();
+
+  static Mesh* generateCube(Color color = {0, 0, 0, 1});
+  static Mesh* generatePlane(vec2 dimensions, vec2 vertexAmounts,
+                             Color color = {0, 0, 0, 1});
+  static Mesh* generateCone(float radius, float height, int resolution,
+                            Color color = {0, 0, 0, 1});
+  static Mesh* generateCylinder(float radius, float height, int resolution,
+                                Color color = {0, 0, 0, 1});
+
+  static Mesh* generateUVSphere(int nbSlices, int nbStacks,
+                                Color color = {0, 0, 0, 1});
+  static Mesh* generateIcoSphere(int nbDivisions, Color color = {0, 0, 0, 1});
 };

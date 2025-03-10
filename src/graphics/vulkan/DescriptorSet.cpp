@@ -7,18 +7,18 @@
 #include "Sampler.h"
 #include "Buffer.h"
 
-VkDescriptorSetAllocateInfo DescriptorSet::getSetAllocateInfo(DescriptorPool* pool, DescriptorSetLayout* layout) const {
+VkDescriptorSetAllocateInfo DescriptorSet::getSetAllocateInfo(const DescriptorPool& pool, const DescriptorSetLayout& layout) const {
   VkDescriptorSetAllocateInfo info{};
   info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   //info.pNext;
-  info.descriptorPool = pool->handle;
+  info.descriptorPool = pool.handle;
   info.descriptorSetCount = 1;
-  info.pSetLayouts = new VkDescriptorSetLayout(layout->handle);
+  info.pSetLayouts = new VkDescriptorSetLayout(layout.handle);
 
   return info;
 }
 
-VkWriteDescriptorSet DescriptorSet::getWriteInfo(uint32_t binding, Image* image, Sampler* sampler) const {
+VkWriteDescriptorSet DescriptorSet::getWriteInfo(uint32_t binding, const Image& image, const Sampler& sampler) const {
   VkWriteDescriptorSet write{};
   write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   //write.pNext;
@@ -50,11 +50,11 @@ VkWriteDescriptorSet DescriptorSet::getWriteInfo(uint32_t binding, Buffer* buffe
   return write;
 }
 
-VkDescriptorImageInfo DescriptorSet::getImageInfo(Image* image, Sampler* sampler) const {
+VkDescriptorImageInfo DescriptorSet::getImageInfo(const Image& image, const Sampler& sampler) const {
   VkDescriptorImageInfo info{};
-  info.sampler = sampler->handle;
-  info.imageView = image->view;
-  info.imageLayout = image->layout();
+  info.sampler = sampler.handle;
+  info.imageView = image.view;
+  info.imageLayout = image.layout();
 
   return info;
 }
@@ -68,21 +68,20 @@ VkDescriptorBufferInfo DescriptorSet::getBufferInfo(Buffer* buffer) const {
   return info;
 }
 
-DescriptorSet::DescriptorSet(Device* device, DescriptorPool* pool, DescriptorSetLayout* layout) {
-  _devicePtr = device;
-  _poolPtr = pool;
+DescriptorSet::DescriptorSet(std::shared_ptr<Device> device, const DescriptorPool& pool, const DescriptorSetLayout& layout) {
+  _device = device;
 
   VkDescriptorSetAllocateInfo allocateInfo = getSetAllocateInfo(pool, layout);
   VkDescriptorSet descriptorSet{};
-  VK_CHECK(vkAllocateDescriptorSets(_devicePtr->handle, &allocateInfo, &handle));
+  VK_CHECK(vkAllocateDescriptorSets(_device->handle, &allocateInfo, &handle));
 }
 
-void DescriptorSet::write(uint32_t binding, Image* image, Sampler* sampler) {
+void DescriptorSet::write(uint32_t binding, const Image& image, const Sampler& sampler) {
   VkWriteDescriptorSet writeInfo = getWriteInfo(binding, image, sampler);
-  vkUpdateDescriptorSets(_devicePtr->handle, 1, &writeInfo, 0, nullptr);
+  vkUpdateDescriptorSets(_device->handle, 1, &writeInfo, 0, nullptr);
 }
 
 void DescriptorSet::write(uint32_t binding, Buffer* buffer) {
   VkWriteDescriptorSet writeInfo = getWriteInfo(binding, buffer);
-  vkUpdateDescriptorSets(_devicePtr->handle, 1, &writeInfo, 0, nullptr);
+  vkUpdateDescriptorSets(_device->handle, 1, &writeInfo, 0, nullptr);
 }

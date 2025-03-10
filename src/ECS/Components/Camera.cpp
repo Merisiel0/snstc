@@ -8,6 +8,11 @@ Camera::Camera() {
 	updateView();
 }
 
+Camera::Camera(Camera&& c) noexcept
+    : transform(c.transform), view(std::move(c.view)), projection(std::move(c.projection)), projectionType(c.projectionType) {
+    c.transform = nullptr;
+}
+
 void Camera::updateView() {
 	view = glm::inverse(transform->modelMatrix());
 }

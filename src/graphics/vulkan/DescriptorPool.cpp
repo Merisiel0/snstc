@@ -21,17 +21,17 @@ VkDescriptorPoolCreateInfo DescriptorPool::getCreateInfo(std::vector<VkDescripto
   return info;
 }
 
-DescriptorPool::DescriptorPool(Device* device, std::vector<VkDescriptorPoolSize> poolSizes) {
-  _devicePtr = &device->handle;
+DescriptorPool::DescriptorPool(std::shared_ptr<Device> device, std::vector<VkDescriptorPoolSize> poolSizes) {
+  _device = device;
 
   VkDescriptorPoolCreateInfo createInfo = getCreateInfo(poolSizes);
-  VK_CHECK(vkCreateDescriptorPool(*_devicePtr, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateDescriptorPool(_device->handle, &createInfo, nullptr, &handle));
 }
 
 DescriptorPool::~DescriptorPool() {
-  vkDestroyDescriptorPool(*_devicePtr, handle, nullptr);
+  vkDestroyDescriptorPool(_device->handle, handle, nullptr);
 }
 
 void DescriptorPool::reset() const {
-  vkResetDescriptorPool(*_devicePtr, handle, 0);
+  vkResetDescriptorPool(_device->handle, handle, 0);
 }

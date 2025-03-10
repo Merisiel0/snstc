@@ -46,25 +46,30 @@ VkBufferImageCopy Buffer::getBufferImageCopy(Image* image) const {
   return copyRegion;
 }
 
-void Buffer::init(Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit) {
-  _devicePtr = &device->handle;
-  _allocatorPtr = &allocator->handle;
-  _immediateSubmitPtr = immediateSubmit;
+void Buffer::init(std::weak_ptr<Device> device, std::weak_ptr<Allocator> allocator, std::weak_ptr<ImmediateSubmit> immediateSubmit) {
+  _device = device;
+  _allocator = allocator;
+  _immediateSubmit = immediateSubmit;
 }
 
 Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+
   usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
   VkBufferCreateInfo createInfo = getCreateInfo(size, usage);
   VmaAllocationCreateInfo vmaInfo = getAllocationCreateInfo(memoryUsage);
-  VK_CHECK(vmaCreateBuffer(*_allocatorPtr, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateBuffer(allocatorSptr->handle, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
 
   VkBufferDeviceAddressInfo deviceAddressInfo = getDeviceAddressInfo();
-  address = vkGetBufferDeviceAddress(*_devicePtr, &deviceAddressInfo);
+  address = vkGetBufferDeviceAddress(deviceSptr->handle, &deviceAddressInfo);
 }
 
 Buffer::~Buffer() {
-  vmaDestroyBuffer(*_allocatorPtr, handle, _allocation);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+
+  vmaDestroyBuffer(allocatorSptr->handle, handle, _allocation);
 }
 
 VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {

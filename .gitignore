@@ -13,8 +13,8 @@
 
 .ignore
 CMakeUserPresets.json
-build/*
-vcpkg_installed/*
+build
+vcpkg_installed
 
 # Ignore images, files too big (>100MB)
 *.png

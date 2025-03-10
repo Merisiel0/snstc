@@ -15,8 +15,8 @@ VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t> data) const
   return info;
 }
 
-Shader::Shader(Device* device, const char* path, VkShaderStageFlagBits stage) {
-  _devicePtr = &device->handle;
+Shader::Shader(std::shared_ptr<Device> device, const char* path, VkShaderStageFlagBits stage) {
+  _device = device;
   _stage = stage;
 
   std::vector<uint32_t> data = readFileBytes(path);
@@ -26,7 +26,7 @@ Shader::Shader(Device* device, const char* path, VkShaderStageFlagBits stage) {
 }
 
 Shader::~Shader() {
-  vkDestroyShaderModule(*_devicePtr, handle, nullptr);
+  vkDestroyShaderModule(_device->handle, handle, nullptr);
 }
 
 VkPipelineShaderStageCreateInfo Shader::getStageCreateInfo() const {

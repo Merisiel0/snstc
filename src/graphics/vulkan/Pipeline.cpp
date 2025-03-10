@@ -25,14 +25,14 @@ VkPipelineLayoutCreateInfo IPipeline::getLayoutCreateInfo(std::vector<VkPushCons
   return info;
 }
 
-IPipeline::IPipeline(Device* device, std::vector<VkPushConstantRange> pushConstantRanges, std::vector<VkDescriptorSetLayout> setLayouts) {
-  _devicePtr = &device->handle;
+IPipeline::IPipeline(std::shared_ptr<Device> device, std::vector<VkPushConstantRange> pushConstantRanges, std::vector<VkDescriptorSetLayout> setLayouts) {
+  _device = device;
 
   VkPipelineLayoutCreateInfo layoutInfo = getLayoutCreateInfo(pushConstantRanges, setLayouts);
   VK_CHECK(vkCreatePipelineLayout(device->handle, &layoutInfo, nullptr, &_layout));
 }
 
 IPipeline::~IPipeline() {
-  vkDestroyPipeline(*_devicePtr, handle, nullptr);
-  vkDestroyPipelineLayout(*_devicePtr, _layout, nullptr);
+  vkDestroyPipeline(_device->handle, handle, nullptr);
+  vkDestroyPipelineLayout(_device->handle, _layout, nullptr);
 }

@@ -11,21 +11,21 @@ VkFenceCreateInfo Fence::getCreateInfo(bool signaled) const {
   return info;
 }
 
-Fence::Fence(Device* device, bool signaled) {
-  this->_devicePtr = &device->handle;
+Fence::Fence(std::shared_ptr<Device> device, bool signaled) {
+  _device = device;
 
   VkFenceCreateInfo createInfo = getCreateInfo(signaled);
   VK_CHECK(vkCreateFence(device->handle, &createInfo, nullptr, &handle));
 }
 
 Fence::~Fence() {
-  vkDestroyFence(*_devicePtr, handle, nullptr);
+  vkDestroyFence(_device->handle, handle, nullptr);
 }
 
 void Fence::reset() {
-  VK_CHECK(vkResetFences(*_devicePtr, 1, &handle));
+  VK_CHECK(vkResetFences(_device->handle, 1, &handle));
 }
 
 void Fence::wait() {
-  VK_CHECK(vkWaitForFences(*_devicePtr, 1, &handle, true, 9999999999));
+  VK_CHECK(vkWaitForFences(_device->handle, 1, &handle, true, 9999999999));
 }

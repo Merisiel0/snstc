@@ -4,9 +4,9 @@
 #include "VulkanUtils.h"
 #include <vector>
 
+class Instance;
 class ImmediateSubmit;
 class DebugUtilsMessenger;
-class Instance;
 class PhysicalDevice;
 class Device;
 class Allocator;
@@ -22,45 +22,48 @@ class Sampler;
 class World;
 
 enum WindowScreenMode {
-	WINDOWED = 0,
-	FULLSCREEN = SDL_WINDOW_FULLSCREEN
+  WINDOWED = 0,
+  FULLSCREEN = SDL_WINDOW_FULLSCREEN
 };
 
 // Opens a window and renders worlds on it.
 class VulkanHandler {
-private:
-  ImmediateSubmit* _immediateSubmit;
+  private:
+  std::shared_ptr<Instance> _instance;
 
 #ifdef VKDEBUG
-  DebugUtilsMessenger* _debugMessenger;
+  std::shared_ptr<DebugUtilsMessenger> _debugMessenger;
 #endif // VKDEBUG
 
-  Instance* _instance;
-  PhysicalDevice* _physicalDevice;
-  Device* _device;
-  Allocator* _allocator;
-public:
-  Window* _window;
-private:
-  Swapchain* _swapchain;
-  Image* _drawImage;
-  Image* _depthImage;
+  std::shared_ptr<PhysicalDevice> _physicalDevice;
+  std::shared_ptr<Device> _device;
+  std::shared_ptr<Allocator> _allocator;
 
-  GraphicsPipeline* _pipelinePBR;
-  GraphicsPipeline* _pipelineLinePBR;
-  GraphicsPipeline* _pipelineColor;
-  GraphicsPipeline* _pipelineLineColor;
+  std::shared_ptr<ImmediateSubmit> _immediateSubmit;
 
-  Sampler* _defaultSampler;
+  public:
+  std::shared_ptr<Window> _window;
+  
+  private:
+  std::shared_ptr<Swapchain> _swapchain;
+  std::shared_ptr<Image> _drawImage;
+  std::shared_ptr<Image> _depthImage;
 
-  DescriptorPool* _descriptorPool;
-  DescriptorSetLayout* _camDescSetLayout;
-  DescriptorSetLayout* _objDescSetLayout;
+  std::shared_ptr<GraphicsPipeline> _pipelinePBR;
+  std::shared_ptr<GraphicsPipeline> _pipelineLinePBR;
+  std::shared_ptr<GraphicsPipeline> _pipelineColor;
+  std::shared_ptr<GraphicsPipeline> _pipelineLineColor;
+
+  std::shared_ptr<Sampler> _defaultSampler;
+
+  std::shared_ptr<DescriptorPool> _descriptorPool;
+  std::shared_ptr<DescriptorSetLayout> _camDescSetLayout;
+  std::shared_ptr<DescriptorSetLayout> _objDescSetLayout;
 
   void beginDrawing(World* world);
   void endDrawing();
 
-public:
+  public:
   VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName, int engineVersion);
   ~VulkanHandler();
 

@@ -30,7 +30,7 @@ private:
     VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const;
 
 public:
-  GraphicsPipeline(Device* device, VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
+  GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
     std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
     std::vector<VkDescriptorSetLayout> setLayouts);
 };

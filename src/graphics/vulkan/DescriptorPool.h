@@ -6,15 +6,15 @@ class Device;
 class DescriptorSetLayout;
 
 class DescriptorPool {
-private:
-  VkDevice* _devicePtr;
+  private:
+  std::shared_ptr<Device> _device;
 
   VkDescriptorPoolCreateInfo getCreateInfo(std::vector<VkDescriptorPoolSize> poolSizes) const;
 
-public:
+  public:
   VkDescriptorPool handle;
 
-  DescriptorPool(Device* device, std::vector<VkDescriptorPoolSize> poolSizes);
+  DescriptorPool(std::shared_ptr<Device>, std::vector<VkDescriptorPoolSize> poolSizes);
   ~DescriptorPool();
 
   void reset() const;

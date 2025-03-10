@@ -10,7 +10,7 @@ class Swapchain;
 
 class Queue {
 private:
-  VkPresentInfoKHR getPresentInfo(Swapchain* swapchain, uint32_t imageIndex, Semaphore* wait) const;
+  VkPresentInfoKHR getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex, Semaphore* wait) const;
 
 public:
   VkQueue handle;
@@ -19,5 +19,5 @@ public:
   Queue(Device* device, uint32_t familyIndex);
   ~Queue() {};
 
-  void present(Swapchain* swapchain, uint32_t imageIndex, Semaphore* wait) const;
+  void present(const Swapchain& swapchain, uint32_t imageIndex, Semaphore* wait) const;
 };

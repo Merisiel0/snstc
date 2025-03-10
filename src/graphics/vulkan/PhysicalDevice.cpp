@@ -105,7 +105,7 @@ int PhysicalDevice::rate(VkPhysicalDevice physicalDevice, std::vector<const char
   return score;
 }
 
-PhysicalDevice::PhysicalDevice(Instance* instance, std::vector<const char*> requiredExtensions) {
+PhysicalDevice::PhysicalDevice(std::shared_ptr<Instance> instance, std::vector<const char*> requiredExtensions) {
   size_t requiredExtensionsFound{ 0 };
 
   uint32_t physicalDeviceCount;

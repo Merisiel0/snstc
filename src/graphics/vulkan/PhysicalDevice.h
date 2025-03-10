@@ -36,6 +36,6 @@ public:
   VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties{};
   VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
 
-  PhysicalDevice(Instance* instance, std::vector<const char*> requiredExtensions);
+  PhysicalDevice(std::shared_ptr<Instance> instance, std::vector<const char*> requiredExtensions);
   ~PhysicalDevice() {};
 };

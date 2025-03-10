@@ -23,18 +23,18 @@ private:
 public:
   VkCommandBuffer handle;
 
-  CommandBuffer(Device* device, CommandPool* commandPool);
+  CommandBuffer(std::shared_ptr<Device>, CommandPool* commandPool);
   ~CommandBuffer() {};
 
   void reset() const;
 
   void begin() const;
-  void beginRendering(Image* colorImage, Image* depthImage) const;
+  void beginRendering(const Image& colorImage, const Image& depthImage) const;
   void endRendering() const;
   void end() const;
 
-  void bindPipeline(GraphicsPipeline* pipeline) const;
-  void bindDescriptorSet(DescriptorSet* set, uint32_t setNb, IPipeline* pipeline) const;
+  void bindPipeline(const GraphicsPipeline& pipeline) const;
+  void bindDescriptorSet(DescriptorSet* set, uint32_t setNb, const IPipeline& pipeline) const;
   void setViewport(VkViewport* viewport) const;
   void setScissor(VkRect2D* scissor) const;
   void setLineWidth(float lineWidth) const;

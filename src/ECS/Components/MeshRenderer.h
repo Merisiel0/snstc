@@ -41,7 +41,14 @@ struct MeshRenderer : public ECS::BaseComponent {
     lineWidth{ lineWidth }, instanceTransforms{ instanceTransforms } {
   };
 
-  MeshRenderer(const MeshRenderer& mr) : MeshRenderer(mr.mesh, mr.material, mr.cullMode, mr.polygonMode, mr.lineWidth, mr.instanceTransforms) {};
+  MeshRenderer(const MeshRenderer& mr) : MeshRenderer(mr.mesh, mr.material, mr.cullMode, mr.polygonMode, mr.lineWidth, mr.instanceTransforms) {}
+
+  MeshRenderer(MeshRenderer&& mr) noexcept 
+      : mesh{ mr.mesh }, material{ mr.material }, cullMode{ mr.cullMode }, polygonMode{ mr.polygonMode },
+        lineWidth{ mr.lineWidth }, instanceTransforms{ std::move(mr.instanceTransforms) } {
+    mr.mesh = nullptr;
+    mr.material = nullptr;
+  }
 
   ~MeshRenderer();
 };

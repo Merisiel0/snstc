@@ -37,10 +37,17 @@ public:
   ~GameObject();
 
   template<typename Type>
-  Type* getComponent() const { return &_registry.get<Type>(_id); }
+  Type* getComponent() const {
+    if(_registry.valid(_id) && _registry.all_of<Type>(_id)) {
+      return &_registry.get<Type>(_id);
+    }
+    return nullptr;
+  }
 
   template<typename Type>
-  bool hasComponent() const { return _registry.all_of<Type>(_id); }
+  bool hasComponent() const {
+    return _registry.valid(_id) && _registry.all_of<Type>(_id);
+  }
 
   template<typename Type, typename... Args>
   Type* addComponent(Args &&... args) {

@@ -19,8 +19,8 @@ VkDeviceCreateInfo Device::getCreateInfo(VkPhysicalDeviceFeatures2 features, std
   return info;
 }
 
-Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> extensions) {
-  _physicalDevicePtr = physicalDevice;
+Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice, std::vector<const char*> extensions) {
+  _physicalDevice = physicalDevice;
 
   std::vector<uint32_t> queueFamilyIndexes = physicalDevice->queueFamilies.getIndexes();
 
@@ -82,25 +82,25 @@ Device::~Device() {
 
 VkPhysicalDeviceLimits Device::physicalDeviceLimits() const {
   VkPhysicalDeviceProperties properties{};
-  vkGetPhysicalDeviceProperties(_physicalDevicePtr->handle, &properties);
+  vkGetPhysicalDeviceProperties(_physicalDevice->handle, &properties);
   return properties.limits;
 }
 
 VkPhysicalDeviceProperties Device::physicalDeviceProperties() const {
   VkPhysicalDeviceProperties properties{};
-  vkGetPhysicalDeviceProperties(_physicalDevicePtr->handle, &properties);
+  vkGetPhysicalDeviceProperties(_physicalDevice->handle, &properties);
   return properties;
 }
 
 VkFormatProperties Device::formatProperties(VkFormat format) const {
   VkFormatProperties properties{};
-  vkGetPhysicalDeviceFormatProperties(_physicalDevicePtr->handle, format, &properties);
+  vkGetPhysicalDeviceFormatProperties(_physicalDevice->handle, format, &properties);
   return properties;
 }
 
 VkImageFormatProperties Device::imageFormatProperties(VkImageCreateInfo* createInfo) const {
   VkImageFormatProperties properties{};
-  VK_CHECK(vkGetPhysicalDeviceImageFormatProperties(_physicalDevicePtr->handle,
+  VK_CHECK(vkGetPhysicalDeviceImageFormatProperties(_physicalDevice->handle,
     createInfo->format,
     createInfo->imageType,
     createInfo->tiling,

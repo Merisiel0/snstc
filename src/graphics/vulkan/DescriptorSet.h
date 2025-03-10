@@ -10,21 +10,22 @@ class Sampler;
 class Buffer;
 
 class DescriptorSet {
-private:
-  Device* _devicePtr;
-  DescriptorPool* _poolPtr;
+  private:
+  std::shared_ptr<Device> _device;
 
-  VkDescriptorSetAllocateInfo getSetAllocateInfo(DescriptorPool* pool, DescriptorSetLayout* layout) const;
-  VkWriteDescriptorSet getWriteInfo(uint32_t binding, Image* image, Sampler* sampler) const;
+  VkDescriptorSetAllocateInfo getSetAllocateInfo(const DescriptorPool& pool, const DescriptorSetLayout& layout) const;
+  VkWriteDescriptorSet getWriteInfo(uint32_t binding, const Image& image, const Sampler& sampler) const;
   VkWriteDescriptorSet getWriteInfo(uint32_t binding, Buffer* buffer) const;
-  VkDescriptorImageInfo getImageInfo(Image* image, Sampler* sampler) const;
+  VkDescriptorImageInfo getImageInfo(const Image& image, const Sampler& sampler) const;
   VkDescriptorBufferInfo getBufferInfo(Buffer* buffer) const;
 
-public:
+  public:
   VkDescriptorSet handle;
 
-  DescriptorSet(Device* device, DescriptorPool* pool, DescriptorSetLayout* layout);
+  DescriptorSet(std::shared_ptr<Device> device, const DescriptorPool& pool, const DescriptorSetLayout& layout);
 
-  void write(uint32_t binding, Image* image, Sampler* sampler);
+  ~DescriptorSet();
+
+  void write(uint32_t binding, const Image& image, const Sampler& sampler);
   void write(uint32_t binding, Buffer* buffer);
 };

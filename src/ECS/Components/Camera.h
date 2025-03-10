@@ -28,5 +28,6 @@ public:
 
 	Camera();
 	Camera(CameraProjections projectionType) : Camera() { this->projectionType = projectionType; }
-	Camera(const Camera& c) : Camera(c.projectionType) {}
+	Camera(const Camera& c) : Camera(c.projectionType) { this->transform = transform; }
+	Camera(Camera&& c) noexcept;
 };

@@ -19,6 +19,8 @@ public:
 
 	World(std::vector<GameObject*> gameObjects);
 
+	~World();
+
 	void addGameObject(GameObject* obj);
 
 	void updateCamera(CommandBuffer* commandBuffer);

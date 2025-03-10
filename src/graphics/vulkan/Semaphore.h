@@ -5,15 +5,15 @@
 class Device;
 
 class Semaphore {
-private:
-  VkDevice* _devicePtr;
+  private:
+  std::shared_ptr<Device> _device;
 
   VkSemaphoreCreateInfo getCreateInfo() const;
 
-public:
+  public:
   VkSemaphore handle;
 
-  Semaphore(Device* device);
+  Semaphore(std::shared_ptr<Device> device);
   ~Semaphore();
 
   VkSemaphoreSubmitInfo getSubmitInfo(VkPipelineStageFlags2 stageMask) const;

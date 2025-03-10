@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <memory>
 
 #define SDL_CHECK(x)												        																\
 	do{				    											        																			\
@@ -16,9 +17,9 @@
 		}															        																					\
 	}while(0)
 
-typedef glm::vec4 Color;
+using Color = glm::vec4;
 
-typedef int Index;
+using Index = int;
 
 struct Vertex {
 	glm::vec3 position;
@@ -34,10 +35,10 @@ static inline std::string readFileText(const char* path) {
 	if (!file.is_open()) {
 		throw std::runtime_error("Failed to read file bytes.");
 	}
-	
+
 	size_t fileSize = (size_t)file.tellg();
 	std::string text;
-	
+
 	file.seekg(0);
 	file.read(text.data(), fileSize);
 	file.close();
@@ -80,4 +81,15 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat4& m) {
 		os << "\n";
 	}
 	return os;
+}
+
+template<typename T>
+inline std::shared_ptr<T> getShared(const std::weak_ptr<T>& weak) {
+	if (!weak.expired()) {
+		return weak.lock();
+	}
+	else {
+		std::runtime_error("Weak pointer of type " + std::string(typeid(T).name()) + "has expired");
+		return nullptr;
+	}
 }

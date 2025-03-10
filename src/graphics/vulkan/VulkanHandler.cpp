@@ -2,34 +2,34 @@
 
 #include "VulkanUtils.h"
 
-#include "ImmediateSubmit.h"
+#include "Allocator.h"
+#include "Buffer.h"
+#include "CommandBuffer.h"
 #include "DebugUtilsMessenger.h"
+#include "DescriptorPool.h"
+#include "DescriptorSet.h"
+#include "DescriptorSetLayout.h"
+#include "Device.h"
+#include "Fence.h"
+#include "Frame.h"
+#include "GraphicsPipeline.h"
+#include "Image.h"
+#include "ImmediateSubmit.h"
 #include "Instance.h"
 #include "PhysicalDevice.h"
-#include "Device.h"
 #include "Queue.h"
-#include "Allocator.h"
-#include "graphics/Window.h"
-#include "Swapchain.h"
-#include "Frame.h"
-#include "CommandBuffer.h"
-#include "Semaphore.h"
-#include "Fence.h"
-#include "Buffer.h"
-#include "Image.h"
-#include "Shader.h"
-#include "GraphicsPipeline.h"
-#include "DescriptorPool.h"
-#include "DescriptorSetLayout.h"
-#include "DescriptorSet.h"
 #include "Sampler.h"
+#include "Semaphore.h"
+#include "Shader.h"
+#include "Swapchain.h"
+#include "graphics/Window.h"
 
 #include "ECS/ECS.h"
 #include "resources/Material.h"
 
-#include <vector>
-#include <optional>
 #include <array>
+#include <optional>
+#include <vector>
 
 void VulkanHandler::beginDrawing(World* world) {
   Frame* currentFrame = _swapchain->getCurrentFrame();
@@ -45,18 +45,18 @@ void VulkanHandler::beginDrawing(World* world) {
 
   // clear image with color - todo: insert skybox here
   _drawImage->transitionLayout(currentFrame->commandBuffer,
-    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  _drawImage->clear(currentFrame->commandBuffer, { 1, 1, 1, 1 });
+                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  _drawImage->clear(currentFrame->commandBuffer, {1, 1, 1, 1});
 
   // transition image into writeable mode before rendering
   _drawImage->transitionLayout(currentFrame->commandBuffer,
-    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+                               VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
   // update camera information
   world->updateCamera(currentFrame->commandBuffer);
 
   // begin a render pass connected to our draw image
-  currentFrame->commandBuffer->beginRendering(_drawImage, _depthImage);
+  currentFrame->commandBuffer->beginRendering(*_drawImage, *_depthImage);
 
   // set constant dynamic states
   VkViewport viewport{};
@@ -69,9 +69,9 @@ void VulkanHandler::beginDrawing(World* world) {
 
   VkRect2D scissor{};
   scissor.offset.x =
-    _window->position.x >= 0 ? (int32_t)_window->position.x : 0;
+      _window->position.x >= 0 ? (int32_t)_window->position.x : 0;
   scissor.offset.y =
-    _window->position.y >= 0 ? (int32_t)_window->position.y : 0;
+      _window->position.y >= 0 ? (int32_t)_window->position.y : 0;
   scissor.extent.width = _window->extent.x;
   scissor.extent.height = _window->extent.y;
 
@@ -82,7 +82,7 @@ void VulkanHandler::beginDrawing(World* world) {
   currentFrame->camDescSet->write(0, world->camBuffer);
   currentFrame->camDescSet->write(1, world->lightsBuffer);
   currentFrame->commandBuffer->bindDescriptorSet(currentFrame->camDescSet, 0,
-    _pipelineColor);
+                                                 *_pipelineColor);
 }
 
 void VulkanHandler::endDrawing() {
@@ -96,38 +96,41 @@ void VulkanHandler::endDrawing() {
   // transition the draw image and the swapchain image into their correct
   // transfer layouts
   _drawImage->transitionLayout(currentFrame->commandBuffer,
-    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
   _swapchain->getImage(swapchainImageIndex)
-    ->transitionLayout(currentFrame->commandBuffer,
-      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+      ->transitionLayout(currentFrame->commandBuffer,
+                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
   // copy drawimage to swapchain image
   _drawImage->blitTo(currentFrame->commandBuffer,
-    _swapchain->getImage(swapchainImageIndex));
+                     _swapchain->getImage(swapchainImageIndex));
 
   // make the swapchain image into presentable mode
-  _swapchain->getImage(swapchainImageIndex)->transitionLayout(currentFrame->commandBuffer,
-    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+  _swapchain->getImage(swapchainImageIndex)
+      ->transitionLayout(currentFrame->commandBuffer,
+                         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
   // end the command buffer
   currentFrame->commandBuffer->end();
 
   // submit command buffer to queue and execute it
   currentFrame->commandBuffer->submitToQueue(
-    _device->graphicsQueue, currentFrame->renderFence,
-    currentFrame->swapchainSemaphore, currentFrame->renderSemaphore); //currentFrame->swapchainSemaphore
+      _device->graphicsQueue, currentFrame->renderFence,
+      currentFrame->swapchainSemaphore,
+      currentFrame->renderSemaphore);  // currentFrame->swapchainSemaphore
 
   // present image to screen
-  _device->graphicsQueue->present(_swapchain, swapchainImageIndex,
-    currentFrame->renderSemaphore);
+  _device->graphicsQueue->present(*_swapchain, swapchainImageIndex,
+                                  currentFrame->renderSemaphore);
 
   // increase the number of frames drawn
   _swapchain->frameNumber++;
 }
 
 VulkanHandler::VulkanHandler(const char* applicationName,
-  int applicationVersion, const char* engineName,
-  int engineVersion) {
+                             int applicationVersion,
+                             const char* engineName,
+                             int engineVersion) {
   // instance
   std::vector<const char*> instanceLayers{
 #ifdef VKDEBUG
@@ -139,47 +142,48 @@ VulkanHandler::VulkanHandler(const char* applicationName,
 #ifdef VKDEBUG
       VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 #endif
-
-      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME };
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
 
   uint32_t sdlExtensionCount;
   const char* const* sdlExtensions =
-    SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+      SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
   SDL_CHECK(sdlExtensions);
   for (uint32_t i = 0; i < sdlExtensionCount; i++) {
     instanceExtensions.push_back(sdlExtensions[i]);
   }
 
-  _instance = new Instance(applicationName, applicationVersion, engineName,
-    engineVersion, instanceLayers, instanceExtensions);
+  _instance = std::make_shared<Instance>(applicationName, applicationVersion,
+                                         engineName, engineVersion,
+                                         instanceLayers, instanceExtensions);
 
   fetchExtensionFunctionPointers(_instance->handle);
 
   // window
-  _window = new Window("SphereNSTC", _instance);
+  _window = std::make_shared<Window>("SphereNSTC", _instance);
   _window->setIcon("../src/assets/sprites/icon.png");
 
   // debug messenger
 #ifdef VKDEBUG
-  _debugMessenger = new DebugUtilsMessenger(_instance);
+  _debugMessenger = std::make_shared<DebugUtilsMessenger>(_instance);
 #endif
 
   // physical device, device and allocator
-  std::vector<const char*> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-  _physicalDevice = new PhysicalDevice(_instance, deviceExtensions);
-  _device = new Device(_physicalDevice, deviceExtensions);
-  _allocator = new Allocator(_instance, _physicalDevice, _device);
+  std::vector<const char*> deviceExtensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  _physicalDevice =
+      std::make_shared<PhysicalDevice>(_instance, deviceExtensions);
+  _device = std::make_shared<Device>(_physicalDevice, deviceExtensions);
+  _allocator = std::make_shared<Allocator>(_instance, _physicalDevice, _device);
 
-  _immediateSubmit = new ImmediateSubmit(_device);
+  _immediateSubmit = std::make_shared<ImmediateSubmit>(_device);
 
   Buffer::init(_device, _allocator, _immediateSubmit);
-  Image::init(_window, _device, _allocator, _immediateSubmit);
+  Image::init(_device, _allocator, _immediateSubmit);
 
   // descriptor pool
   std::vector<VkDescriptorPoolSize> poolSizes;
   VkDescriptorPoolSize poolSize{};
   poolSize.descriptorCount =
-    Swapchain::FRAME_OVERLAP * 2;  // times 2 for cam buffer and light buffer
+      Swapchain::FRAME_OVERLAP * 2;  // times 2 for cam buffer and light buffer
   poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
   poolSizes.push_back(poolSize);
 
@@ -187,7 +191,7 @@ VulkanHandler::VulkanHandler(const char* applicationName,
   poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   poolSizes.push_back(poolSize);
 
-  _descriptorPool = new DescriptorPool(_device, poolSizes);
+  _descriptorPool = std::make_shared<DescriptorPool>(_device, poolSizes);
 
   // cam shader stage descriptor set layout
   std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -203,12 +207,12 @@ VulkanHandler::VulkanHandler(const char* applicationName,
   binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
   bindings.push_back(binding);
 
-  _camDescSetLayout = new DescriptorSetLayout(_device, bindings);
+  _camDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
 
   bindings.clear();
 
   binding.descriptorType =
-    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;  // color texture
+      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;  // color texture
   binding.binding = 0;
   bindings.push_back(binding);
 
@@ -227,67 +231,74 @@ VulkanHandler::VulkanHandler(const char* applicationName,
   binding.binding = 5;  // ambiant occlusion texture
   bindings.push_back(binding);
 
-  _objDescSetLayout = new DescriptorSetLayout(_device, bindings);
+  _objDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
 
-  _swapchain = new Swapchain(_window, _device, _descriptorPool,
-    _camDescSetLayout, _objDescSetLayout);
+  _swapchain =
+      std::make_shared<Swapchain>(*_window, _device, *_descriptorPool,
+                                  *_camDescSetLayout, *_objDescSetLayout);
 
-  _drawImage = new Image(
-    _swapchain, COLOR,
-    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-    VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+  _drawImage = std::make_shared<Image>(
+      *_swapchain, COLOR,
+      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+          VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
-  _depthImage =
-    new Image(_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  _depthImage = std::make_shared<Image>(
+      *_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
   _immediateSubmit->submit([&](CommandBuffer* cmd) {
     _depthImage->transitionLayout(
-      cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    });
+        cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+  });
 
-  _defaultSampler = new Sampler(_device);
+  _defaultSampler = std::make_shared<Sampler>(_device);
 
   // PBR pipelines
   Shader* vertexShader =
-    new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
-      VK_SHADER_STAGE_VERTEX_BIT);
+      new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
+                 VK_SHADER_STAGE_VERTEX_BIT);
   Shader* fragmentShader =
-    new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
-      VK_SHADER_STAGE_FRAGMENT_BIT);
+      new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
+                 VK_SHADER_STAGE_FRAGMENT_BIT);
 
-  _pipelinePBR = new GraphicsPipeline(
-    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-    { vertexShader->getStageCreateInfo(),
-     fragmentShader->getStageCreateInfo() },
-    { _camDescSetLayout->handle, _objDescSetLayout->handle });
+  _pipelinePBR = std::make_shared<GraphicsPipeline>(
+      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+      std::vector<VkPipelineShaderStageCreateInfo>{
+          vertexShader->getStageCreateInfo(),
+          fragmentShader->getStageCreateInfo()},
+      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
+                                         _objDescSetLayout->handle});
 
-  _pipelineLinePBR = new GraphicsPipeline(
-    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-    { vertexShader->getStageCreateInfo(),
-     fragmentShader->getStageCreateInfo() },
-    { _camDescSetLayout->handle, _objDescSetLayout->handle });
+  _pipelineLinePBR = std::make_shared<GraphicsPipeline>(
+      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+      std::vector<VkPipelineShaderStageCreateInfo>{
+          vertexShader->getStageCreateInfo(),
+          fragmentShader->getStageCreateInfo()},
+      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
+                                         _objDescSetLayout->handle});
 
   delete vertexShader;
   delete fragmentShader;
 
   // plain color pipelines
   Shader* vertexShader2 =
-    new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
-      VK_SHADER_STAGE_VERTEX_BIT);
+      new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
+                 VK_SHADER_STAGE_VERTEX_BIT);
   Shader* fragmentShader2 =
-    new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
-      VK_SHADER_STAGE_FRAGMENT_BIT);
+      new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
+                 VK_SHADER_STAGE_FRAGMENT_BIT);
 
-  _pipelineColor = new GraphicsPipeline(
-    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-    { vertexShader2->getStageCreateInfo(),
-     fragmentShader2->getStageCreateInfo() },
-    { _camDescSetLayout->handle });
+  _pipelineColor = std::make_shared<GraphicsPipeline>(
+      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+      std::vector<VkPipelineShaderStageCreateInfo>{
+          vertexShader2->getStageCreateInfo(),
+          fragmentShader2->getStageCreateInfo()},
+      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
 
-  _pipelineLineColor = new GraphicsPipeline(
-    _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-    { vertexShader2->getStageCreateInfo(),
-     fragmentShader2->getStageCreateInfo() },
-    { _camDescSetLayout->handle });
+  _pipelineLineColor = std::make_shared<GraphicsPipeline>(
+      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+      std::vector<VkPipelineShaderStageCreateInfo>{
+          vertexShader2->getStageCreateInfo(),
+          fragmentShader2->getStageCreateInfo()},
+      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
 
   delete vertexShader2;
   delete fragmentShader2;
@@ -296,32 +307,36 @@ VulkanHandler::VulkanHandler(const char* applicationName,
 VulkanHandler::~VulkanHandler() {
   _device->waitIdle();
 
-  delete _pipelineLineColor;
-  delete _pipelineColor;
-  delete _pipelineLinePBR;
-  delete _pipelinePBR;
+  _pipelineLineColor.reset();
+  _pipelineColor.reset();
+  _pipelineLinePBR.reset();
+  _pipelinePBR.reset();
 
-  delete _camDescSetLayout;
-  delete _objDescSetLayout;
-  delete _descriptorPool;
+  _camDescSetLayout.reset();
+  _objDescSetLayout.reset();
+  _descriptorPool.reset();
 
-  delete _defaultSampler;
+  _defaultSampler.reset();
 
-  delete _depthImage;
-  delete _drawImage;
-  delete _swapchain;
+  _depthImage.reset();
+  _drawImage.reset();
+  _swapchain.reset();
+  std::cout << _device.use_count() << std::endl;
 
-  delete _immediateSubmit;
+  _immediateSubmit.reset();
 
-  delete _allocator;
-  delete _device;
+  _allocator.reset();
+  std::cout << _device.use_count() << std::endl;
+  _device.reset();
 
 #ifdef VKDEBUG
-  delete _debugMessenger;
+  _debugMessenger.reset();
 #endif  // VKDEBUG
 
-  delete _instance;
-  delete _window;
+  _window.reset();
+  _instance.reset();
+
+  std::cout << _device.use_count() << std::endl;
 }
 
 void VulkanHandler::render(World* world) {
@@ -332,29 +347,27 @@ void VulkanHandler::render(World* world) {
 
   // for each renderers in the scene..
   std::vector<MeshRenderer*> renderers =
-    world->getComponentsInChildren<MeshRenderer>();
+      world->getComponentsInChildren<MeshRenderer>();
   for (const auto& renderer : renderers) {
     // choose which pipeline to use
-    GraphicsPipeline* currentPipeline;
+    std::shared_ptr<GraphicsPipeline> currentPipeline;
     if (!renderer->material->plainColor) {
       if (renderer->polygonMode == VK_POLYGON_MODE_LINE)
         currentPipeline = _pipelineLinePBR;
       else
         currentPipeline = _pipelinePBR;
-    }
-    else if (renderer->polygonMode == VK_POLYGON_MODE_LINE) {
+    } else if (renderer->polygonMode == VK_POLYGON_MODE_LINE) {
       currentPipeline = _pipelineLineColor;
-    }
-    else {
+    } else {
       currentPipeline = _pipelineColor;
     }
-    currentFrame->commandBuffer->bindPipeline(currentPipeline);
+    currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write object descriptor set if needed
     if (!renderer->material->plainColor) {
-      if (renderer->material->getColor()) {
-        currentFrame->objDescSet->write(0, renderer->material->getColor(),
-          _defaultSampler);
+      if (renderer->material->hasMap(ALBEDO)) {
+        currentFrame->objDescSet->write(0, renderer->material->getMap(ALBEDO),
+                                        *_defaultSampler);
       }
       /*if (renderer->material->getNormal()) {
         currentFrame->objDescSet->write(1, renderer->material->getNormal(),
@@ -378,18 +391,18 @@ void VulkanHandler::render(World* world) {
       }*/
 
       currentFrame->commandBuffer->bindDescriptorSet(currentFrame->objDescSet,
-        1, currentPipeline);
+                                                     1, *currentPipeline);
     }
 
     // push vertices and model matrix inside pushconstants
     PushConstants constants{};
     constants.transform =
-      renderer->gameObject->getComponent<Transform>()->modelMatrix();
+        renderer->gameObject->getComponent<Transform>()->modelMatrix();
     // constants.transform = world->camera()->projection * world->camera()->view
     // * renderer->gameObject->getComponent<Transform>()->modelMatrix();
     constants.vertexBuffer = renderer->mesh->vertices->address;
     currentFrame->commandBuffer->pushConstants(
-      constants, currentPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+        constants, currentPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
     currentFrame->commandBuffer->setLineWidth(renderer->lineWidth);
@@ -404,4 +417,6 @@ void VulkanHandler::render(World* world) {
   endDrawing();
 }
 
-void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }
+void VulkanHandler::waitForEndOfWork() const {
+  _device->waitIdle();
+}

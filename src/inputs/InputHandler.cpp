@@ -12,10 +12,10 @@ bool InputHandler::getButton(SDL_Gamepad* gamepad, SDL_GamepadButton button) {
 float InputHandler::getAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis) {
   float ret = SDL_GetGamepadAxis(gamepad, axis) / (float)SDL_JOYSTICK_AXIS_MAX;
   if (axis | SDL_GAMEPAD_AXIS_LEFT_TRIGGER | SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
-    glm::clamp(ret, 0.f, 1.f);
+    ret = glm::clamp(ret, 0.f, 1.f);
   }
   else {
-    glm::clamp(ret, -1.f, 1.f);
+    ret = glm::clamp(ret, -1.f, 1.f);
   }
   if (-JOYSTICK_DEADZONE < ret && ret < JOYSTICK_DEADZONE) return 0;
   return ret;

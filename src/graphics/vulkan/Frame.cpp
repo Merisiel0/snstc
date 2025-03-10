@@ -1,14 +1,17 @@
 #include "Frame.h"
 
-#include "Device.h"
-#include "Queue.h"
-#include "CommandPool.h"
 #include "CommandBuffer.h"
-#include "Semaphore.h"
-#include "Fence.h"
+#include "CommandPool.h"
 #include "DescriptorSet.h"
+#include "Device.h"
+#include "Fence.h"
+#include "Queue.h"
+#include "Semaphore.h"
 
-Frame::Frame(Device* device, DescriptorPool* pool, DescriptorSetLayout* camDescSetLayout, DescriptorSetLayout* objDescSetLayout) {
+Frame::Frame(std::shared_ptr<Device> device,
+             const DescriptorPool& pool,
+             const DescriptorSetLayout& camDescSetLayout,
+             const DescriptorSetLayout& objDescSetLayout) {
   commandPool = new CommandPool(device, device->graphicsQueue->familyIndex);
   commandBuffer = new CommandBuffer(device, commandPool);
 
@@ -27,7 +30,4 @@ Frame::~Frame() {
   delete swapchainSemaphore;
   delete renderSemaphore;
   delete renderFence;
-
-  delete camDescSet;
-  delete objDescSet;
 }

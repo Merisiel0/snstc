@@ -17,7 +17,7 @@ private:
   Queue* _queue;
 
 public:
-  ImmediateSubmit(Device* device);
+  ImmediateSubmit(std::shared_ptr<Device> device);
   ~ImmediateSubmit();
 
   void submit(std::function<void(CommandBuffer* cmd)>&& function);

@@ -13,18 +13,20 @@ class DescriptorPool;
 class DescriptorSetLayout;
 
 class Swapchain {
-private:
-  VkDevice* _devicePtr;
+ private:
+  std::shared_ptr<Device> _device;
 
   Image** _images;
   uint32_t* _imageCount;
 
   VkSurfaceFormatKHR _surfaceFormat;
 
-  VkSwapchainCreateInfoKHR getCreateInfo(VkSurfaceKHR suface, uint32_t imageCount,
-    VkSurfaceCapabilitiesKHR capabilities, VkPresentModeKHR presentMode) const;
+  VkSwapchainCreateInfoKHR getCreateInfo(VkSurfaceKHR suface,
+                                         uint32_t imageCount,
+                                         VkSurfaceCapabilitiesKHR capabilities,
+                                         VkPresentModeKHR presentMode) const;
 
-public:
+ public:
   static const unsigned int FRAME_OVERLAP = 2;
 
   VkSwapchainKHR handle;
@@ -34,8 +36,12 @@ public:
   Frame** frames;
   Frame* getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
 
-  Swapchain(Window* window, Device* device, DescriptorPool* descriptorPool,
-    DescriptorSetLayout* vertLayout, DescriptorSetLayout* fragLayout);
+  Swapchain(const Window& window,
+            std::shared_ptr<Device> device,
+            const DescriptorPool& descriptorPool,
+            const DescriptorSetLayout& vertLayout,
+            const DescriptorSetLayout& fragLayout);
+
   ~Swapchain();
 
   uint32_t acquireNextImage() const;

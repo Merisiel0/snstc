@@ -66,15 +66,15 @@ VkDebugUtilsMessengerCreateInfoEXT DebugUtilsMessenger::getCreateInfo() {
   return info;
 }
 
-DebugUtilsMessenger::DebugUtilsMessenger(Instance* instance) {
-  this->_instancePtr = &instance->handle;
+DebugUtilsMessenger::DebugUtilsMessenger(std::shared_ptr<Instance> instance) {
+  _instance = instance;
 
   VkDebugUtilsMessengerCreateInfoEXT createInfo = getCreateInfo();
   VK_CHECK(vkCreateDebugUtilsMessengerEXT(instance->handle, &createInfo, nullptr, &handle));
 }
 
 DebugUtilsMessenger::~DebugUtilsMessenger() {
-  vkDestroyDebugUtilsMessengerEXT(*_instancePtr, handle, nullptr);
+  vkDestroyDebugUtilsMessengerEXT(_instance->handle, handle, nullptr);
 }
 
 #endif // VKDEBUG

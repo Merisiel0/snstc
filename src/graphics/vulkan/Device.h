@@ -7,7 +7,7 @@ class Queue;
 
 class Device {
 private:
-  PhysicalDevice* _physicalDevicePtr{ nullptr };
+std::shared_ptr<PhysicalDevice> _physicalDevice;
 
   VkDeviceCreateInfo getCreateInfo(VkPhysicalDeviceFeatures2 features, std::vector<VkDeviceQueueCreateInfo>& queues, std::vector<const char*>& extensions) const;
 
@@ -17,10 +17,10 @@ public:
   Queue* computeQueue;
   VkPhysicalDeviceFeatures enabledFeatures{};
 
-  Device(PhysicalDevice* physicalDevice, std::vector<const char*> extensions);
+  Device(std::shared_ptr<PhysicalDevice> physicalDevice, std::vector<const char*> extensions);
   ~Device();
 
-  PhysicalDevice* physicalDevice() const { return _physicalDevicePtr; };
+  std::shared_ptr<PhysicalDevice> physicalDevice() const { return _physicalDevice; };
   VkPhysicalDeviceLimits physicalDeviceLimits() const;
   VkPhysicalDeviceProperties physicalDeviceProperties() const;
   VkFormatProperties formatProperties(VkFormat format) const;

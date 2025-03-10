@@ -12,13 +12,13 @@ VkCommandPoolCreateInfo CommandPool::getCreateInfo(VkDevice device, uint32_t que
   return info;
 }
 
-CommandPool::CommandPool(Device* device, uint32_t queueFamilyIndex) {
-  this->_devicePtr = &device->handle;
+CommandPool::CommandPool(std::shared_ptr<Device> device, uint32_t queueFamilyIndex) {
+  _device = device;
 
   VkCommandPoolCreateInfo createInfo = getCreateInfo(device->handle, queueFamilyIndex);
   VK_CHECK(vkCreateCommandPool(device->handle, &createInfo, nullptr, &handle));
 }
 
 CommandPool::~CommandPool() {
-  vkDestroyCommandPool(*_devicePtr, handle, nullptr);
+  vkDestroyCommandPool(_device->handle, handle, nullptr);
 }

@@ -3,6 +3,7 @@
 #include "Components/MeshRenderer.h"
 #include "resources/Material.h"
 #include "Components/Transform.h"
+#include "Components/Camera.h"
 
 using namespace ECS;
 
@@ -14,11 +15,6 @@ GameObject::GameObject() {
 
 GameObject::~GameObject() {
   const ObjectData& data = _registry.get<ObjectData>(_id);
-
-  // destroy all components with allocated resources
-  if (_registry.all_of<MeshRenderer>(_id)) {
-    _registry.get<MeshRenderer>(_id).~MeshRenderer();
-  }
 
   // recur through children
   GameObject* currentChild = data.first;

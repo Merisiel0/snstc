@@ -19,6 +19,11 @@ World::World(std::vector<GameObject*> gameObjects) {
     | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 }
 
+World::~World() {
+  delete camBuffer;
+  delete lightsBuffer;
+}
+
 void World::addGameObject(GameObject* obj) {
   if (_camera == nullptr && obj->hasComponent<Camera>()) {
     _camera = obj->getComponent<Camera>();

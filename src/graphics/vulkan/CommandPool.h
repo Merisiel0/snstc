@@ -5,14 +5,14 @@
 class Device;
 
 class CommandPool {
-private:
-  VkDevice* _devicePtr;
+  private:
+  std::shared_ptr<Device> _device;
 
   VkCommandPoolCreateInfo getCreateInfo(VkDevice device, uint32_t queueFamily) const;
 
-public:
+  public:
   VkCommandPool handle;
 
-  CommandPool(Device* device, uint32_t queueFamilyIndex);
+  CommandPool(std::shared_ptr<Device> device, uint32_t queueFamilyIndex);
   ~CommandPool();
 };

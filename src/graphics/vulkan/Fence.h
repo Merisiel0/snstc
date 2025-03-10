@@ -5,15 +5,15 @@
 class Device;
 
 class Fence {
-private:
-  VkDevice* _devicePtr{ nullptr };
+  private:
+  std::shared_ptr<Device> _device;
 
   VkFenceCreateInfo getCreateInfo(bool signaled) const;
 
-public:
+  public:
   VkFence handle;
 
-  Fence(Device* device, bool signaled = false);
+  Fence(std::shared_ptr<Device> device, bool signaled = false);
   ~Fence();
 
   void reset();

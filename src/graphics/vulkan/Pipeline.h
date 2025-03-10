@@ -5,19 +5,19 @@
 class Device;
 
 class IPipeline {
-private:
+  private:
   VkPipelineLayoutCreateInfo getLayoutCreateInfo(std::vector<VkPushConstantRange> pushConstantRanges,
     std::vector<VkDescriptorSetLayout> setLayouts) const;
 
-protected:
-  VkDevice* _devicePtr;
+  protected:
+  std::shared_ptr<Device> _device;
   VkPipelineLayout _layout;
   VkPipelineBindPoint _type;
 
-public:
+  public:
   VkPipeline handle;
 
-  IPipeline(Device* device, std::vector<VkPushConstantRange> pushConstantRanges, std::vector<VkDescriptorSetLayout> setLayouts);
+  IPipeline(std::shared_ptr<Device> device, std::vector<VkPushConstantRange> pushConstantRanges, std::vector<VkDescriptorSetLayout> setLayouts);
   ~IPipeline();
 
   VkPipelineLayout layout() const { return _layout; }

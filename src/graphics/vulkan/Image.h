@@ -9,6 +9,7 @@ class ImmediateSubmit;
 class CommandBuffer;
 class Buffer;
 class Swapchain;
+class ResourceManager;
 
 enum ImageType{
   COLOR, DEPTH
@@ -16,9 +17,9 @@ enum ImageType{
 
 class Image {
 private:
-  static inline Device* _devicePtr;
-  static inline VmaAllocator* _allocatorPtr;
-  static inline ImmediateSubmit* _immediateSubmitPtr;
+  static inline std::weak_ptr<Device> _device;
+  static inline std::weak_ptr<Allocator> _allocator;
+  static inline std::weak_ptr<ImmediateSubmit> _immediateSubmit;
 
   VmaAllocation _allocation;
   VmaAllocationInfo _info;
@@ -32,9 +33,13 @@ private:
   VkImageCreateInfo getCreateInfo() const;
   VkImageViewCreateInfo getViewCreateInfo() const;
   VmaAllocationCreateInfo getAllocationInfo() const;
-  VkRenderingAttachmentInfo getRenderingAttachmentInfo(VkClearValue* clear) const;
+  VkRenderingAttachmentInfo getRenderingAttachmentInfo(const VkClearValue& clear = VkClearValue{}, bool doClear = false) const;
 
   VkImageSubresourceRange getSubresourceRange() const;
+
+  Image(const char* path);
+  
+  friend class ResourceManager;
 
 public:
   static inline VkColorSpaceKHR colorSpace;
@@ -48,18 +53,17 @@ public:
 
   VkImageSubresourceLayers getSubresourceLayers() const;
 
-  static void init(Window* window, Device* device, Allocator* allocator, ImmediateSubmit* immediateSubmit);
+  static void init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator, std::weak_ptr<ImmediateSubmit> immediateSubmit);
 
   Image(VkImage image, VkImageView view, VkExtent2D extent);
-  Image(Swapchain* swapchain, ImageType type, VkImageUsageFlags usageFlags);
-  Image(const char* path);
+  Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usageFlags);
   ~Image();
 
   VkImageLayout layout() const { return _layout; }
   VkExtent2D extent() const { return _extent; }
   VkFormat format() const { return _format; }
 
-  static VkRenderingInfo getRenderingInfo(Image* color, Image* depth, VkClearValue* clear = nullptr);
+  static VkRenderingInfo getRenderingInfo(const Image& color, const Image& depth, const VkClearValue& clear = VkClearValue{}, bool doClear = false);
 
   void transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout);
   void transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat);

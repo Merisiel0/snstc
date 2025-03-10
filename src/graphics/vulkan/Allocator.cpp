@@ -19,7 +19,7 @@ VmaAllocatorCreateInfo Allocator::getCreateInfo(VkInstance instance, VkPhysicalD
   return info;
 }
 
-Allocator::Allocator(Instance* instance, PhysicalDevice* physicalDevice, Device* device) {
+Allocator::Allocator(std::shared_ptr<Instance> instance, std::shared_ptr<PhysicalDevice> physicalDevice, std::shared_ptr<Device> device) {
   VmaAllocatorCreateInfo createInfo = getCreateInfo(instance->handle, physicalDevice->handle, device->handle);
   VK_CHECK(vmaCreateAllocator(&createInfo, &handle));
 }

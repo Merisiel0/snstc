@@ -11,15 +11,15 @@ VkSemaphoreCreateInfo Semaphore::getCreateInfo() const {
   return info;
 }
 
-Semaphore::Semaphore(Device* device) {
-  this->_devicePtr = &device->handle;
+Semaphore::Semaphore(std::shared_ptr<Device> device) {
+  _device = device;
 
   VkSemaphoreCreateInfo createInfo = getCreateInfo();
   VK_CHECK(vkCreateSemaphore(device->handle, &createInfo, nullptr, &handle));
 }
 
 Semaphore::~Semaphore() {
-  vkDestroySemaphore(*_devicePtr, handle, nullptr);
+  vkDestroySemaphore(_device->handle, handle, nullptr);
 }
 
 VkSemaphoreSubmitInfo Semaphore::getSubmitInfo(VkPipelineStageFlags2 stageMask) const {

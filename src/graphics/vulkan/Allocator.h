@@ -13,6 +13,6 @@ private:
 public:
   VmaAllocator handle;
 
-  Allocator(Instance* instance, PhysicalDevice* physicalDevice, Device* device);
+  Allocator(std::shared_ptr<Instance>, std::shared_ptr<PhysicalDevice> physicalDevice, std::shared_ptr<Device> device);
   ~Allocator();
 };

@@ -199,7 +199,7 @@ VkGraphicsPipelineCreateInfo GraphicsPipeline::getCreateInfo(std::vector<VkPipel
   return info;
 }
 
-GraphicsPipeline::GraphicsPipeline(Device* device, VkPrimitiveTopology primitiveTopology,
+GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device, VkPrimitiveTopology primitiveTopology,
   VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
   std::vector<VkDescriptorSetLayout> setLayouts) : IPipeline(device, { getPushConstantRange() }, setLayouts) {
   _type = VK_PIPELINE_BIND_POINT_GRAPHICS;

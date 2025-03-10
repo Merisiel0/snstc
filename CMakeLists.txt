@@ -26,11 +26,11 @@ target_link_libraries(Sphere PRIVATE Vulkan::Vulkan GPUOpen::VulkanMemoryAllocat
 target_include_directories(Sphere PRIVATE ${CMAKE_SOURCE_DIR}/build/vcpkg_installed/installed/x64-linux/include)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-D_DEBUG)
+  add_definitions(-D_DEBUG)
 endif()
 
 if(WIN32)
-    set(VCPKG_MANIFEST_FEATURES "vulkan")
+  set(VCPKG_MANIFEST_FEATURES "vulkan")
 else()
-    set(VCPKG_MANIFEST_FEATURES "vulkan;x11")
+  set(VCPKG_MANIFEST_FEATURES "vulkan;x11")
 endif()

@@ -3,8 +3,8 @@
 #include "vulkan/Instance.h"
 #include "stb_image.h"
 
-Window::Window(const char* title, Instance* instance) {
-  _instancePtr = instance;
+Window::Window(const char* title, std::shared_ptr<Instance> instance) {
+  _instance = instance;
   _iconSurface = nullptr;
 
   SDL_DisplayID* displays = SDL_GetDisplays(nullptr);
@@ -33,7 +33,7 @@ Window::Window(const char* title, Instance* instance) {
 }
 
 Window::~Window() {
-  vkDestroySurfaceKHR(_instancePtr->handle, surface, nullptr);
+  vkDestroySurfaceKHR(_instance->handle, surface, nullptr);
 
   SDL_DestroyWindow(handle);
 
