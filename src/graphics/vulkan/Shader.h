@@ -5,13 +5,13 @@
 class Device;
 
 class Shader {
-  private:
+private:
   std::shared_ptr<Device> _device;
   VkShaderStageFlagBits _stage;
 
   VkShaderModuleCreateInfo getCreateInfo(std::vector<uint32_t> data) const;
 
-  public:
+public:
   VkShaderModule handle;
 
   Shader(std::shared_ptr<Device> device, const char* path, VkShaderStageFlagBits stage);

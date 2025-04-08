@@ -10,25 +10,25 @@ class World;
 class Camera;
 
 namespace ECS {
-struct ObjectData : public BaseComponent {
-  std::vector<const char*> tags{};
-  bool isActive{true};
+  struct ObjectData : public BaseComponent {
+    std::vector<const char*> tags {};
+    bool isActive {true};
 
-  uint32_t childCount{0};
-  // First child
-  GameObject* first{nullptr};
-  // Previous sibling
-  GameObject* prev{nullptr};
-  // Next sibling
-  GameObject* next{nullptr};
-  GameObject* parent{nullptr};
+    uint32_t childCount {0};
+    // First child
+    GameObject* first {nullptr};
+    // Previous sibling
+    GameObject* prev {nullptr};
+    // Next sibling
+    GameObject* next {nullptr};
+    GameObject* parent {nullptr};
 
-  World* world{nullptr};
-};
-}  // namespace ECS
+    World* world {nullptr};
+  };
+} // namespace ECS
 
 class GameObject {
- private:
+private:
   entt::registry* _registry;
 
   entt::entity _id;
@@ -39,58 +39,53 @@ class GameObject {
 
   void setWorldCamera(Camera& cam);
 
- public:
+public:
   GameObject(World& world);
   ~GameObject();
 
-  template <typename Type>
+  template<typename Type>
   Type* getComponent() const {
-    if (_registry->valid(_id) && _registry->all_of<Type>(_id)) {
-      return &_registry->get<Type>(_id);
-    }
+    if(_registry->valid(_id) && _registry->all_of<Type>(_id)) { return &_registry->get<Type>(_id); }
     return nullptr;
   }
 
-  template <typename Type>
+  template<typename Type>
   bool hasComponent() const {
     return _registry->valid(_id) && _registry->all_of<Type>(_id);
   }
 
-  template <typename Type, typename... Args>
+  template<typename Type, typename... Args>
   Type& addComponent(Args&&... args) {
     static_assert(std::is_base_of<ECS::BaseComponent, Type>::value,
-                  "Components must be derived from BaseComponent");
+      "Components must be derived from BaseComponent");
 
-    if (_registry->all_of<Type>(_id))
-      return _registry->get<Type>(_id);
+    if(_registry->all_of<Type>(_id)) return _registry->get<Type>(_id);
 
     ECS::BaseComponent::gameObjectBuffer = this;
 
     Type& component = _registry->emplace<Type>(_id, args...);
 
-    if constexpr (std::is_same_v<Type, Camera>){
-      setWorldCamera(component);
-    }
+    if constexpr(std::is_same_v<Type, Camera>) { setWorldCamera(component); }
 
-    return component;;
+    return component;
+    ;
   }
 
-  template <typename Type>
+  template<typename Type>
   void removeComponent() const {
     _registry->remove<Type>(_id);
   }
 
-  template <typename Type>
+  template<typename Type>
   Type* getComponentInChildren() {
     ECS::ObjectData& data = _registry->get<ECS::ObjectData>(_id);
 
-    if (data.childCount == 0)
-      return nullptr;
+    if(data.childCount == 0) return nullptr;
 
     GameObject& currentChild = *data.first;
 
-    for (std::uint32_t i = 0; i < data.childCount; ++i) {
-      if (_registry->all_of<Type>(currentChild._id)) {
+    for(std::uint32_t i = 0; i < data.childCount; ++i) {
+      if(_registry->all_of<Type>(currentChild._id)) {
         return &_registry->get<Type>(currentChild._id);
       }
       currentChild = *_registry->get<ECS::ObjectData>(currentChild._id).next;
@@ -99,25 +94,25 @@ class GameObject {
     return nullptr;
   }
 
-  template <typename Type>
+  template<typename Type>
   std::vector<std::reference_wrapper<Type>> getComponentsInChildren() {
-    std::vector<std::reference_wrapper<Type>> components{};
+    std::vector<std::reference_wrapper<Type>> components {};
 
-    entt::runtime_view view{};
+    entt::runtime_view view {};
     view.iterate(_registry->storage<Type>());
 
-    for (auto entity : view) {
+    for(auto entity : view) {
       components.push_back(_registry->get<Type>(entity));
     }
 
     return components;
   }
 
-  template <typename Type>
+  template<typename Type>
   Type getComponentInParent() {
     const ECS::ObjectData& data = _registry->get<ECS::ObjectData>(_id);
 
-    if (data.parent != entt::null && _registry->all_of<Type>(data.parent)) {
+    if(data.parent != entt::null && _registry->all_of<Type>(data.parent)) {
       return _registry->get<Type>(data.parent);
     }
 

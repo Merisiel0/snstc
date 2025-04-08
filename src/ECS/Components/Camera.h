@@ -1,33 +1,32 @@
 #pragma once
 
-#include "BaseComponent.h"
 #include "../../utils/Math.h"
+#include "BaseComponent.h"
 
 struct Transform;
 
 struct CameraBuffer {
-	mat4 projView;
+  mat4 projView;
 };
 
-enum CameraProjections {
-	PERSPECTIVE, ORTHOGRAPHIC
-};
+enum CameraProjections { PERSPECTIVE, ORTHOGRAPHIC };
 
 struct Camera : public ECS::BaseComponent {
 private:
-	Transform* transform;
+  Transform* transform;
 
 public:
-	mat4 view;
-	mat4 projection;
-	CameraProjections projectionType{ PERSPECTIVE };
+  mat4 view;
+  mat4 projection;
+  CameraProjections projectionType {PERSPECTIVE};
 
-	void updateView();
-	void updateProjectionPerspective(float fovY, float aspect, float zNear, float zFar);
-	void updateProjectionOrthographic(float left, float right, float bottom, float top, float zNear, float zFar);
+  void updateView();
+  void updateProjectionPerspective(float fovY, float aspect, float zNear, float zFar);
+  void updateProjectionOrthographic(float left, float right, float bottom, float top, float zNear,
+    float zFar);
 
-	Camera();
-	Camera(CameraProjections projectionType) : Camera() { this->projectionType = projectionType; }
-	Camera(const Camera& c) : Camera(c.projectionType) { this->transform = transform; }
-	Camera(Camera&& c) noexcept;
+  Camera();
+  Camera(CameraProjections projectionType) : Camera() { this->projectionType = projectionType; }
+  Camera(const Camera& c) : Camera(c.projectionType) { this->transform = transform; }
+  Camera(Camera&& c) noexcept;
 };

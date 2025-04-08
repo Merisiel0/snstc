@@ -11,9 +11,7 @@ class Buffer;
 class Swapchain;
 class ResourceManager;
 
-enum ImageType{
-  COLOR, DEPTH
-};
+enum ImageType { COLOR, DEPTH };
 
 class Image {
 private:
@@ -23,22 +21,23 @@ private:
 
   VmaAllocation _allocation;
   VmaAllocationInfo _info;
-  VkImageLayout _layout{ VK_IMAGE_LAYOUT_UNDEFINED };
+  VkImageLayout _layout {VK_IMAGE_LAYOUT_UNDEFINED};
   int _channelAmount;
   VkExtent2D _extent;
   VkFormat _format;
   VkImageAspectFlags _aspect;
   VkImageUsageFlags _usage;
-    
+
   VkImageCreateInfo getCreateInfo() const;
   VkImageViewCreateInfo getViewCreateInfo() const;
   VmaAllocationCreateInfo getAllocationInfo() const;
-  VkRenderingAttachmentInfo getRenderingAttachmentInfo(const VkClearValue& clear = VkClearValue{}, bool doClear = false) const;
+  VkRenderingAttachmentInfo getRenderingAttachmentInfo(const VkClearValue& clear = VkClearValue {},
+    bool doClear = false) const;
 
   VkImageSubresourceRange getSubresourceRange() const;
 
   Image(const char* path);
-  
+
   friend class ResourceManager;
 
 public:
@@ -53,7 +52,8 @@ public:
 
   VkImageSubresourceLayers getSubresourceLayers() const;
 
-  static void init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator, std::weak_ptr<ImmediateSubmit> immediateSubmit);
+  static void init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator,
+    std::weak_ptr<ImmediateSubmit> immediateSubmit);
 
   Image(VkImage image, VkImageView view, VkExtent2D extent);
   Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usageFlags);
@@ -63,7 +63,8 @@ public:
   VkExtent2D extent() const { return _extent; }
   VkFormat format() const { return _format; }
 
-  static VkRenderingInfo getRenderingInfo(const Image& color, const Image& depth, const VkClearValue& clear = VkClearValue{}, bool doClear = false);
+  static VkRenderingInfo getRenderingInfo(const Image& color, const Image& depth,
+    const VkClearValue& clear = VkClearValue {}, bool doClear = false);
 
   void transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout);
   void transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat);

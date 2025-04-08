@@ -5,12 +5,12 @@
 class Device;
 
 class Sampler {
-  private:
+private:
   std::shared_ptr<Device> _device;
 
   VkSamplerCreateInfo getCreateInfo() const;
 
-  public:
+public:
   VkSampler handle;
 
   Sampler(std::shared_ptr<Device> device);

@@ -1,12 +1,12 @@
 #include "Buffer.h"
 
-#include "Device.h"
 #include "Allocator.h"
-#include "Image.h"
 #include "CommandBuffer.h"
+#include "Device.h"
+#include "Image.h"
 
 VkBufferCreateInfo Buffer::getCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage) const {
-  VkBufferCreateInfo info{};
+  VkBufferCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   //info.pNext = nullptr;
   //info.flags = 0;
@@ -20,7 +20,7 @@ VkBufferCreateInfo Buffer::getCreateInfo(VkDeviceSize size, VkBufferUsageFlags u
 }
 
 VmaAllocationCreateInfo Buffer::getAllocationCreateInfo(VmaMemoryUsage usage) const {
-  VmaAllocationCreateInfo info{};
+  VmaAllocationCreateInfo info {};
   info.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
   info.usage = usage;
   //info.requiredFlags = 0;
@@ -34,7 +34,7 @@ VmaAllocationCreateInfo Buffer::getAllocationCreateInfo(VmaMemoryUsage usage) co
 }
 
 VkBufferImageCopy Buffer::getBufferImageCopy(Image* image) const {
-  VkBufferImageCopy copyRegion{};
+  VkBufferImageCopy copyRegion {};
   //copyRegion.bufferOffset = 0;
   //copyRegion.bufferRowLength = 0;
   //copyRegion.bufferImageHeight = 0;
@@ -46,7 +46,8 @@ VkBufferImageCopy Buffer::getBufferImageCopy(Image* image) const {
   return copyRegion;
 }
 
-void Buffer::init(std::weak_ptr<Device> device, std::weak_ptr<Allocator> allocator, std::weak_ptr<ImmediateSubmit> immediateSubmit) {
+void Buffer::init(std::weak_ptr<Device> device, std::weak_ptr<Allocator> allocator,
+  std::weak_ptr<ImmediateSubmit> immediateSubmit) {
   _device = device;
   _allocator = allocator;
   _immediateSubmit = immediateSubmit;
@@ -60,7 +61,8 @@ Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memor
 
   VkBufferCreateInfo createInfo = getCreateInfo(size, usage);
   VmaAllocationCreateInfo vmaInfo = getAllocationCreateInfo(memoryUsage);
-  VK_CHECK(vmaCreateBuffer(allocatorSptr->handle, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
+  VK_CHECK(
+    vmaCreateBuffer(allocatorSptr->handle, &createInfo, &vmaInfo, &handle, &_allocation, &_info));
 
   VkBufferDeviceAddressInfo deviceAddressInfo = getDeviceAddressInfo();
   address = vkGetBufferDeviceAddress(deviceSptr->handle, &deviceAddressInfo);
@@ -73,7 +75,7 @@ Buffer::~Buffer() {
 }
 
 VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {
-  VkBufferDeviceAddressInfo info{};
+  VkBufferDeviceAddressInfo info {};
   info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
   //info->pNext = nullptr;
   info.buffer = handle;
@@ -83,5 +85,6 @@ VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {
 
 void Buffer::copyToImage(CommandBuffer* commandBuffer, Image* image) const {
   VkBufferImageCopy copyRegion = getBufferImageCopy(image);
-  vkCmdCopyBufferToImage(commandBuffer->handle, handle, image->handle, image->layout(), 1, &copyRegion);
+  vkCmdCopyBufferToImage(commandBuffer->handle, handle, image->handle, image->layout(), 1,
+    &copyRegion);
 }

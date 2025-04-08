@@ -1,8 +1,7 @@
 #pragma once
 
-#include "VulkanUtils.h"
-
 #include "Pipeline.h"
+#include "VulkanUtils.h"
 
 class Device;
 
@@ -17,7 +16,8 @@ private:
 
   VkPipelineRenderingCreateInfo getRenderingCreateInfo() const;
   VkPipelineVertexInputStateCreateInfo getVertexInputState() const;
-  VkPipelineInputAssemblyStateCreateInfo getInputAssemblyState(VkPrimitiveTopology primitiveTopology) const;
+  VkPipelineInputAssemblyStateCreateInfo getInputAssemblyState(
+    VkPrimitiveTopology primitiveTopology) const;
   VkPipelineTessellationStateCreateInfo getTessellationState() const;
   VkPipelineViewportStateCreateInfo getViewportState() const;
   VkPipelineRasterizationStateCreateInfo getRasterizationState(VkPolygonMode polygonMode) const;
@@ -26,11 +26,12 @@ private:
   VkPipelineColorBlendStateCreateInfo getColorBlendState() const;
   VkPipelineDynamicStateCreateInfo getDynamicState() const;
 
-  VkGraphicsPipelineCreateInfo getCreateInfo(std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
+  VkGraphicsPipelineCreateInfo getCreateInfo(
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
     VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const;
 
 public:
-  GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
+  GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology,
+    VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
     std::vector<VkDescriptorSetLayout> setLayouts);
 };

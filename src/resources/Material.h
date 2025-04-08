@@ -17,14 +17,14 @@ enum MapIndex {
 };
 
 class Material {
- private:
-  std::vector<std::shared_ptr<Image>> _maps{MAP_COUNT, nullptr};
+private:
+  std::vector<std::shared_ptr<Image>> _maps {MAP_COUNT, nullptr};
 
   Material(const char* name);
 
   friend class ResourceManager;
 
- public:
+public:
   bool plainColor = true;
 
   bool hasMap(MapIndex i) { return !_maps[i]; }

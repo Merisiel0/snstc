@@ -8,10 +8,8 @@
 #include "Queue.h"
 #include "Semaphore.h"
 
-Frame::Frame(std::shared_ptr<Device> device,
-             const DescriptorPool& pool,
-             const DescriptorSetLayout& camDescSetLayout,
-             const DescriptorSetLayout& objDescSetLayout) {
+Frame::Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
+  const DescriptorSetLayout& camDescSetLayout, const DescriptorSetLayout& objDescSetLayout) {
   commandPool = new CommandPool(device, device->graphicsQueue->familyIndex);
   commandBuffer = new CommandBuffer(device, commandPool);
 

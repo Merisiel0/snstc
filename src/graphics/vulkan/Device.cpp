@@ -3,11 +3,9 @@
 #include "PhysicalDevice.h"
 #include "Queue.h"
 
-VkDeviceCreateInfo Device::getCreateInfo(
-    VkPhysicalDeviceFeatures2& features,
-    std::vector<VkDeviceQueueCreateInfo>& queues,
-    std::vector<const char*>& extensions) const {
-  VkDeviceCreateInfo info{};
+VkDeviceCreateInfo Device::getCreateInfo(VkPhysicalDeviceFeatures2& features,
+  std::vector<VkDeviceQueueCreateInfo>& queues, std::vector<const char*>& extensions) const {
+  VkDeviceCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   info.pNext = &features;
   // info.flags = 0;
@@ -23,17 +21,16 @@ VkDeviceCreateInfo Device::getCreateInfo(
 }
 
 Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice,
-               std::vector<const char*> extensions) {
+  std::vector<const char*> extensions) {
   _physicalDevice = physicalDevice;
 
-  std::vector<uint32_t> queueFamilyIndexes =
-      physicalDevice->queueFamilies.getIndexes();
+  std::vector<uint32_t> queueFamilyIndexes = physicalDevice->queueFamilies.getIndexes();
 
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
   float queuePriority = 1.0f;
 
-  for (size_t i = 0; i < queueFamilyIndexes.size(); i++) {
-    VkDeviceQueueCreateInfo createInfo{};
+  for(size_t i = 0; i < queueFamilyIndexes.size(); i++) {
+    VkDeviceQueueCreateInfo createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     // createInfo.pNext;
     // createInfo.flags;
@@ -56,66 +53,56 @@ Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice,
   // accelStructFeatures.pNext = &rayTracingPipelineFeatures;
   // accelStructFeatures.accelerationStructure = VK_TRUE;
 
-  VkPhysicalDeviceVulkan13Features vk13Features{};
+  VkPhysicalDeviceVulkan13Features vk13Features {};
   vk13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
   // vk13Features.pNext = &accelStructFeatures;
   vk13Features.synchronization2 = VK_TRUE;
   vk13Features.dynamicRendering = VK_TRUE;
 
-  VkPhysicalDeviceVulkan12Features vk12Features{};
+  VkPhysicalDeviceVulkan12Features vk12Features {};
   vk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
   vk12Features.pNext = &vk13Features;
   vk12Features.bufferDeviceAddress = VK_TRUE;
 
-  VkPhysicalDeviceFeatures2 features{};
+  VkPhysicalDeviceFeatures2 features {};
   features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
   features.pNext = &vk12Features;
   features.features.logicOp = VK_TRUE;
   features.features.fillModeNonSolid = VK_TRUE;
 
-  VkDeviceCreateInfo createInfo =
-      getCreateInfo(features, queueCreateInfos, extensions);
-  VK_CHECK(
-      vkCreateDevice(physicalDevice->handle, &createInfo, nullptr, &handle));
+  VkDeviceCreateInfo createInfo = getCreateInfo(features, queueCreateInfos, extensions);
+  VK_CHECK(vkCreateDevice(physicalDevice->handle, &createInfo, nullptr, &handle));
 
-  graphicsQueue = new Queue(
-      this, physicalDevice->queueFamilies.graphicsFamilyIndex.value());
+  graphicsQueue =
+    std::make_shared<Queue>(this, physicalDevice->queueFamilies.graphicsFamilyIndex.value());
   computeQueue =
-      new Queue(this, physicalDevice->queueFamilies.computeFamilyIndex.value());
+    std::make_shared<Queue>(this, physicalDevice->queueFamilies.computeFamilyIndex.value());
 }
 
-Device::~Device() {
-  delete graphicsQueue;
-  delete computeQueue;
-
-  vkDestroyDevice(handle, nullptr);
-}
+Device::~Device() { vkDestroyDevice(handle, nullptr); }
 
 VkPhysicalDeviceLimits Device::physicalDeviceLimits() const {
-  VkPhysicalDeviceProperties properties{};
+  VkPhysicalDeviceProperties properties {};
   vkGetPhysicalDeviceProperties(_physicalDevice->handle, &properties);
   return properties.limits;
 }
 
 VkPhysicalDeviceProperties Device::physicalDeviceProperties() const {
-  VkPhysicalDeviceProperties properties{};
+  VkPhysicalDeviceProperties properties {};
   vkGetPhysicalDeviceProperties(_physicalDevice->handle, &properties);
   return properties;
 }
 
 VkFormatProperties Device::formatProperties(VkFormat format) const {
-  VkFormatProperties properties{};
-  vkGetPhysicalDeviceFormatProperties(_physicalDevice->handle, format,
-                                      &properties);
+  VkFormatProperties properties {};
+  vkGetPhysicalDeviceFormatProperties(_physicalDevice->handle, format, &properties);
   return properties;
 }
 
-VkImageFormatProperties Device::imageFormatProperties(
-    VkImageCreateInfo* createInfo) const {
-  VkImageFormatProperties properties{};
-  VK_CHECK(vkGetPhysicalDeviceImageFormatProperties(
-      _physicalDevice->handle, createInfo->format, createInfo->imageType,
-      createInfo->tiling, createInfo->usage, createInfo->flags, &properties));
+VkImageFormatProperties Device::imageFormatProperties(VkImageCreateInfo* createInfo) const {
+  VkImageFormatProperties properties {};
+  VK_CHECK(vkGetPhysicalDeviceImageFormatProperties(_physicalDevice->handle, createInfo->format,
+    createInfo->imageType, createInfo->tiling, createInfo->usage, createInfo->flags, &properties));
   return properties;
 }
 

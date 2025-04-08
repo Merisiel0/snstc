@@ -1,14 +1,15 @@
 #include "Queue.h"
 
-#include "Device.h"
-#include "Frame.h"
 #include "CommandBuffer.h"
-#include "Semaphore.h"
+#include "Device.h"
 #include "Fence.h"
+#include "Frame.h"
+#include "Semaphore.h"
 #include "Swapchain.h"
 
-VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex, Semaphore* wait) const {
-  VkPresentInfoKHR info{};
+VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex,
+  Semaphore* wait) const {
+  VkPresentInfoKHR info {};
   info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   //info.pNext = nullptr;
 

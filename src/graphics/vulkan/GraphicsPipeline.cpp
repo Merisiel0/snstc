@@ -4,7 +4,7 @@
 #include "Image.h"
 
 VkPushConstantRange GraphicsPipeline::getPushConstantRange() const {
-  VkPushConstantRange range{};
+  VkPushConstantRange range {};
   range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   //range.offset = 0;
   range.size = sizeof(PushConstants);
@@ -13,7 +13,7 @@ VkPushConstantRange GraphicsPipeline::getPushConstantRange() const {
 }
 
 VkPipelineRenderingCreateInfo GraphicsPipeline::getRenderingCreateInfo() const {
-  VkPipelineRenderingCreateInfo info{};
+  VkPipelineRenderingCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
   //info.pNext = nullptr;
   //info.viewMask = 0;
@@ -26,7 +26,7 @@ VkPipelineRenderingCreateInfo GraphicsPipeline::getRenderingCreateInfo() const {
 }
 
 VkPipelineVertexInputStateCreateInfo GraphicsPipeline::getVertexInputState() const {
-  VkPipelineVertexInputStateCreateInfo state{};
+  VkPipelineVertexInputStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -38,8 +38,9 @@ VkPipelineVertexInputStateCreateInfo GraphicsPipeline::getVertexInputState() con
   return state;
 }
 
-VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::getInputAssemblyState(VkPrimitiveTopology primitiveTopology) const {
-  VkPipelineInputAssemblyStateCreateInfo state{};
+VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::getInputAssemblyState(
+  VkPrimitiveTopology primitiveTopology) const {
+  VkPipelineInputAssemblyStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -50,7 +51,7 @@ VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::getInputAssemblyState(V
 }
 
 VkPipelineTessellationStateCreateInfo GraphicsPipeline::getTessellationState() const {
-  VkPipelineTessellationStateCreateInfo state{};
+  VkPipelineTessellationStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -60,7 +61,7 @@ VkPipelineTessellationStateCreateInfo GraphicsPipeline::getTessellationState() c
 }
 
 VkPipelineViewportStateCreateInfo GraphicsPipeline::getViewportState() const {
-  VkPipelineViewportStateCreateInfo state{};
+  VkPipelineViewportStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -72,8 +73,9 @@ VkPipelineViewportStateCreateInfo GraphicsPipeline::getViewportState() const {
   return state;
 }
 
-VkPipelineRasterizationStateCreateInfo GraphicsPipeline::getRasterizationState(VkPolygonMode polygonMode) const {
-  VkPipelineRasterizationStateCreateInfo state{};
+VkPipelineRasterizationStateCreateInfo GraphicsPipeline::getRasterizationState(
+  VkPolygonMode polygonMode) const {
+  VkPipelineRasterizationStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -92,7 +94,7 @@ VkPipelineRasterizationStateCreateInfo GraphicsPipeline::getRasterizationState(V
 }
 
 VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getMultisampleState() const {
-  VkPipelineMultisampleStateCreateInfo state{};
+  VkPipelineMultisampleStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -107,7 +109,7 @@ VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getMultisampleState() con
 }
 
 VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState() const {
-  VkPipelineDepthStencilStateCreateInfo state{};
+  VkPipelineDepthStencilStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   //state.pNext;
   state.flags;
@@ -125,7 +127,7 @@ VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState() c
 }
 
 VkPipelineColorBlendStateCreateInfo GraphicsPipeline::getColorBlendState() const {
-  VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+  VkPipelineColorBlendAttachmentState colorBlendAttachment {};
   colorBlendAttachment.blendEnable = VK_FALSE;
   colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
   colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -133,10 +135,10 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipeline::getColorBlendState() const
   colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
   colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
   colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-  colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
-    | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
-  VkPipelineColorBlendStateCreateInfo state{};
+  VkPipelineColorBlendStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
@@ -153,12 +155,12 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipeline::getColorBlendState() const
 }
 
 VkPipelineDynamicStateCreateInfo GraphicsPipeline::getDynamicState() const {
-  VkPipelineDynamicStateCreateInfo state{};
+  VkPipelineDynamicStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
   //state.pNext = nullptr;
   //state.flags = 0;
   state.dynamicStateCount = 4;
-  state.pDynamicStates = new VkDynamicState[4]{
+  state.pDynamicStates = new VkDynamicState[4] {
     VK_DYNAMIC_STATE_VIEWPORT_WITH_COUNT, // allows for resizing of window
     VK_DYNAMIC_STATE_SCISSOR_WITH_COUNT, // allows for resizing of window
     VK_DYNAMIC_STATE_LINE_WIDTH, // allows custom line width
@@ -168,10 +170,10 @@ VkPipelineDynamicStateCreateInfo GraphicsPipeline::getDynamicState() const {
   return state;
 }
 
-VkGraphicsPipelineCreateInfo GraphicsPipeline::getCreateInfo(std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
+VkGraphicsPipelineCreateInfo GraphicsPipeline::getCreateInfo(
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
   VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const {
-
-  VkGraphicsPipelineCreateInfo info{};
+  VkGraphicsPipelineCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   info.pNext = new VkPipelineRenderingCreateInfo(getRenderingCreateInfo());
   //info.flags = 0;
@@ -182,10 +184,12 @@ VkGraphicsPipelineCreateInfo GraphicsPipeline::getCreateInfo(std::vector<VkPipel
   info.pStages = stagesPtr;
 
   info.pVertexInputState = new VkPipelineVertexInputStateCreateInfo(getVertexInputState());
-  info.pInputAssemblyState = new VkPipelineInputAssemblyStateCreateInfo(getInputAssemblyState(primitiveTopology));
+  info.pInputAssemblyState =
+    new VkPipelineInputAssemblyStateCreateInfo(getInputAssemblyState(primitiveTopology));
   info.pTessellationState = new VkPipelineTessellationStateCreateInfo(getTessellationState());
   info.pViewportState = new VkPipelineViewportStateCreateInfo(getViewportState());
-  info.pRasterizationState = new VkPipelineRasterizationStateCreateInfo(getRasterizationState(polygonMode));
+  info.pRasterizationState =
+    new VkPipelineRasterizationStateCreateInfo(getRasterizationState(polygonMode));
   info.pMultisampleState = new VkPipelineMultisampleStateCreateInfo(getMultisampleState());
   info.pDepthStencilState = new VkPipelineDepthStencilStateCreateInfo(getDepthStencilState());
   info.pColorBlendState = new VkPipelineColorBlendStateCreateInfo(getColorBlendState());
@@ -199,11 +203,14 @@ VkGraphicsPipelineCreateInfo GraphicsPipeline::getCreateInfo(std::vector<VkPipel
   return info;
 }
 
-GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device, VkPrimitiveTopology primitiveTopology,
-  VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
-  std::vector<VkDescriptorSetLayout> setLayouts) : IPipeline(device, { getPushConstantRange() }, setLayouts) {
+GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device,
+  VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
+  std::vector<VkDescriptorSetLayout> setLayouts) :
+    IPipeline(device, {getPushConstantRange()}, setLayouts) {
   _type = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
-  VkGraphicsPipelineCreateInfo createInfo = getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode);
+  VkGraphicsPipelineCreateInfo createInfo =
+    getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode);
   vkCreateGraphicsPipelines(device->handle, VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle);
 }

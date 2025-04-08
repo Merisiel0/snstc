@@ -39,10 +39,11 @@ public:
   void setScissor(VkRect2D* scissor) const;
   void setLineWidth(float lineWidth) const;
   void setCullMode(VkCullModeFlags cullMode) const;
-  void pushConstants(PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const;
+  void pushConstants(PushConstants constants, VkPipelineLayout layout,
+    VkShaderStageFlags stage) const;
   void bindIndexBuffer(Buffer* buffer) const;
   void drawIndexed(uint32_t indexCount) const;
   void drawVertices(uint32_t vertexCount) const;
 
-  void submitToQueue(Queue* queue, Fence* fence, Semaphore* wait, Semaphore* signal) const;
+  void submitToQueue(std::shared_ptr<Queue> queue, Fence* fence, Semaphore* wait, Semaphore* signal) const;
 };

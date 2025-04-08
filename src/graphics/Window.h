@@ -5,11 +5,11 @@
 class Instance;
 
 class Window {
-  private:
+private:
   std::shared_ptr<Instance> _instance;
   SDL_Surface* _iconSurface;
 
-  public:
+public:
   SDL_Window* handle;
   glm::vec2 position;
   glm::uvec2 extent;

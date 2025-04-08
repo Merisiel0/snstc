@@ -7,10 +7,10 @@
 class Instance;
 
 class DebugUtilsMessenger {
-  private:
+private:
   std::shared_ptr<Instance> _instance;
 
-  public:
+public:
   VkDebugUtilsMessengerEXT handle;
 
   static VkDebugUtilsMessengerCreateInfoEXT getCreateInfo();

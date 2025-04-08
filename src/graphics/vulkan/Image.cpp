@@ -14,30 +14,30 @@
 #define STB_IMAGE_RESIZE2_IMPLEMENTATION
 #include "stb_image_resize2.h"
 
-void Image::init(std::shared_ptr<Device> device,
-                 std::weak_ptr<Allocator> allocator,
-                 std::weak_ptr<ImmediateSubmit> immediateSubmit) {
+void Image::init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator,
+  std::weak_ptr<ImmediateSubmit> immediateSubmit) {
   _device = device;
   _allocator = allocator;
   _immediateSubmit = immediateSubmit;
 
   // find color format
   const std::vector<VkFormat> preferredColorFormats = {
-      VK_FORMAT_R8G8B8A8_SRGB,    VK_FORMAT_R8G8B8A8_UNORM,
-      VK_FORMAT_R8G8B8A8_SNORM,   VK_FORMAT_R8G8B8A8_USCALED,
-      VK_FORMAT_R8G8B8A8_SSCALED,
+    VK_FORMAT_R8G8B8A8_SRGB,
+    VK_FORMAT_R8G8B8A8_UNORM,
+    VK_FORMAT_R8G8B8A8_SNORM,
+    VK_FORMAT_R8G8B8A8_USCALED,
+    VK_FORMAT_R8G8B8A8_SSCALED,
   };
 
   Image::colorFormat = VK_FORMAT_UNDEFINED;
-  for (const auto& format : preferredColorFormats) {
+  for(const auto& format : preferredColorFormats) {
     VkImageFormatProperties properties;
-    VkResult result = vkGetPhysicalDeviceImageFormatProperties(
-        device->physicalDevice()->handle, format, VK_IMAGE_TYPE_2D,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        0, &properties);
-    if (result == VK_SUCCESS) {
+    VkResult result = vkGetPhysicalDeviceImageFormatProperties(device->physicalDevice()->handle,
+      format, VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL,
+      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+      0, &properties);
+    if(result == VK_SUCCESS) {
       Image::colorFormat = format;
       Image::colorAspect = VK_IMAGE_ASPECT_COLOR_BIT;
       break;
@@ -50,33 +50,28 @@ void Image::init(std::shared_ptr<Device> device,
     //   break;
     // }
   }
-  if (Image::colorFormat == VK_FORMAT_UNDEFINED) {
+  if(Image::colorFormat == VK_FORMAT_UNDEFINED) {
     throw std::runtime_error("No prefered color image format available.");
   }
 
   // find depth format
-  const std::vector<VkFormat> preferredDepthFormats = {
-      VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-      VK_FORMAT_D32_SFLOAT};
+  const std::vector<VkFormat> preferredDepthFormats = {VK_FORMAT_D24_UNORM_S8_UINT,
+    VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT};
 
   Image::depthFormat = VK_FORMAT_UNDEFINED;
-  for (const auto& format : preferredDepthFormats) {
+  for(const auto& format : preferredDepthFormats) {
     VkFormatProperties properties;
-    vkGetPhysicalDeviceFormatProperties(device->physicalDevice()->handle,
-                                        format, &properties);
-    if (properties.optimalTilingFeatures &
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+    vkGetPhysicalDeviceFormatProperties(device->physicalDevice()->handle, format, &properties);
+    if(properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
       Image::depthFormat = format;
 
       Image::depthAspect = VK_IMAGE_ASPECT_DEPTH_BIT;
-      if (format != VK_FORMAT_D32_SFLOAT) {
-        Image::depthAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
-      }
+      if(format != VK_FORMAT_D32_SFLOAT) { Image::depthAspect |= VK_IMAGE_ASPECT_STENCIL_BIT; }
 
       break;
     }
   }
-  if (Image::depthFormat == VK_FORMAT_UNDEFINED) {
+  if(Image::depthFormat == VK_FORMAT_UNDEFINED) {
     throw std::runtime_error("No prefered depth image format available.");
   }
 
@@ -97,16 +92,14 @@ Image::Image(VkImage image, VkImageView view, VkExtent2D extent) {
   _usage = 0;
 }
 
-Image::Image(const Swapchain& swapchain,
-             ImageType type,
-             VkImageUsageFlags usageFlags) {
+Image::Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usageFlags) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
 
   _extent = {swapchain.extent.width, swapchain.extent.height};
   _usage = usageFlags;
 
-  switch (type) {
+  switch(type) {
     case COLOR: {
       _aspect = Image::colorAspect;
       _format = Image::colorFormat;
@@ -116,7 +109,7 @@ Image::Image(const Swapchain& swapchain,
     case DEPTH: {
       _aspect = Image::depthAspect;
       _format = Image::depthFormat;
-      if (_format == VK_FORMAT_D32_SFLOAT)
+      if(_format == VK_FORMAT_D32_SFLOAT)
         _channelAmount = 1;
       else
         _channelAmount = 2;
@@ -126,34 +119,29 @@ Image::Image(const Swapchain& swapchain,
 
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocCreateInfo,
-                          &handle, &_allocation, &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocCreateInfo, &handle,
+    &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(
-      vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
 Image::Image(const char* path) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
-  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr =
-      getShared(_immediateSubmit);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
 
   int width, height;
-  stbi_uc* pixels =
-      stbi_load(path, &width, &height, &_channelAmount, STBI_rgb_alpha);
+  stbi_uc* pixels = stbi_load(path, &width, &height, &_channelAmount, STBI_rgb_alpha);
   _channelAmount = 4;
 
-  if (!pixels) {
-    throw std::runtime_error("Failed to find image file.");
-  }
+  if(!pixels) { throw std::runtime_error("Failed to find image file."); }
 
   _extent.width = static_cast<uint32_t>(width);
   _extent.height = static_cast<uint32_t>(height);
   _format = VK_FORMAT_R8G8B8A8_SRGB;
-  _usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-           VK_IMAGE_USAGE_SAMPLED_BIT;
+  _usage =
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
   _aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 
   // VkPhysicalDeviceLimits limits = _devicePtr->limits();
@@ -163,10 +151,9 @@ Image::Image(const char* path) {
   //   //stbir_resize_uint8_srgb()
   // }
 
-  size_t imageSize =
-      static_cast<size_t>(_extent.width * _extent.height * _channelAmount);
-  Buffer* stagingBuffer = new Buffer(
-      imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+  size_t imageSize = static_cast<size_t>(_extent.width * _extent.height * _channelAmount);
+  Buffer* stagingBuffer =
+    new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
   void* data;
   vmaMapMemory(allocatorSptr->handle, stagingBuffer->allocation(), &data);
   memcpy(data, pixels, imageSize);
@@ -176,22 +163,18 @@ Image::Image(const char* path) {
 
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo,
-                          &allocationCreateInfo, &handle, &_allocation,
-                          &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
+    &_allocation, &_info));
 
-  immediateSubmitSptr->submit([&stagingBuffer,
-                               this](CommandBuffer* commandBuffer) {
+  immediateSubmitSptr->submit([&stagingBuffer, this](CommandBuffer* commandBuffer) {
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     stagingBuffer->copyToImage(commandBuffer, this);
-    this->transitionLayout(commandBuffer,
-                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   });
   delete stagingBuffer;
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(
-      vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
 Image::~Image() {
@@ -200,24 +183,22 @@ Image::~Image() {
 
   vkDestroyImageView(deviceSptr->handle, view, nullptr);
 
-  if (_info.deviceMemory == VK_NULL_HANDLE) {
+  if(_info.deviceMemory == VK_NULL_HANDLE) {
     vkDestroyImage(deviceSptr->handle, handle, nullptr);
   } else {
     vmaDestroyImage(allocatorSptr->handle, handle, _allocation);
   }
 }
 
-void Image::transitionLayout(CommandBuffer* commandBuffer,
-                             VkImageLayout newLayout) {
-  VkImageMemoryBarrier2 imageBarrier{};
+void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout) {
+  VkImageMemoryBarrier2 imageBarrier {};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
   // imageBarrier.pNext = nullptr;
 
   imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
   imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
   imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-  imageBarrier.dstAccessMask =
-      VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+  imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
 
   imageBarrier.oldLayout = _layout;
   imageBarrier.newLayout = newLayout;
@@ -229,7 +210,7 @@ void Image::transitionLayout(CommandBuffer* commandBuffer,
   imageBarrier.image = handle;
   imageBarrier.subresourceRange = getSubresourceRange();
 
-  VkDependencyInfo depInfo{};
+  VkDependencyInfo depInfo {};
   depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
   // depInfo.pNext = nullptr;
   // depInfo.dependencyFlags = 0;
@@ -249,8 +230,7 @@ void Image::transitionLayout(CommandBuffer* commandBuffer,
 void Image::transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
-  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr =
-      getShared(_immediateSubmit);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
 
   Image* stagingImg = new Image(*this);
   VkImageLayout layout = _layout;
@@ -262,25 +242,22 @@ void Image::transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat) {
   _format = newFormat;
   VkImageCreateInfo createInfo = getCreateInfo();
   VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
-  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo,
-                          &allocationCreateInfo, &handle, &_allocation,
-                          &_info));
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
+    &_allocation, &_info));
 
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
-  VK_CHECK(
-      vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 
-  immediateSubmitSptr->submit(
-      [&layout, &stagingImg, this](CommandBuffer* commandBuffer) {
-        this->transitionLayout(commandBuffer, layout);
-        stagingImg->blitTo(commandBuffer, std::shared_ptr<Image>(this));
-      });
+  immediateSubmitSptr->submit([&layout, &stagingImg, this](CommandBuffer* commandBuffer) {
+    this->transitionLayout(commandBuffer, layout);
+    stagingImg->blitTo(commandBuffer, std::shared_ptr<Image>(this));
+  });
 
   delete stagingImg;
 }
 
 VkImageCreateInfo Image::getCreateInfo() const {
-  VkImageCreateInfo info{};
+  VkImageCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   // info.pNext = nullptr;
   // info.flags = 0;
@@ -301,7 +278,7 @@ VkImageCreateInfo Image::getCreateInfo() const {
 }
 
 VkImageViewCreateInfo Image::getViewCreateInfo() const {
-  VkImageViewCreateInfo info{};
+  VkImageViewCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   // info.pNext = nullptr;
   // info.flags = 0;
@@ -318,7 +295,7 @@ VkImageViewCreateInfo Image::getViewCreateInfo() const {
 }
 
 VmaAllocationCreateInfo Image::getAllocationInfo() const {
-  VmaAllocationCreateInfo info{};
+  VmaAllocationCreateInfo info {};
   // info.flags = 0;
   info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
   info.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -331,10 +308,9 @@ VmaAllocationCreateInfo Image::getAllocationInfo() const {
   return info;
 }
 
-VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(
-    const VkClearValue& clear,
-    bool doClear) const {
-  VkRenderingAttachmentInfo attachmentInfo{};
+VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(const VkClearValue& clear,
+  bool doClear) const {
+  VkRenderingAttachmentInfo attachmentInfo {};
   attachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
   // colorAttachment.pNext = nullptr;
 
@@ -345,23 +321,18 @@ VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(
   attachmentInfo.resolveImageView = VK_NULL_HANDLE;
   attachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-  attachmentInfo.loadOp =
-      doClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+  attachmentInfo.loadOp = doClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
   attachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-  if (doClear) {
-    attachmentInfo.clearValue = clear;
-  }
+  if(doClear) { attachmentInfo.clearValue = clear; }
 
   // delete clear;
 
   return attachmentInfo;
 }
 
-VkRenderingInfo Image::getRenderingInfo(const Image& color,
-                                        const Image& depth,
-                                        const VkClearValue& clear,
-                                        bool doClear) {
-  VkRenderingInfo renderInfo{};
+VkRenderingInfo Image::getRenderingInfo(const Image& color, const Image& depth,
+  const VkClearValue& clear, bool doClear) {
+  VkRenderingInfo renderInfo {};
   renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
   // renderInfo.pNext = nullptr;
   // renderInfo.flags = 0;
@@ -370,17 +341,17 @@ VkRenderingInfo Image::getRenderingInfo(const Image& color,
   renderInfo.layerCount = 1;
   // renderInfo.viewMask = 0;
   renderInfo.colorAttachmentCount = 1;
-  renderInfo.pColorAttachments = new VkRenderingAttachmentInfo(
-      color.getRenderingAttachmentInfo(clear, true));
-  renderInfo.pDepthAttachment = new VkRenderingAttachmentInfo(
-      depth.getRenderingAttachmentInfo(VkClearValue{1.0f, 0}, true));
+  renderInfo.pColorAttachments =
+    new VkRenderingAttachmentInfo(color.getRenderingAttachmentInfo(clear, true));
+  renderInfo.pDepthAttachment =
+    new VkRenderingAttachmentInfo(depth.getRenderingAttachmentInfo(VkClearValue {1.0f, 0}, true));
   // renderInfo.pStencilAttachment = nullptr;
 
   return renderInfo;
 }
 
 VkImageSubresourceRange Image::getSubresourceRange() const {
-  VkImageSubresourceRange range{};
+  VkImageSubresourceRange range {};
   range.aspectMask = _aspect;
   // range.baseMipLevel = 0;
   range.levelCount = 1;
@@ -391,7 +362,7 @@ VkImageSubresourceRange Image::getSubresourceRange() const {
 }
 
 VkImageSubresourceLayers Image::getSubresourceLayers() const {
-  VkImageSubresourceLayers layers{};
+  VkImageSubresourceLayers layers {};
   layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   // layers.mipLevel = 0;
   // layers.baseArrayLayer = 0;
@@ -400,9 +371,8 @@ VkImageSubresourceLayers Image::getSubresourceLayers() const {
   return layers;
 }
 
-void Image::blitTo(CommandBuffer* commandBuffer,
-                   std::shared_ptr<Image> image) const {
-  VkImageBlit2 blitRegion{};
+void Image::blitTo(CommandBuffer* commandBuffer, std::shared_ptr<Image> image) const {
+  VkImageBlit2 blitRegion {};
   blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
   // blitRegion.pNext = nullptr;
 
@@ -424,7 +394,7 @@ void Image::blitTo(CommandBuffer* commandBuffer,
   blitRegion.dstOffsets[1].y = image->_extent.height;
   blitRegion.dstOffsets[1].z = 1;
 
-  VkBlitImageInfo2 blitInfo{};
+  VkBlitImageInfo2 blitInfo {};
   blitInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
   // blitInfo.pNext = nullptr;
   blitInfo.srcImage = handle;
@@ -439,19 +409,18 @@ void Image::blitTo(CommandBuffer* commandBuffer,
 }
 
 void Image::copyTo(CommandBuffer* commandBuffer, Image* image) const {
-  VkImageCopy region{};
+  VkImageCopy region {};
   region.srcSubresource = getSubresourceLayers();
   // region.srcOffset = 0;
   region.dstSubresource = image->getSubresourceLayers();
   // region.dstOffset = 0;
   region.extent = {_extent.width, _extent.height, 1};
 
-  vkCmdCopyImage(commandBuffer->handle, handle, _layout, image->handle,
-                 image->_layout, 1, &region);
+  vkCmdCopyImage(commandBuffer->handle, handle, _layout, image->handle, image->_layout, 1, &region);
 }
 
 void Image::copyToBuffer(CommandBuffer* commandBuffer, Buffer* buffer) const {
-  VkBufferImageCopy region{};
+  VkBufferImageCopy region {};
   // region.bufferOffset;
   // region.bufferRowLength;
   // region.bufferImageHeight;
@@ -462,39 +431,35 @@ void Image::copyToBuffer(CommandBuffer* commandBuffer, Buffer* buffer) const {
   // region.imageOffset;
   region.imageExtent = {_extent.width, _extent.height, 1};
 
-  vkCmdCopyImageToBuffer(commandBuffer->handle, handle, _layout, buffer->handle,
-                         1, &region);
+  vkCmdCopyImageToBuffer(commandBuffer->handle, handle, _layout, buffer->handle, 1, &region);
 }
 
 void Image::save(const char* path) {
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
-  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr =
-      getShared(_immediateSubmit);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
 
   uint32_t imageSize = _extent.width * _extent.height * _channelAmount;
-  if (_format != VK_FORMAT_R8G8B8A8_SRGB)
-    imageSize *= 2;
+  if(_format != VK_FORMAT_R8G8B8A8_SRGB) imageSize *= 2;
   imageSize += 1;
-  Buffer* staging = new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                               VMA_MEMORY_USAGE_CPU_ONLY);
+  Buffer* staging =
+    new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 
   immediateSubmitSptr->submit([&staging, this](CommandBuffer* cmd) {
     VkImageLayout oldLayout = this->layout();
-    if (oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+    if(oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
       this->transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
     this->copyToBuffer(cmd, staging);
 
-    if (oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-      this->transitionLayout(cmd, oldLayout);
+    if(oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) this->transitionLayout(cmd, oldLayout);
   });
 
   void* data;
   vmaMapMemory(allocatorSptr->handle, staging->allocation(), &data);
   delete staging;
 
-  if (stbi_write_png(path, _extent.height, _extent.width, _channelAmount, data,
-                     _extent.width * _channelAmount) == 0) {
+  if(stbi_write_png(path, _extent.height, _extent.width, _channelAmount, data,
+       _extent.width * _channelAmount) == 0) {
     throw std::runtime_error("Failed to save image.");
   }
 }
@@ -502,6 +467,5 @@ void Image::save(const char* path) {
 void Image::clear(CommandBuffer* commandBuffer, Color color) {
   VkClearColorValue clearColor = {{color.r, color.g, color.b}};
   VkImageSubresourceRange clearRange = getSubresourceRange();
-  vkCmdClearColorImage(commandBuffer->handle, handle, _layout, &clearColor, 1,
-                       &clearRange);
+  vkCmdClearColorImage(commandBuffer->handle, handle, _layout, &clearColor, 1, &clearRange);
 }

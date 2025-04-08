@@ -3,7 +3,7 @@
 #include "Device.h"
 
 VkSamplerCreateInfo Sampler::getCreateInfo() const {
-  VkSamplerCreateInfo info{};
+  VkSamplerCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   //info.pNext;
   //info.flags;
@@ -15,7 +15,7 @@ VkSamplerCreateInfo Sampler::getCreateInfo() const {
   info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
   info.mipLodBias = 0.0f;
   info.anisotropyEnable = VK_FALSE;
-  info.maxAnisotropy = 1.0f;// _devicePtr->physicalDeviceLimits().maxSamplerAnisotropy;
+  info.maxAnisotropy = 1.0f; // _devicePtr->physicalDeviceLimits().maxSamplerAnisotropy;
   info.compareEnable = VK_FALSE;
   info.compareOp = VK_COMPARE_OP_ALWAYS;
   info.minLod = 0.0f;
@@ -33,6 +33,4 @@ Sampler::Sampler(std::shared_ptr<Device> device) {
   VK_CHECK(vkCreateSampler(device->handle, &createInfo, nullptr, &handle));
 }
 
-Sampler::~Sampler() {
-  vkDestroySampler(_device->handle, handle, nullptr);
-}
+Sampler::~Sampler() { vkDestroySampler(_device->handle, handle, nullptr); }

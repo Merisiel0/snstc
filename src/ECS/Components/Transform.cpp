@@ -8,7 +8,7 @@ mat4 Transform::modelMatrix() const {
   vec3 scl = scale;
 
   ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
-  while (data->parent && data->parent->hasComponent<Transform>()) {
+  while(data->parent && data->parent->hasComponent<Transform>()) {
     Transform* parentTransform = data->parent->getComponent<Transform>();
     pos += parentTransform->position;
     rot = parentTransform->rotation * rot;
@@ -29,7 +29,7 @@ vec3 Transform::truePosition() const {
   vec3 pos = position;
 
   ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
-  while (data->parent && data->parent->hasComponent<Transform>()) {
+  while(data->parent && data->parent->hasComponent<Transform>()) {
     pos += data->parent->getComponent<Transform>()->truePosition();
     data = data->parent->getComponent<ECS::ObjectData>();
   }
@@ -38,12 +38,11 @@ vec3 Transform::truePosition() const {
 }
 
 void Transform::getDirections(vec3& right, vec3& up, vec3& forward, Space space) const {
-  if (space == WORLD) {
-    right = { 1,0,0 };
-    up = { 0,1,0 };
-    forward = { 0,0,1 };
-  }
-  else {
+  if(space == WORLD) {
+    right = {1, 0, 0};
+    up = {0, 1, 0};
+    forward = {0, 0, 1};
+  } else {
     right = this->right();
     up = this->up();
     forward = this->forward();
@@ -58,7 +57,7 @@ void Transform::translate(vec3 movement, Space space) {
 }
 
 void Transform::translate(float x, float y, float z, Space space) {
-  this->translate({ x,y,z }, space);
+  this->translate({x, y, z}, space);
 }
 
 void Transform::rotate(vec3 angles, Space space) {
@@ -70,33 +69,25 @@ void Transform::rotate(vec3 angles, Space space) {
   rotation = glm::rotate(rotation, angles.z, forward);
 }
 
-void Transform::rotate(float x, float y, float z, Space space) {
-  this->rotate({ x, y, z }, space);
-}
+void Transform::rotate(float x, float y, float z, Space space) { this->rotate({x, y, z}, space); }
 
 vec3 Transform::right() const {
   mat4 mat = modelMatrix();
-  return { mat[0].x, mat[0].y, mat[0].z };
+  return {mat[0].x, mat[0].y, mat[0].z};
 }
 
-vec3 Transform::left() const {
-  return right() * -1.0f;
-}
+vec3 Transform::left() const { return right() * -1.0f; }
 
 vec3 Transform::up() const {
   mat4 mat = modelMatrix();
-  return { mat[1].x, mat[1].y, mat[1].z };
+  return {mat[1].x, mat[1].y, mat[1].z};
 }
 
-vec3 Transform::down() const {
-  return up() * -1.0f;
-}
+vec3 Transform::down() const { return up() * -1.0f; }
 
-vec3 Transform::forward() const {
-  return backward() * -1.0f;
-}
+vec3 Transform::forward() const { return backward() * -1.0f; }
 
 vec3 Transform::backward() const {
   mat4 mat = modelMatrix();
-  return { mat[2].x, mat[2].y, mat[2].z };
+  return {mat[2].x, mat[2].y, mat[2].z};
 }

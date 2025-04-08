@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BaseComponent.h"
 #include "../../utils/Utils.h"
+#include "BaseComponent.h"
 
 struct LightBuffer {
   Color ambiantColor;
@@ -14,12 +14,12 @@ struct AmbiantLight : ECS::BaseComponent {
   // r,g,b make the color, a is the strength of the light
   Color color;
 
-  AmbiantLight(Color color) : color{ color } {}
+  AmbiantLight(Color color) : color {color} {}
 };
 
 struct Light : ECS::BaseComponent {
   // r,g,b make the color, a is the strength of the light
   Color color;
 
-  Light(Color color) : color{ color } {}
+  Light(Color color) : color {color} {}
 };

@@ -3,10 +3,8 @@
 #include "DebugUtilsMessenger.h"
 
 VkApplicationInfo Instance::getApplicationInfo(const char* applicationName,
-                                               uint32_t applicationVersion,
-                                               const char* engineName,
-                                               uint32_t engineVersion) const {
-  VkApplicationInfo info{};
+  uint32_t applicationVersion, const char* engineName, uint32_t engineVersion) const {
+  VkApplicationInfo info {};
   info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   // info.pNext = nullptr;
   info.pApplicationName = applicationName;
@@ -18,10 +16,9 @@ VkApplicationInfo Instance::getApplicationInfo(const char* applicationName,
   return info;
 }
 
-VkInstanceCreateInfo Instance::getCreateInfo(
-    VkApplicationInfo* appInfo, std::vector<const char*>& requiredLayers,
-    std::vector<const char*>& requiredExtensions) const {
-  VkInstanceCreateInfo info{};
+VkInstanceCreateInfo Instance::getCreateInfo(VkApplicationInfo* appInfo,
+  std::vector<const char*>& requiredLayers, std::vector<const char*>& requiredExtensions) const {
+  VkInstanceCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   // info.flags = 0;
   info.pApplicationInfo = appInfo;
@@ -33,60 +30,54 @@ VkInstanceCreateInfo Instance::getCreateInfo(
   return info;
 }
 
-Instance::Instance(const char* applicationName, uint32_t applicationVersion,
-                   const char* engineName, uint32_t engineVersion,
-                   std::vector<const char*> requiredLayers,
-                   std::vector<const char*> requiredExtensions) {
+Instance::Instance(const char* applicationName, uint32_t applicationVersion, const char* engineName,
+  uint32_t engineVersion, std::vector<const char*> requiredLayers,
+  std::vector<const char*> requiredExtensions) {
   uint32_t layerPropertyCount;
   VK_CHECK(vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr));
   std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
-  VK_CHECK(vkEnumerateInstanceLayerProperties(&layerPropertyCount,
-                                              layerProperties.data()));
+  VK_CHECK(vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data()));
 
-  size_t requiredLayersFound{0};
-  for (const auto& layerProperty : layerProperties) {
-    for (const char*& requiredLayer : requiredLayers) {
-      if (strcmp(layerProperty.layerName, requiredLayer) == 0) {
+  size_t requiredLayersFound {0};
+  for(const auto& layerProperty : layerProperties) {
+    for(const char*& requiredLayer : requiredLayers) {
+      if(strcmp(layerProperty.layerName, requiredLayer) == 0) {
         requiredLayersFound++;
         break;
       }
     }
   }
-  if (requiredLayersFound < requiredLayers.size()) {
+  if(requiredLayersFound < requiredLayers.size()) {
     throw std::runtime_error("Some requested instance layers are missing.");
   }
 
   uint32_t extensionPropertyCount;
-  VK_CHECK(vkEnumerateInstanceExtensionProperties(
-      nullptr, &extensionPropertyCount, nullptr));
-  std::vector<VkExtensionProperties> extensionProperties(
-      extensionPropertyCount);
-  VK_CHECK(vkEnumerateInstanceExtensionProperties(
-      nullptr, &extensionPropertyCount, extensionProperties.data()));
+  VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertyCount, nullptr));
+  std::vector<VkExtensionProperties> extensionProperties(extensionPropertyCount);
+  VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertyCount,
+    extensionProperties.data()));
 
-  size_t requiredExtensionsFound{0};
-  for (const auto& extensionProperty : extensionProperties) {
-    for (const char*& requiredExtension : requiredExtensions) {
-      if (strcmp(extensionProperty.extensionName, requiredExtension) == 0) {
+  size_t requiredExtensionsFound {0};
+  for(const auto& extensionProperty : extensionProperties) {
+    for(const char*& requiredExtension : requiredExtensions) {
+      if(strcmp(extensionProperty.extensionName, requiredExtension) == 0) {
         requiredExtensionsFound++;
         break;
       }
     }
   }
-  if (requiredExtensionsFound < requiredExtensions.size()) {
+  if(requiredExtensionsFound < requiredExtensions.size()) {
     throw std::runtime_error("Some requested instance extensions are missing.");
   }
 
-  VkApplicationInfo appInfo = getApplicationInfo(
-      applicationName, applicationVersion, engineName, engineVersion);
-  VkInstanceCreateInfo createInfo =
-      getCreateInfo(&appInfo, requiredLayers, requiredExtensions);
+  VkApplicationInfo appInfo =
+    getApplicationInfo(applicationName, applicationVersion, engineName, engineVersion);
+  VkInstanceCreateInfo createInfo = getCreateInfo(&appInfo, requiredLayers, requiredExtensions);
 
 #ifdef VKDEBUG
-  VkDebugUtilsMessengerCreateInfoEXT debugInfo =
-      DebugUtilsMessenger::getCreateInfo();
+  VkDebugUtilsMessengerCreateInfoEXT debugInfo = DebugUtilsMessenger::getCreateInfo();
   createInfo.pNext = &debugInfo;
-#endif  // VKDEBUG
+#endif // VKDEBUG
 
   VK_CHECK(vkCreateInstance(&createInfo, nullptr, &handle));
 }

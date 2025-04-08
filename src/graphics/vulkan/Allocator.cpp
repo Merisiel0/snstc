@@ -2,8 +2,9 @@
 
 #include "VulkanUtils.h"
 
-VmaAllocatorCreateInfo Allocator::getCreateInfo(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device) {
-  VmaAllocatorCreateInfo info{};
+VmaAllocatorCreateInfo Allocator::getCreateInfo(VkInstance instance,
+  VkPhysicalDevice physicalDevice, VkDevice device) {
+  VmaAllocatorCreateInfo info {};
   info.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
   info.physicalDevice = physicalDevice;
   info.device = device;
@@ -19,11 +20,11 @@ VmaAllocatorCreateInfo Allocator::getCreateInfo(VkInstance instance, VkPhysicalD
   return info;
 }
 
-Allocator::Allocator(std::shared_ptr<Instance> instance, std::shared_ptr<PhysicalDevice> physicalDevice, std::shared_ptr<Device> device) {
-  VmaAllocatorCreateInfo createInfo = getCreateInfo(instance->handle, physicalDevice->handle, device->handle);
+Allocator::Allocator(std::shared_ptr<Instance> instance,
+  std::shared_ptr<PhysicalDevice> physicalDevice, std::shared_ptr<Device> device) {
+  VmaAllocatorCreateInfo createInfo =
+    getCreateInfo(instance->handle, physicalDevice->handle, device->handle);
   VK_CHECK(vmaCreateAllocator(&createInfo, &handle));
 }
 
-Allocator::~Allocator() {
-  vmaDestroyAllocator(handle);
-}
+Allocator::~Allocator() { vmaDestroyAllocator(handle); }

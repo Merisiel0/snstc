@@ -2,6 +2,7 @@
 
 #include "BaseComponent.h"
 #include "utils/Utils.h"
+
 #include <array>
 #include <variant>
 
@@ -39,9 +40,9 @@ static const SDL_KeyboardID nullKeyboard = std::numeric_limits<SDL_KeyboardID>::
 static const SDL_MouseID nullMouse = std::numeric_limits<SDL_MouseID>::max();
 
 struct PlayerController : ECS::BaseComponent {
-  SDL_KeyboardID keyboard{ nullKeyboard };
-  SDL_MouseID mouse{ nullMouse };
-  SDL_Gamepad* gamepad{ nullptr };
+  SDL_KeyboardID keyboard {nullKeyboard};
+  SDL_MouseID mouse {nullMouse};
+  SDL_Gamepad* gamepad {nullptr};
 
   float movementSpeed;
   float rotationSpeed;

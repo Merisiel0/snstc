@@ -5,12 +5,12 @@
 class Device;
 
 class Semaphore {
-  private:
+private:
   std::shared_ptr<Device> _device;
 
   VkSemaphoreCreateInfo getCreateInfo() const;
 
-  public:
+public:
   VkSemaphore handle;
 
   Semaphore(std::shared_ptr<Device> device);

@@ -3,7 +3,7 @@
 #include "Device.h"
 
 VkCommandPoolCreateInfo CommandPool::getCreateInfo(VkDevice device, uint32_t queueFamily) const {
-  VkCommandPoolCreateInfo info{};
+  VkCommandPoolCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   //info.pNext = nullptr;
   info.queueFamilyIndex = queueFamily;
@@ -19,6 +19,4 @@ CommandPool::CommandPool(std::shared_ptr<Device> device, uint32_t queueFamilyInd
   VK_CHECK(vkCreateCommandPool(device->handle, &createInfo, nullptr, &handle));
 }
 
-CommandPool::~CommandPool() {
-  vkDestroyCommandPool(_device->handle, handle, nullptr);
-}
+CommandPool::~CommandPool() { vkDestroyCommandPool(_device->handle, handle, nullptr); }

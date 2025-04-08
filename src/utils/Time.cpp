@@ -16,6 +16,6 @@ void Time::init() {
 void Time::update() {
   last = now;
   now = SDL_GetTicks();
-  deltaTime = (float)(now - last);
+  deltaTime = (float) (now - last);
   deltaTime /= 1000;
 }

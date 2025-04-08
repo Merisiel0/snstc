@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VulkanUtils.h"
+
 #include <functional>
 
 class Device;
@@ -14,7 +15,7 @@ private:
   CommandPool* _commandPool;
   CommandBuffer* _commandBuffer;
   Fence* _fence;
-  Queue* _queue;
+  std::shared_ptr<Queue> _queue;
 
 public:
   ImmediateSubmit(std::shared_ptr<Device> device);

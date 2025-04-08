@@ -2,6 +2,7 @@
 
 #include "SDL3/SDL.h"
 #include "utils/Utils.h"
+
 #include <functional>
 #include <map>
 
@@ -26,7 +27,7 @@ typedef void (*ControllerDeviceEventCallback)(SDL_GamepadDeviceEvent);
 template<typename T, typename U>
 class Event {
 private:
-  std::vector<T> _callbacks{};
+  std::vector<T> _callbacks {};
 
 public:
   Event() {}
@@ -39,13 +40,11 @@ public:
 
   void operator-=(T callback) {
     auto it = std::find(_callbacks.begin(), _callbacks.end(), callback);
-    if (it != _callbacks.end()) {
-      _callbacks.erase(it);
-    }
+    if(it != _callbacks.end()) { _callbacks.erase(it); }
   }
 
   void operator()(U e) {
-    for (const auto& callback : _callbacks) {
+    for(const auto& callback : _callbacks) {
       callback(e);
     }
   }
@@ -56,26 +55,26 @@ public:
 class EventHandler {
 public:
   /* application events */
-  static inline Event<QuitEventCallback, SDL_QuitEvent> quit{};
+  static inline Event<QuitEventCallback, SDL_QuitEvent> quit {};
 
   /* keyboard events */
-  static inline Event<KeyboardDeviceEventCallback, SDL_KeyboardDeviceEvent> keyboardAdded{};
-  static inline Event<KeyboardDeviceEventCallback, SDL_KeyboardDeviceEvent> keyboardRemoved{};
-  static inline Event<KeyboardEventCallback, SDL_KeyboardEvent> keyDown{};
-  static inline Event<KeyboardEventCallback, SDL_KeyboardEvent> keyUp{};
+  static inline Event<KeyboardDeviceEventCallback, SDL_KeyboardDeviceEvent> keyboardAdded {};
+  static inline Event<KeyboardDeviceEventCallback, SDL_KeyboardDeviceEvent> keyboardRemoved {};
+  static inline Event<KeyboardEventCallback, SDL_KeyboardEvent> keyDown {};
+  static inline Event<KeyboardEventCallback, SDL_KeyboardEvent> keyUp {};
 
-  static inline Event<MouseDeviceEventCallback, SDL_MouseDeviceEvent> mouseAdded{};
-  static inline Event<MouseDeviceEventCallback, SDL_MouseDeviceEvent> mouseRemoved{};
+  static inline Event<MouseDeviceEventCallback, SDL_MouseDeviceEvent> mouseAdded {};
+  static inline Event<MouseDeviceEventCallback, SDL_MouseDeviceEvent> mouseRemoved {};
   //static inline Event<MouseMotionEventCallback, SDL_MouseMotionEvent> mouseMotion{};
   //static inline Event<MouseButtonEventCallback, SDL_MouseButtonEvent> mouseButtonDown{};
   //static inline Event<MouseButtonEventCallback, SDL_MouseButtonEvent> mouseButtonUp{};
   //static inline Event<MouseWheelEventCallback, SDL_MouseWheelEvent> mouseWheel{};
 
-  static inline Event<ControllerDeviceEventCallback, SDL_GamepadDeviceEvent> gamepadAdded{};
-  static inline Event<ControllerDeviceEventCallback, SDL_GamepadDeviceEvent> gamepadRemoved{};
+  static inline Event<ControllerDeviceEventCallback, SDL_GamepadDeviceEvent> gamepadAdded {};
+  static inline Event<ControllerDeviceEventCallback, SDL_GamepadDeviceEvent> gamepadRemoved {};
   //static inline Event<ControllerAxisEventCallback, SDL_ControllerAxisEvent> axisMotion{};
   //static inline Event<ControllerButtonEventCallback, SDL_ControllerButtonEvent> buttonDown{};
   //static inline Event<ControllerButtonEventCallback, SDL_ControllerButtonEvent> buttonUp{};
 
   static void processEvents();
-  };
+};

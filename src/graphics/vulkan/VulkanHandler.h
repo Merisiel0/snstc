@@ -2,6 +2,7 @@
 #pragma once
 
 #include "VulkanUtils.h"
+
 #include <vector>
 
 class Instance;
@@ -21,14 +22,11 @@ class Sampler;
 
 class World;
 
-enum WindowScreenMode {
-  WINDOWED = 0,
-  FULLSCREEN = SDL_WINDOW_FULLSCREEN
-};
+enum WindowScreenMode { WINDOWED = 0, FULLSCREEN = SDL_WINDOW_FULLSCREEN };
 
 // Opens a window and renders worlds on it.
 class VulkanHandler {
-  private:
+private:
   std::shared_ptr<Instance> _instance;
 
 #ifdef VKDEBUG
@@ -41,10 +39,10 @@ class VulkanHandler {
 
   std::shared_ptr<ImmediateSubmit> _immediateSubmit;
 
-  public:
+public:
   std::shared_ptr<Window> _window;
-  
-  private:
+
+private:
   std::shared_ptr<Swapchain> _swapchain;
   std::shared_ptr<Image> _drawImage;
   std::shared_ptr<Image> _depthImage;
@@ -63,8 +61,9 @@ class VulkanHandler {
   void beginDrawing(World& world);
   void endDrawing();
 
-  public:
-  VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName, int engineVersion);
+public:
+  VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName,
+    int engineVersion);
   ~VulkanHandler();
 
   void render(World& world);

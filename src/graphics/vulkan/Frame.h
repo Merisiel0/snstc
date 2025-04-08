@@ -12,7 +12,7 @@ class DescriptorSetLayout;
 class DescriptorSet;
 
 class Frame {
- public:
+public:
   CommandPool* commandPool;
   CommandBuffer* commandBuffer;
 
@@ -24,7 +24,6 @@ class Frame {
   DescriptorSet* objDescSet;
 
   Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
-        const DescriptorSetLayout& camDescSetLayout,
-        const DescriptorSetLayout& objDescSetLayout);
+    const DescriptorSetLayout& camDescSetLayout, const DescriptorSetLayout& objDescSetLayout);
   ~Frame();
 };

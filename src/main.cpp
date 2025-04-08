@@ -1,6 +1,4 @@
 #define SDL_MAIN_HANDLED
-#include <filesystem>
-
 #include "ECS/ECS.h"
 #include "SDL3/SDL_main.h"
 #include "events/EventHandler.h"
@@ -11,15 +9,15 @@
 #include "resources/ResourceManager.h"
 #include "utils/Utils.h"
 
+#include <filesystem>
+
 std::shared_ptr<VulkanHandler> vulkanHandler;
 bool quit = false;
 
 static void quitFunctor(SDL_QuitEvent e) { quit = true; }
 
 static void quitFunctor(SDL_KeyboardEvent e) {
-  if (e.key == SDLK_ESCAPE) {
-    quit = true;
-  }
+  if(e.key == SDLK_ESCAPE) { quit = true; }
 }
 
 /**
@@ -39,9 +37,8 @@ int main() {
   EventHandler::keyDown += quitFunctor;
 
   try {
-    vulkanHandler = std::make_shared<VulkanHandler>("SphereNSTC", 0,
-                                                    "SphereNSTC Engine", 0);
-  } catch (std::runtime_error e) {
+    vulkanHandler = std::make_shared<VulkanHandler>("SphereNSTC", 0, "SphereNSTC Engine", 0);
+  } catch(std::runtime_error e) {
     std::cout << "Failed to initialize Vulkan." << std::endl << e.what();
   }
 

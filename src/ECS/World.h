@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
+
 #include <vector>
 
 struct Camera;
@@ -9,22 +10,22 @@ class CommandBuffer;
 
 class World : public GameObject {
 private:
-	using GameObject::addChild;
-	friend class GameObject;
+  using GameObject::addChild;
+  friend class GameObject;
 
-	entt::registry _registry;
+  entt::registry _registry;
 
-	Camera* _camera;
+  Camera* _camera;
 
 public:
-	Buffer* camBuffer;
-	Buffer* lightsBuffer;
+  Buffer* camBuffer;
+  Buffer* lightsBuffer;
 
-	World();
+  World();
 
-	~World();
+  ~World();
 
-	void updateCamera(CommandBuffer* commandBuffer);
+  void updateCamera(CommandBuffer* commandBuffer);
 
-	Camera* camera() const { return _camera; }
+  Camera* camera() const { return _camera; }
 };

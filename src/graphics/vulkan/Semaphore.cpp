@@ -3,7 +3,7 @@
 #include "Device.h"
 
 VkSemaphoreCreateInfo Semaphore::getCreateInfo() const {
-  VkSemaphoreCreateInfo info{};
+  VkSemaphoreCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
   //info.pNext = nullptr;
   //info.flags = 0;
@@ -18,12 +18,10 @@ Semaphore::Semaphore(std::shared_ptr<Device> device) {
   VK_CHECK(vkCreateSemaphore(device->handle, &createInfo, nullptr, &handle));
 }
 
-Semaphore::~Semaphore() {
-  vkDestroySemaphore(_device->handle, handle, nullptr);
-}
+Semaphore::~Semaphore() { vkDestroySemaphore(_device->handle, handle, nullptr); }
 
 VkSemaphoreSubmitInfo Semaphore::getSubmitInfo(VkPipelineStageFlags2 stageMask) const {
-  VkSemaphoreSubmitInfo info{};
+  VkSemaphoreSubmitInfo info {};
   info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
   //info.pNext = nullptr;
   info.semaphore = handle;

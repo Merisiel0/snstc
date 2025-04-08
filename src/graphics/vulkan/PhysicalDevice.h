@@ -16,8 +16,8 @@ struct PhysicalDeviceQueueFamilyIndexes {
   std::vector<uint32_t> getIndexes() {
     std::vector<uint32_t> indexes;
 
-    if (graphicsFamilyIndex.has_value()) indexes.push_back(graphicsFamilyIndex.value());
-    if (computeFamilyIndex.has_value()) indexes.push_back(computeFamilyIndex.value());
+    if(graphicsFamilyIndex.has_value()) indexes.push_back(graphicsFamilyIndex.value());
+    if(computeFamilyIndex.has_value()) indexes.push_back(computeFamilyIndex.value());
 
     return indexes;
   }
@@ -32,9 +32,9 @@ public:
   VkPhysicalDevice handle;
   PhysicalDeviceQueueFamilyIndexes queueFamilies;
 
-  VkPhysicalDeviceProperties properties{};
-  VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties{};
-  VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
+  VkPhysicalDeviceProperties properties {};
+  VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties {};
+  VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties {};
 
   PhysicalDevice(std::shared_ptr<Instance> instance, std::vector<const char*> requiredExtensions);
   ~PhysicalDevice() {};

@@ -1,8 +1,8 @@
 #include "PlayerController.h"
 
-#include "inputs/InputHandler.h"
-#include "Transform.h"
 #include "ECS/GameObject.h"
+#include "Transform.h"
+#include "inputs/InputHandler.h"
 #include "utils/Time.h"
 
 PlayerController::PlayerController(float movementSpeed, float rotationSpeed) {
@@ -12,6 +12,4 @@ PlayerController::PlayerController(float movementSpeed, float rotationSpeed) {
   InputHandler::registerPlayerController(this);
 }
 
-PlayerController::~PlayerController() {
-  InputHandler::forgetPlayerController(this);
-}
+PlayerController::~PlayerController() { InputHandler::forgetPlayerController(this); }

@@ -29,13 +29,13 @@ bool InputHandler::getButton(SDL_Gamepad* gamepad, SDL_GamepadButton button) {
  * @return a value in one of the two ranges, depending on the axis.
  */
 float InputHandler::getAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis) {
-  float ret = SDL_GetGamepadAxis(gamepad, axis) / (float)SDL_JOYSTICK_AXIS_MAX;
-  if (axis | SDL_GAMEPAD_AXIS_LEFT_TRIGGER | SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
+  float ret = SDL_GetGamepadAxis(gamepad, axis) / (float) SDL_JOYSTICK_AXIS_MAX;
+  if(axis | SDL_GAMEPAD_AXIS_LEFT_TRIGGER | SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
     ret = glm::clamp(ret, 0.f, 1.f);
   } else {
     ret = glm::clamp(ret, -1.f, 1.f);
   }
-  if (-JOYSTICK_DEADZONE < ret && ret < JOYSTICK_DEADZONE) return 0;
+  if(-JOYSTICK_DEADZONE < ret && ret < JOYSTICK_DEADZONE) return 0;
   return ret;
 }
 
@@ -49,13 +49,11 @@ float InputHandler::getAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis) {
 vec2 InputHandler::getJoystick(SDL_Gamepad* gamepad, Joystick joystick) {
   vec2 axes = {0, 0};
 
-  switch (joystick) {
+  switch(joystick) {
     case LEFT:
-      axes = {getAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTX),
-              getAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTY)};
+      axes = {getAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTX), getAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTY)};
     case RIGHT:
-      axes = {getAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTX),
-              getAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTY)};
+      axes = {getAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTX), getAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTY)};
   }
 
   return normalize(axes);
@@ -68,29 +66,23 @@ vec2 InputHandler::getJoystick(SDL_Gamepad* gamepad, Joystick joystick) {
  */
 void InputHandler::init() {
   // setup keyboard events
-  EventHandler::keyboardAdded +=
-      [](SDL_KeyboardDeviceEvent e) { registerKeyboard(e.which); };
-  EventHandler::keyboardRemoved +=
-      [](SDL_KeyboardDeviceEvent e) { forgetKeyboard(e.which); };
+  EventHandler::keyboardAdded += [](SDL_KeyboardDeviceEvent e) { registerKeyboard(e.which); };
+  EventHandler::keyboardRemoved += [](SDL_KeyboardDeviceEvent e) { forgetKeyboard(e.which); };
 
   // setup mouse events
-  EventHandler::mouseAdded +=
-      [](SDL_MouseDeviceEvent e) { registerMouse(e.which); };
-  EventHandler::mouseRemoved +=
-      [](SDL_MouseDeviceEvent e) { forgetMouse(e.which); };
+  EventHandler::mouseAdded += [](SDL_MouseDeviceEvent e) { registerMouse(e.which); };
+  EventHandler::mouseRemoved += [](SDL_MouseDeviceEvent e) { forgetMouse(e.which); };
 
   // setup gamepad events
-  EventHandler::gamepadAdded +=
-      [](SDL_GamepadDeviceEvent e) { registerGamepad(e.which); };
-  EventHandler::gamepadRemoved +=
-      [](SDL_GamepadDeviceEvent e) { forgetGamepad(e.which); };
+  EventHandler::gamepadAdded += [](SDL_GamepadDeviceEvent e) { registerGamepad(e.which); };
+  EventHandler::gamepadRemoved += [](SDL_GamepadDeviceEvent e) { forgetGamepad(e.which); };
 
   // setup keyboards
   int keyboardCount = 0;
   SDL_KeyboardID* keyboards = SDL_GetKeyboards(&keyboardCount);
   SDL_CHECK(keyboards);
 
-  for (int i = 0; i < keyboardCount; i++) {
+  for(int i = 0; i < keyboardCount; i++) {
     registerKeyboard(keyboards[i]);
   }
 
@@ -101,7 +93,7 @@ void InputHandler::init() {
   SDL_MouseID* mice = SDL_GetMice(&miceCount);
   SDL_CHECK(mice);
 
-  for (int i = 0; i < miceCount; i++) {
+  for(int i = 0; i < miceCount; i++) {
     registerMouse(mice[i]);
   }
 
@@ -112,7 +104,7 @@ void InputHandler::init() {
   SDL_JoystickID* gamepads = SDL_GetGamepads(&gamepadCount);
   SDL_CHECK(gamepads);
 
-  for (int i = 0; i < gamepadCount; i++) {
+  for(int i = 0; i < gamepadCount; i++) {
     registerGamepad(gamepads[i]);
   }
 
@@ -132,22 +124,20 @@ void InputHandler::init() {
  * @param controller a controller.
  */
 void InputHandler::registerPlayerController(PlayerController* controller) {
-  auto it = std::find(_playerControllers.begin(), _playerControllers.end(),
-                      controller);
-  if (it != _playerControllers.end()) return;
+  auto it = std::find(_playerControllers.begin(), _playerControllers.end(), controller);
+  if(it != _playerControllers.end()) return;
 
-  if (_unusedKeyboards.size() > 0) {
+  if(_unusedKeyboards.size() > 0) {
     controller->keyboard = _unusedKeyboards.front();
     _unusedKeyboards.pop_front();
     _playerControllers.push_back(controller);
   }
-  if (controller->usesKeyboard() && _unusedMice.size() > 0) {
+  if(controller->usesKeyboard() && _unusedMice.size() > 0) {
     controller->mouse = _unusedMice.front();
     _unusedMice.pop_front();
     return;
   }
-  if (_unusedGamepads.size() > 0 && !controller->usesKeyboard() &&
-      !controller->usesMouse()) {
+  if(_unusedGamepads.size() > 0 && !controller->usesKeyboard() && !controller->usesMouse()) {
     controller->gamepad = _unusedGamepads.front();
     _unusedGamepads.pop_front();
     _playerControllers.push_back(controller);
@@ -167,24 +157,23 @@ void InputHandler::registerPlayerController(PlayerController* controller) {
  * @param controller a controller.
  */
 void InputHandler::forgetPlayerController(PlayerController* controller) {
-  auto it = std::find(_playerControllers.begin(), _playerControllers.end(),
-                      controller);
-  if (it == _playerControllers.end()) return;
+  auto it = std::find(_playerControllers.begin(), _playerControllers.end(), controller);
+  if(it == _playerControllers.end()) return;
 
   // retrieve keyboard
-  if ((*it)->usesKeyboard()) {
+  if((*it)->usesKeyboard()) {
     _unusedKeyboards.push_back((*it)->keyboard);
     (*it)->keyboard = nullKeyboard;
   }
 
   // retrieve mouse
-  if ((*it)->usesMouse()) {
+  if((*it)->usesMouse()) {
     _unusedMice.push_back((*it)->mouse);
     (*it)->mouse = nullMouse;
   }
 
   // retrieve gamepad
-  if ((*it)->usesGamepad()) {
+  if((*it)->usesGamepad()) {
     _unusedGamepads.push_back((*it)->gamepad);
     (*it)->gamepad = nullptr;
   }
@@ -192,7 +181,7 @@ void InputHandler::forgetPlayerController(PlayerController* controller) {
   _playerControllers.erase(it);
 
   // reassigns keyboard, mouse and gamepad if possible
-  if (_unusablePlayerControllers.size() == 0) return;
+  if(_unusablePlayerControllers.size() == 0) return;
 
   PlayerController* playerController = _unusablePlayerControllers.back();
   _unusablePlayerControllers.pop_back();
@@ -209,10 +198,8 @@ void InputHandler::forgetPlayerController(PlayerController* controller) {
  */
 void InputHandler::registerKeyboard(SDL_KeyboardID id) {
   auto it = std::find_if(_playerControllers.begin(), _playerControllers.end(),
-                         [](PlayerController* pc) {
-                           return !pc->usesKeyboard() && !pc->usesGamepad();
-                         });
-  if (it != _playerControllers.end()) {
+    [](PlayerController* pc) { return !pc->usesKeyboard() && !pc->usesGamepad(); });
+  if(it != _playerControllers.end()) {
     (*it)->keyboard = id;
   } else {
     _unusedKeyboards.push_back(id);
@@ -226,18 +213,17 @@ void InputHandler::registerKeyboard(SDL_KeyboardID id) {
  */
 void InputHandler::forgetKeyboard(SDL_KeyboardID id) {
   auto it0 = std::find(_unusedKeyboards.begin(), _unusedKeyboards.end(), id);
-  if (it0 != _unusedKeyboards.end()) {
+  if(it0 != _unusedKeyboards.end()) {
     _unusedKeyboards.erase(it0);
     return;
   }
 
-  auto it1 =
-      std::find_if(_playerControllers.begin(), _playerControllers.end(),
-                   [&id](PlayerController* pc) { return pc->keyboard == id; });
-  if (it1 != _playerControllers.end()) {
+  auto it1 = std::find_if(_playerControllers.begin(), _playerControllers.end(),
+    [&id](PlayerController* pc) { return pc->keyboard == id; });
+  if(it1 != _playerControllers.end()) {
     (*it1)->keyboard = nullKeyboard;
 
-    if (!(*it1)->hasInputDevice()) {
+    if(!(*it1)->hasInputDevice()) {
       _unusablePlayerControllers.push_back((*it1));
       _playerControllers.erase(it1);
     }
@@ -253,10 +239,8 @@ void InputHandler::forgetKeyboard(SDL_KeyboardID id) {
  */
 void InputHandler::registerMouse(SDL_MouseID id) {
   auto it = std::find_if(_playerControllers.begin(), _playerControllers.end(),
-                         [](PlayerController* pc) {
-                           return !pc->usesMouse() && !pc->usesGamepad();
-                         });
-  if (it != _playerControllers.end()) {
+    [](PlayerController* pc) { return !pc->usesMouse() && !pc->usesGamepad(); });
+  if(it != _playerControllers.end()) {
     (*it)->mouse = id;
   } else {
     _unusedMice.push_back(id);
@@ -270,18 +254,17 @@ void InputHandler::registerMouse(SDL_MouseID id) {
  */
 void InputHandler::forgetMouse(SDL_MouseID id) {
   auto it0 = std::find(_unusedMice.begin(), _unusedMice.end(), id);
-  if (it0 != _unusedMice.end()) {
+  if(it0 != _unusedMice.end()) {
     _unusedMice.erase(it0);
     return;
   }
 
-  auto it1 =
-      std::find_if(_playerControllers.begin(), _playerControllers.end(),
-                   [&id](PlayerController* pc) { return pc->mouse == id; });
-  if (it1 != _playerControllers.end()) {
+  auto it1 = std::find_if(_playerControllers.begin(), _playerControllers.end(),
+    [&id](PlayerController* pc) { return pc->mouse == id; });
+  if(it1 != _playerControllers.end()) {
     (*it1)->mouse = nullMouse;
 
-    if (!(*it1)->hasInputDevice()) {
+    if(!(*it1)->hasInputDevice()) {
       _unusablePlayerControllers.push_back((*it1));
       _playerControllers.erase(it1);
     }
@@ -296,14 +279,13 @@ void InputHandler::forgetMouse(SDL_MouseID id) {
  * @param id a gamepad id.
  */
 void InputHandler::registerGamepad(SDL_JoystickID id) {
-  auto it =
-      std::find_if(_playerControllers.begin(), _playerControllers.end(),
-                   [](PlayerController* pc) { return !pc->hasInputDevice(); });
+  auto it = std::find_if(_playerControllers.begin(), _playerControllers.end(),
+    [](PlayerController* pc) { return !pc->hasInputDevice(); });
 
   SDL_Gamepad* gamepad = SDL_OpenGamepad(id);
   SDL_CHECK(gamepad);
 
-  if (it != _playerControllers.end()) {
+  if(it != _playerControllers.end()) {
     (*it)->gamepad = gamepad;
   } else {
     _unusedGamepads.push_back(gamepad);
@@ -319,20 +301,19 @@ void InputHandler::forgetGamepad(SDL_JoystickID id) {
   SDL_Gamepad* gamepad = SDL_GetGamepadFromID(id);
 
   auto it0 = std::find(_unusedGamepads.begin(), _unusedGamepads.end(), gamepad);
-  if (it0 != _unusedGamepads.end()) {
+  if(it0 != _unusedGamepads.end()) {
     SDL_CloseGamepad((*it0));
     _unusedGamepads.erase(it0);
     return;
   }
 
-  auto it1 = std::find_if(
-      _playerControllers.begin(), _playerControllers.end(),
-      [&gamepad](PlayerController* pc) { return pc->gamepad == gamepad; });
-  if (it1 != _playerControllers.end()) {
+  auto it1 = std::find_if(_playerControllers.begin(), _playerControllers.end(),
+    [&gamepad](PlayerController* pc) { return pc->gamepad == gamepad; });
+  if(it1 != _playerControllers.end()) {
     SDL_CloseGamepad((*it1)->gamepad);
     (*it1)->gamepad = nullptr;
 
-    if (!(*it1)->hasInputDevice()) {
+    if(!(*it1)->hasInputDevice()) {
       _unusablePlayerControllers.push_back((*it1));
       _playerControllers.erase(it1);
     }
@@ -344,49 +325,28 @@ void InputHandler::forgetGamepad(SDL_JoystickID id) {
  * 
  */
 void InputHandler::processInputs() {
-  for (auto& playerController : _playerControllers) {
-    if (playerController->usesKeyboard()) {
+  for(auto& playerController : _playerControllers) {
+    if(playerController->usesKeyboard()) {
       int numKeys = 0;
       const bool* keyboardStates = SDL_GetKeyboardState(&numKeys);
 
-      vec3 movement{};
+      vec3 movement {};
 
-      if (keyboardStates[SDL_SCANCODE_D]) {
-        movement.x += 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_A]) {
-        movement.x -= 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_Q]) {
-        movement.y -= 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_E]) {
-        movement.y += 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_S]) {
-        movement.z -= 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_W]) {
-        movement.z += 1;
-      }
+      if(keyboardStates[SDL_SCANCODE_D]) { movement.x += 1; }
+      if(keyboardStates[SDL_SCANCODE_A]) { movement.x -= 1; }
+      if(keyboardStates[SDL_SCANCODE_Q]) { movement.y -= 1; }
+      if(keyboardStates[SDL_SCANCODE_E]) { movement.y += 1; }
+      if(keyboardStates[SDL_SCANCODE_S]) { movement.z -= 1; }
+      if(keyboardStates[SDL_SCANCODE_W]) { movement.z += 1; }
 
       movement *= playerController->movementSpeed * Time::deltaTime;
-      playerController->gameObject->getComponent<Transform>()->translate(
-          movement);
+      playerController->gameObject->getComponent<Transform>()->translate(movement);
 
-      vec3 rotation{};
-      if (keyboardStates[SDL_SCANCODE_LEFT]) {
-        rotation.y += 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_RIGHT]) {
-        rotation.y -= 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_DOWN]) {
-        rotation.x -= 1;
-      }
-      if (keyboardStates[SDL_SCANCODE_UP]) {
-        rotation.x += 1;
-      }
+      vec3 rotation {};
+      if(keyboardStates[SDL_SCANCODE_LEFT]) { rotation.y += 1; }
+      if(keyboardStates[SDL_SCANCODE_RIGHT]) { rotation.y -= 1; }
+      if(keyboardStates[SDL_SCANCODE_DOWN]) { rotation.x -= 1; }
+      if(keyboardStates[SDL_SCANCODE_UP]) { rotation.x += 1; }
 
       rotation *= playerController->rotationSpeed * Time::deltaTime;
       playerController->gameObject->getComponent<Transform>()->rotate(rotation);
