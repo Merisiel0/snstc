@@ -26,7 +26,6 @@ Window::Window(const char* title, std::shared_ptr<Instance> instance) {
   SDL_GetWindowPosition(handle, &x, &y);
   position = { x, y };
 
-  //delete dm;
   SDL_free(displays);
 
   SDL_CHECK(SDL_Vulkan_CreateSurface(handle, instance->handle, nullptr, &surface));

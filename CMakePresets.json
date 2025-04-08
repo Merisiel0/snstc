@@ -1,5 +1,9 @@
 {
-  "version": 2,
+  "version": 9,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21
+  },
   "configurePresets": [
     {
       "name": "vcpkg",
@@ -33,6 +37,20 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "build-debug-asan",
+      "configurePreset": "debug-asan"
+    },
+    {
+      "name": "build-release",
+      "configurePreset": "release"
     }
   ]
 }

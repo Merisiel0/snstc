@@ -67,7 +67,7 @@ public:
 
   void transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout);
   void transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat);
-  void blitTo(CommandBuffer* commandBuffer, Image* image) const;
+  void blitTo(CommandBuffer* commandBuffer, std::shared_ptr<Image> image) const;
   void copyTo(CommandBuffer* commandBuffer, Image* image) const;
   void copyToBuffer(CommandBuffer* commandBuffer, Buffer* buffer) const;
   void save(const char* path);

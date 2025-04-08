@@ -44,9 +44,9 @@ Swapchain::Swapchain(const Window& window,
                      const DescriptorSetLayout& fragLayout) {
   _device = device;
 
-  frames = new Frame*[FRAME_OVERLAP];
   for (int i = 0; i < FRAME_OVERLAP; i++) {
-    frames[i] = new Frame(device, descriptorPool, vertLayout, fragLayout);
+    frames[i] =
+        std::make_shared<Frame>(device, descriptorPool, vertLayout, fragLayout);
   }
 
   extent.width = window.extent.x;
@@ -127,17 +127,17 @@ Swapchain::Swapchain(const Window& window,
   VK_CHECK(vkCreateSwapchainKHR(device->handle, &createInfo, nullptr, &handle));
 
   // get swapchain images
-  _imageCount = new uint32_t;
+  uint32_t _imageCount = 0;
   VK_CHECK(
-      vkGetSwapchainImagesKHR(device->handle, handle, _imageCount, nullptr));
-  std::vector<VkImage> vkImages(*_imageCount);
-  VK_CHECK(vkGetSwapchainImagesKHR(device->handle, handle, _imageCount,
+      vkGetSwapchainImagesKHR(device->handle, handle, &_imageCount, nullptr));
+  std::vector<VkImage> vkImages(_imageCount);
+  VK_CHECK(vkGetSwapchainImagesKHR(device->handle, handle, &_imageCount,
                                    vkImages.data()));
 
-  _images = new Image*[*_imageCount];
+  _images.resize(_imageCount);
   // get swapchain image views
-  std::vector<VkImageView> imageViews(*_imageCount);
-  for (uint32_t i = 0; i < *_imageCount; i++) {
+  std::vector<VkImageView> imageViews(_imageCount);
+  for (uint32_t i = 0; i < _imageCount; i++) {
     VkImageViewCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     // createInfo.pNext = nullptr;
@@ -158,20 +158,14 @@ Swapchain::Swapchain(const Window& window,
     VK_CHECK(vkCreateImageView(device->handle, &createInfo, nullptr,
                                &imageViews[i]));
 
-    _images[i] = new Image(vkImages[i], imageViews[i], extent);
+    _images[i] = std::shared_ptr<Image>(new Image(vkImages[i], imageViews[i], extent), [](Image* i) {});
   }
 }
 
 Swapchain::~Swapchain() {
-  for (int i = 0; i < FRAME_OVERLAP; i++) {
-    delete frames[i];
-  }
-  delete[] frames;
-
-  for (uint32_t i = 0; i < *_imageCount; i++) {
+  for (size_t i = 0; i < _images.size(); i++) {
     vkDestroyImageView(_device->handle, _images[i]->view, nullptr);
   }
-  delete _imageCount;
 
   vkDestroySwapchainKHR(_device->handle, handle, nullptr);
 }
@@ -184,6 +178,6 @@ uint32_t Swapchain::acquireNextImage() const {
   return swapchainImageIndex;
 }
 
-Image* Swapchain::getImage(uint32_t index) const {
+std::shared_ptr<Image> Swapchain::getImage(uint32_t index) const {
   return _images[index];
 }

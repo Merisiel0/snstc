@@ -24,8 +24,6 @@ class DescriptorSet {
 
   DescriptorSet(std::shared_ptr<Device> device, const DescriptorPool& pool, const DescriptorSetLayout& layout);
 
-  ~DescriptorSet();
-
   void write(uint32_t binding, const Image& image, const Sampler& sampler);
   void write(uint32_t binding, Buffer* buffer);
 };

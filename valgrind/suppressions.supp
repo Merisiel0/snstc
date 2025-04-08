@@ -1,0 +1,67 @@
+# sdl leaks
+{
+   sdl_definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:SDL_InitSubSystem_REAL
+}
+{
+   sdl_definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:SDL_VideoInit
+}
+
+# x11 leaks
+{
+   x11_leak_reachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+{
+   x11_leak_indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+{
+   x11_leak_definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+{
+   x11_leak_possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+
+# dl leaks
+{
+   dl_leak_reachable
+   Memcheck:Addr8
+   ...
+   fun:_dl_*
+   ...
+}
+
+# others
+{
+  global_content_scale
+  Memcheck:Leak
+  match-leak-kinds: definite
+  ...
+  fun:GetGlobalContentScale
+}

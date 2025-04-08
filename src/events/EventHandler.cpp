@@ -60,10 +60,10 @@ void EventHandler::processEvents() {
       //  buttonUp(e.cbutton);
       //  break;
       //case SDL_CONTROLLERDEVICEADDED:
-      //  controllerAdded(e.cdevice);
+      //  gamepadAdded(e.cdevice);
       //  break;
       //case SDL_CONTROLLERDEVICEREMOVED:
-      //  controllerRemoved(e.cdevice);
+      //  gamepadRemoved(e.cdevice);
       //  break;
       //case SDL_CONTROLLERDEVICEREMAPPED:
       //  break;

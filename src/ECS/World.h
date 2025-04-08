@@ -10,6 +10,9 @@ class CommandBuffer;
 class World : public GameObject {
 private:
 	using GameObject::addChild;
+	friend class GameObject;
+
+	entt::registry _registry;
 
 	Camera* _camera;
 
@@ -17,11 +20,9 @@ public:
 	Buffer* camBuffer;
 	Buffer* lightsBuffer;
 
-	World(std::vector<GameObject*> gameObjects);
+	World();
 
 	~World();
-
-	void addGameObject(GameObject* obj);
 
 	void updateCamera(CommandBuffer* commandBuffer);
 

@@ -1,13 +1,14 @@
 #pragma once
 
 #include "VulkanUtils.h"
+#include "Frame.h"
+#include <array>
+#include "Image.h"
 
-class Frame;
 class Window;
 class Instance;
 class PhysicalDevice;
 class Device;
-class Image;
 class CommandBuffer;
 class DescriptorPool;
 class DescriptorSetLayout;
@@ -16,8 +17,7 @@ class Swapchain {
  private:
   std::shared_ptr<Device> _device;
 
-  Image** _images;
-  uint32_t* _imageCount;
+  std::vector<std::shared_ptr<Image>> _images;
 
   VkSurfaceFormatKHR _surfaceFormat;
 
@@ -33,8 +33,8 @@ class Swapchain {
   VkExtent2D extent;
 
   uint32_t frameNumber;
-  Frame** frames;
-  Frame* getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
+  std::array<std::shared_ptr<Frame>, FRAME_OVERLAP> frames;
+  std::shared_ptr<Frame> getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
 
   Swapchain(const Window& window,
             std::shared_ptr<Device> device,
@@ -45,5 +45,5 @@ class Swapchain {
   ~Swapchain();
 
   uint32_t acquireNextImage() const;
-  Image* getImage(uint32_t index) const;
+  std::shared_ptr<Image> getImage(uint32_t index) const;
 };

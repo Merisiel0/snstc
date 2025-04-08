@@ -30,4 +30,7 @@ Frame::~Frame() {
   delete swapchainSemaphore;
   delete renderSemaphore;
   delete renderFence;
+
+  delete camDescSet;
+  delete objDescSet;
 }

@@ -60,13 +60,13 @@ class VulkanHandler {
   std::shared_ptr<DescriptorSetLayout> _camDescSetLayout;
   std::shared_ptr<DescriptorSetLayout> _objDescSetLayout;
 
-  void beginDrawing(World* world);
+  void beginDrawing(World& world);
   void endDrawing();
 
   public:
   VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName, int engineVersion);
   ~VulkanHandler();
 
-  void render(World* world);
+  void render(World& world);
   void waitForEndOfWork() const;
 };

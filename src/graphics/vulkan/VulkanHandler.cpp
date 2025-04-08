@@ -31,8 +31,8 @@
 #include <optional>
 #include <vector>
 
-void VulkanHandler::beginDrawing(World* world) {
-  Frame* currentFrame = _swapchain->getCurrentFrame();
+void VulkanHandler::beginDrawing(World& world) {
+  std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
   // wait for gpu to finish rendering the last frame
   currentFrame->renderFence->wait();
@@ -53,7 +53,7 @@ void VulkanHandler::beginDrawing(World* world) {
                                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
   // update camera information
-  world->updateCamera(currentFrame->commandBuffer);
+  world.updateCamera(currentFrame->commandBuffer);
 
   // begin a render pass connected to our draw image
   currentFrame->commandBuffer->beginRendering(*_drawImage, *_depthImage);
@@ -79,14 +79,14 @@ void VulkanHandler::beginDrawing(World* world) {
   currentFrame->commandBuffer->setScissor(&scissor);
 
   // write camera descriptor set
-  currentFrame->camDescSet->write(0, world->camBuffer);
-  currentFrame->camDescSet->write(1, world->lightsBuffer);
+  currentFrame->camDescSet->write(0, world.camBuffer);
+  currentFrame->camDescSet->write(1, world.lightsBuffer);
   currentFrame->commandBuffer->bindDescriptorSet(currentFrame->camDescSet, 0,
                                                  *_pipelineColor);
 }
 
 void VulkanHandler::endDrawing() {
-  Frame* currentFrame = _swapchain->getCurrentFrame();
+  std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
   currentFrame->commandBuffer->endRendering();
 
@@ -156,7 +156,7 @@ VulkanHandler::VulkanHandler(const char* applicationName,
                                          engineName, engineVersion,
                                          instanceLayers, instanceExtensions);
 
-  fetchExtensionFunctionPointers(_instance->handle);
+   fetchExtensionFunctionPointers(_instance->handle);
 
   // window
   _window = std::make_shared<Window>("SphereNSTC", _instance);
@@ -174,134 +174,156 @@ VulkanHandler::VulkanHandler(const char* applicationName,
   _device = std::make_shared<Device>(_physicalDevice, deviceExtensions);
   _allocator = std::make_shared<Allocator>(_instance, _physicalDevice, _device);
 
-  _immediateSubmit = std::make_shared<ImmediateSubmit>(_device);
+//   _immediateSubmit = std::make_shared<ImmediateSubmit>(_device);
 
-  Buffer::init(_device, _allocator, _immediateSubmit);
-  Image::init(_device, _allocator, _immediateSubmit);
+//   Buffer::init(_device, _allocator, _immediateSubmit);
+//   Image::init(_device, _allocator, _immediateSubmit);
 
-  // descriptor pool
-  std::vector<VkDescriptorPoolSize> poolSizes;
-  VkDescriptorPoolSize poolSize{};
-  poolSize.descriptorCount =
-      Swapchain::FRAME_OVERLAP * 2;  // times 2 for cam buffer and light buffer
-  poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-  poolSizes.push_back(poolSize);
+//   // descriptor pool
+//   std::vector<VkDescriptorPoolSize> poolSizes;
+//   VkDescriptorPoolSize poolSize{};
+//   poolSize.descriptorCount =
+//       Swapchain::FRAME_OVERLAP * 2;  // times 2 for cam buffer and light buffer
+//   poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+//   poolSizes.push_back(poolSize);
 
-  poolSize.descriptorCount = Swapchain::FRAME_OVERLAP * MapIndex::MAP_COUNT;
-  poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  poolSizes.push_back(poolSize);
+//   poolSize.descriptorCount = Swapchain::FRAME_OVERLAP * MapIndex::MAP_COUNT;
+//   poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+//   poolSizes.push_back(poolSize);
 
-  _descriptorPool = std::make_shared<DescriptorPool>(_device, poolSizes);
+//   _descriptorPool = std::make_shared<DescriptorPool>(_device, poolSizes);
 
-  // cam shader stage descriptor set layout
-  std::vector<VkDescriptorSetLayoutBinding> bindings;
+//   // cam shader stage descriptor set layout
+//   std::vector<VkDescriptorSetLayoutBinding> bindings;
 
-  VkDescriptorSetLayoutBinding binding{};
-  binding.binding = 0;
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // camera buffer
-  binding.descriptorCount = 1;
-  binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  bindings.push_back(binding);
+//   VkDescriptorSetLayoutBinding binding{};
+//   binding.binding = 0;
+//   binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // camera buffer
+//   binding.descriptorCount = 1;
+//   binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+//   bindings.push_back(binding);
 
-  binding.binding = 1;  // lights buffer
-  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-  bindings.push_back(binding);
+//   binding.binding = 1;  // lights buffer
+//   binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+//   bindings.push_back(binding);
 
-  _camDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
+//   _camDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
 
-  bindings.clear();
+//   bindings.clear();
 
-  binding.descriptorType =
-      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;  // color texture
-  binding.binding = 0;
-  bindings.push_back(binding);
+//   binding.descriptorType =
+//       VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;  // color texture
+//   binding.binding = 0;
+//   bindings.push_back(binding);
 
-  binding.binding = 1;  // normal texture
-  bindings.push_back(binding);
+//   binding.binding = 1;  // normal texture
+//   bindings.push_back(binding);
 
-  binding.binding = 2;  // rougness texture
-  bindings.push_back(binding);
+//   binding.binding = 2;  // rougness texture
+//   bindings.push_back(binding);
 
-  binding.binding = 3;  // metalness texture
-  bindings.push_back(binding);
+//   binding.binding = 3;  // metalness texture
+//   bindings.push_back(binding);
 
-  binding.binding = 4;  // height texture
-  bindings.push_back(binding);
+//   binding.binding = 4;  // height texture
+//   bindings.push_back(binding);
 
-  binding.binding = 5;  // ambiant occlusion texture
-  bindings.push_back(binding);
+//   binding.binding = 5;  // ambiant occlusion texture
+//   bindings.push_back(binding);
 
-  _objDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
+//   _objDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
 
-  _swapchain =
-      std::make_shared<Swapchain>(*_window, _device, *_descriptorPool,
-                                  *_camDescSetLayout, *_objDescSetLayout);
+//   _swapchain =
+//       std::make_shared<Swapchain>(*_window, _device, *_descriptorPool,
+//                                   *_camDescSetLayout, *_objDescSetLayout);
 
-  _drawImage = std::make_shared<Image>(
-      *_swapchain, COLOR,
-      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-          VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+//   _drawImage = std::make_shared<Image>(
+//       *_swapchain, COLOR,
+//       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+//           VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
-  _depthImage = std::make_shared<Image>(
-      *_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-  _immediateSubmit->submit([&](CommandBuffer* cmd) {
-    _depthImage->transitionLayout(
-        cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-  });
+//   _depthImage = std::make_shared<Image>(
+//       *_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+//   _immediateSubmit->submit([&](CommandBuffer* cmd) {
+//     _depthImage->transitionLayout(
+//         cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+//   });
 
-  _defaultSampler = std::make_shared<Sampler>(_device);
+//   _defaultSampler = std::make_shared<Sampler>(_device);
 
-  // PBR pipelines
-  Shader* vertexShader =
-      new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
-                 VK_SHADER_STAGE_VERTEX_BIT);
-  Shader* fragmentShader =
-      new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
-                 VK_SHADER_STAGE_FRAGMENT_BIT);
+//   // PBR pipelines
+//   Shader* vertexShader;
+//   Shader* fragmentShader;
+//   bool errorOccurred = false;
 
-  _pipelinePBR = std::make_shared<GraphicsPipeline>(
-      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-      std::vector<VkPipelineShaderStageCreateInfo>{
-          vertexShader->getStageCreateInfo(),
-          fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
-                                         _objDescSetLayout->handle});
+//   try {
+//     vertexShader =
+//         new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
+//                    VK_SHADER_STAGE_VERTEX_BIT);
+//     fragmentShader =
+//         new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
+//                    VK_SHADER_STAGE_FRAGMENT_BIT);
+//   } catch (const std::runtime_error& e) {
+//     std::cerr << e.what() << std::endl;
+//     errorOccurred = true;
+//   }
 
-  _pipelineLinePBR = std::make_shared<GraphicsPipeline>(
-      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-      std::vector<VkPipelineShaderStageCreateInfo>{
-          vertexShader->getStageCreateInfo(),
-          fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
-                                         _objDescSetLayout->handle});
+//   if (!errorOccurred) {
+//     _pipelinePBR = std::make_shared<GraphicsPipeline>(
+//         _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+//         std::vector<VkPipelineShaderStageCreateInfo>{
+//             vertexShader->getStageCreateInfo(),
+//             fragmentShader->getStageCreateInfo()},
+//         std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
+//                                            _objDescSetLayout->handle});
 
-  delete vertexShader;
-  delete fragmentShader;
+//     _pipelineLinePBR = std::make_shared<GraphicsPipeline>(
+//         _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+//         std::vector<VkPipelineShaderStageCreateInfo>{
+//             vertexShader->getStageCreateInfo(),
+//             fragmentShader->getStageCreateInfo()},
+//         std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle,
+//                                            _objDescSetLayout->handle});
 
-  // plain color pipelines
-  Shader* vertexShader2 =
-      new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
-                 VK_SHADER_STAGE_VERTEX_BIT);
-  Shader* fragmentShader2 =
-      new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
-                 VK_SHADER_STAGE_FRAGMENT_BIT);
+//     delete vertexShader;
+//     delete fragmentShader;
+//   }
 
-  _pipelineColor = std::make_shared<GraphicsPipeline>(
-      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-      std::vector<VkPipelineShaderStageCreateInfo>{
-          vertexShader2->getStageCreateInfo(),
-          fragmentShader2->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
+//   // plain color pipelines
+//   Shader* vertexShader2;
+//   Shader* fragmentShader2;
+//   errorOccurred = false;
 
-  _pipelineLineColor = std::make_shared<GraphicsPipeline>(
-      _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-      std::vector<VkPipelineShaderStageCreateInfo>{
-          vertexShader2->getStageCreateInfo(),
-          fragmentShader2->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
+//   try {
+//     vertexShader2 =
+//         new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
+//                    VK_SHADER_STAGE_VERTEX_BIT);
+//     fragmentShader2 =
+//         new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
+//                    VK_SHADER_STAGE_FRAGMENT_BIT);
+//   } catch (const std::runtime_error& e) {
+//     std::cerr << e.what() << std::endl;
+//     errorOccurred = true;
+//   }
 
-  delete vertexShader2;
-  delete fragmentShader2;
+//   if (!errorOccurred) {
+//     _pipelineColor = std::make_shared<GraphicsPipeline>(
+//         _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+//         std::vector<VkPipelineShaderStageCreateInfo>{
+//             vertexShader2->getStageCreateInfo(),
+//             fragmentShader2->getStageCreateInfo()},
+//         std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
+
+//     _pipelineLineColor = std::make_shared<GraphicsPipeline>(
+//         _device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+//         std::vector<VkPipelineShaderStageCreateInfo>{
+//             vertexShader2->getStageCreateInfo(),
+//             fragmentShader2->getStageCreateInfo()},
+//         std::vector<VkDescriptorSetLayout>{_camDescSetLayout->handle});
+
+//     delete vertexShader2;
+//     delete fragmentShader2;
+//   }
 }
 
 VulkanHandler::~VulkanHandler() {
@@ -312,21 +334,19 @@ VulkanHandler::~VulkanHandler() {
   _pipelineLinePBR.reset();
   _pipelinePBR.reset();
 
-  _camDescSetLayout.reset();
-  _objDescSetLayout.reset();
-  _descriptorPool.reset();
-
   _defaultSampler.reset();
 
   _depthImage.reset();
   _drawImage.reset();
   _swapchain.reset();
-  std::cout << _device.use_count() << std::endl;
+
+  _camDescSetLayout.reset();
+  _objDescSetLayout.reset();
+  _descriptorPool.reset();
 
   _immediateSubmit.reset();
 
   _allocator.reset();
-  std::cout << _device.use_count() << std::endl;
   _device.reset();
 
 #ifdef VKDEBUG
@@ -335,28 +355,27 @@ VulkanHandler::~VulkanHandler() {
 
   _window.reset();
   _instance.reset();
-
-  std::cout << _device.use_count() << std::endl;
 }
 
-void VulkanHandler::render(World* world) {
+void VulkanHandler::render(World& world) {
   // begin
   beginDrawing(world);
 
-  Frame* currentFrame = _swapchain->getCurrentFrame();
+  std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
   // for each renderers in the scene..
-  std::vector<MeshRenderer*> renderers =
-      world->getComponentsInChildren<MeshRenderer>();
+  auto renderers = world.getComponentsInChildren<MeshRenderer>();
   for (const auto& renderer : renderers) {
+    MeshRenderer& rd = renderer.get();
+
     // choose which pipeline to use
     std::shared_ptr<GraphicsPipeline> currentPipeline;
-    if (!renderer->material->plainColor) {
-      if (renderer->polygonMode == VK_POLYGON_MODE_LINE)
+    if (!rd.material->plainColor) {
+      if (rd.polygonMode == VK_POLYGON_MODE_LINE)
         currentPipeline = _pipelineLinePBR;
       else
         currentPipeline = _pipelinePBR;
-    } else if (renderer->polygonMode == VK_POLYGON_MODE_LINE) {
+    } else if (rd.polygonMode == VK_POLYGON_MODE_LINE) {
       currentPipeline = _pipelineLineColor;
     } else {
       currentPipeline = _pipelineColor;
@@ -364,9 +383,9 @@ void VulkanHandler::render(World* world) {
     currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write object descriptor set if needed
-    if (!renderer->material->plainColor) {
-      if (renderer->material->hasMap(ALBEDO)) {
-        currentFrame->objDescSet->write(0, renderer->material->getMap(ALBEDO),
+    if (!rd.material->plainColor) {
+      if (rd.material->hasMap(ALBEDO)) {
+        currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO),
                                         *_defaultSampler);
       }
       /*if (renderer->material->getNormal()) {
@@ -397,20 +416,20 @@ void VulkanHandler::render(World* world) {
     // push vertices and model matrix inside pushconstants
     PushConstants constants{};
     constants.transform =
-        renderer->gameObject->getComponent<Transform>()->modelMatrix();
+        rd.gameObject->getComponent<Transform>()->modelMatrix();
     // constants.transform = world->camera()->projection * world->camera()->view
     // * renderer->gameObject->getComponent<Transform>()->modelMatrix();
-    constants.vertexBuffer = renderer->mesh->vertices->address;
+    constants.vertexBuffer = rd.mesh->vertices->address;
     currentFrame->commandBuffer->pushConstants(
         constants, currentPipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
-    currentFrame->commandBuffer->setLineWidth(renderer->lineWidth);
-    currentFrame->commandBuffer->setCullMode(renderer->cullMode);
+    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
+    currentFrame->commandBuffer->setCullMode(rd.cullMode);
 
     // draw
-    currentFrame->commandBuffer->bindIndexBuffer(renderer->mesh->indices);
-    currentFrame->commandBuffer->drawIndexed(renderer->mesh->indices->count());
+    currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
+    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count());
   }
 
   // end
