@@ -27,7 +27,7 @@ World::~World() {
   delete lightsBuffer;
 }
 
-void World::updateCamera(CommandBuffer* commandBuffer) {
+void World::updateCamera(std::shared_ptr<CommandBuffer> commandBuffer) {
   if(!_camera) return;
 
   _camera->updateView();

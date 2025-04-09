@@ -76,7 +76,7 @@ void VulkanHandler::beginDrawing(World& world) {
   // write camera descriptor set
   currentFrame->camDescSet->write(0, world.camBuffer);
   currentFrame->camDescSet->write(1, world.lightsBuffer);
-  currentFrame->commandBuffer->bindDescriptorSet(currentFrame->camDescSet, 0, *_pipelineColor);
+  currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->camDescSet, 0, *_pipelineColor);
 }
 
 void VulkanHandler::endDrawing() {
@@ -104,12 +104,12 @@ void VulkanHandler::endDrawing() {
   currentFrame->commandBuffer->end();
 
   // submit command buffer to queue and execute it
-  currentFrame->commandBuffer->submitToQueue(_device->graphicsQueue, currentFrame->renderFence,
+  currentFrame->commandBuffer->submitToQueue(*_device->graphicsQueue, *currentFrame->renderFence,
     currentFrame->swapchainSemaphore,
     currentFrame->renderSemaphore); // currentFrame->swapchainSemaphore
 
   // present image to screen
-  _device->graphicsQueue->present(*_swapchain, swapchainImageIndex, currentFrame->renderSemaphore);
+  _device->graphicsQueue->present(*_swapchain, swapchainImageIndex, *currentFrame->renderSemaphore);
 
   // increase the number of frames drawn
   _swapchain->frameNumber++;
@@ -224,28 +224,19 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   _depthImage =
     std::make_shared<Image>(*_swapchain, DEPTH, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-  _immediateSubmit->submit([&](CommandBuffer* cmd) {
+  _immediateSubmit->submit([&](std::shared_ptr<CommandBuffer> cmd) {
     _depthImage->transitionLayout(cmd, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
   });
 
   _defaultSampler = std::make_shared<Sampler>(_device);
 
   // PBR pipelines
-  Shader* vertexShader;
-  Shader* fragmentShader;
-  bool errorOccurred = false;
-
   try {
-    vertexShader = new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
+    Shader* vertexShader = new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
       VK_SHADER_STAGE_VERTEX_BIT);
-    fragmentShader = new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
+    Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
-  } catch(const std::runtime_error& e) {
-    std::cerr << e.what() << std::endl;
-    errorOccurred = true;
-  }
 
-  if(!errorOccurred) {
     _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
       VK_POLYGON_MODE_FILL,
       std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
@@ -260,38 +251,36 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
     delete vertexShader;
     delete fragmentShader;
+  } catch(const std::runtime_error& e) {
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Failed to instantiate PBR pipeline." << std::endl;
   }
 
   // plain color pipelines
-  Shader* vertexShader2;
-  Shader* fragmentShader2;
-  errorOccurred = false;
-
   try {
-    vertexShader2 = new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
+    Shader* vertexShader = new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
       VK_SHADER_STAGE_VERTEX_BIT);
-    fragmentShader2 = new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
+    Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
-  } catch(const std::runtime_error& e) {
-    std::cerr << e.what() << std::endl;
-    errorOccurred = true;
-  }
 
-  if(!errorOccurred) {
     _pipelineColor = std::make_shared<GraphicsPipeline>(_device,
       VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader2->getStageCreateInfo(),
-        fragmentShader2->getStageCreateInfo()},
+      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
+        fragmentShader->getStageCreateInfo()},
       std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle});
 
     _pipelineLineColor = std::make_shared<GraphicsPipeline>(_device,
       VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader2->getStageCreateInfo(),
-        fragmentShader2->getStageCreateInfo()},
+      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
+        fragmentShader->getStageCreateInfo()},
       std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle});
 
-    delete vertexShader2;
-    delete fragmentShader2;
+    delete vertexShader;
+    delete fragmentShader;
+
+  } catch(const std::runtime_error& e) {
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Failed to instantiate plain color pipeline." << std::endl;
   }
 }
 
@@ -377,7 +366,7 @@ void VulkanHandler::render(World& world) {
       _defaultSampler);
       }*/
 
-      currentFrame->commandBuffer->bindDescriptorSet(currentFrame->objDescSet, 1, *currentPipeline);
+      currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1, *currentPipeline);
     }
 
     // push vertices and model matrix inside pushconstants

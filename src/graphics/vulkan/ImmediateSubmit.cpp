@@ -7,19 +7,15 @@
 #include "Queue.h"
 
 ImmediateSubmit::ImmediateSubmit(std::shared_ptr<Device> device) {
-  _commandPool = new CommandPool(device, device->graphicsQueue->familyIndex);
-  _commandBuffer = new CommandBuffer(device, _commandPool);
-  _fence = new Fence(device);
+  _commandPool = std::make_shared<CommandPool>(device, device->graphicsQueue->familyIndex);
+  _commandBuffer = std::make_shared<CommandBuffer>(device, *_commandPool);
+  _fence = std::make_shared<Fence>(device);
   _queue = device->graphicsQueue;
 }
 
-ImmediateSubmit::~ImmediateSubmit() {
-  delete _commandPool;
-  delete _commandBuffer;
-  delete _fence;
-}
+ImmediateSubmit::~ImmediateSubmit() {}
 
-void ImmediateSubmit::submit(std::function<void(CommandBuffer* cmd)>&& function) {
+void ImmediateSubmit::submit(std::function<void(std::shared_ptr<CommandBuffer> cmd)>&& function) {
   _fence->reset();
   _commandBuffer->reset();
 
@@ -29,7 +25,7 @@ void ImmediateSubmit::submit(std::function<void(CommandBuffer* cmd)>&& function)
 
   _commandBuffer->end();
 
-  _commandBuffer->submitToQueue(_queue, _fence, nullptr, nullptr);
+  _commandBuffer->submitToQueue(*_queue, *_fence, nullptr, nullptr);
 
   _fence->wait();
 }

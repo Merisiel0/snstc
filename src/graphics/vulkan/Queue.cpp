@@ -8,12 +8,12 @@
 #include "Swapchain.h"
 
 VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex,
-  Semaphore* wait) const {
+  const Semaphore& wait) const {
   VkPresentInfoKHR info {};
   info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   //info.pNext = nullptr;
 
-  info.pWaitSemaphores = &wait->handle;
+  info.pWaitSemaphores = &wait.handle;
   info.waitSemaphoreCount = 1;
 
   info.pSwapchains = &swapchain.handle;
@@ -31,7 +31,7 @@ Queue::Queue(Device* device, uint32_t familyIndex) {
   vkGetDeviceQueue(device->handle, familyIndex, 0, &handle);
 }
 
-void Queue::present(const Swapchain& swapchain, uint32_t imageIndex, Semaphore* wait) const {
+void Queue::present(const Swapchain& swapchain, uint32_t imageIndex, const Semaphore& wait) const {
   VkPresentInfoKHR presentInfo = getPresentInfo(swapchain, imageIndex, wait);
   VK_CHECK(vkQueuePresentKHR(handle, &presentInfo));
 }

@@ -13,15 +13,15 @@ class DescriptorSet;
 
 class Frame {
 public:
-  CommandPool* commandPool;
-  CommandBuffer* commandBuffer;
+  std::shared_ptr<CommandPool> commandPool;
+  std::shared_ptr<CommandBuffer> commandBuffer;
 
-  Semaphore* swapchainSemaphore;
-  Semaphore* renderSemaphore;
-  Fence* renderFence;
+  std::shared_ptr<Semaphore> swapchainSemaphore;
+  std::shared_ptr<Semaphore> renderSemaphore;
+  std::shared_ptr<Fence> renderFence;
 
-  DescriptorSet* camDescSet;
-  DescriptorSet* objDescSet;
+  std::shared_ptr<DescriptorSet> camDescSet;
+  std::shared_ptr<DescriptorSet> objDescSet;
 
   Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
     const DescriptorSetLayout& camDescSetLayout, const DescriptorSetLayout& objDescSetLayout);

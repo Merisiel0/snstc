@@ -10,25 +10,15 @@
 
 Frame::Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
   const DescriptorSetLayout& camDescSetLayout, const DescriptorSetLayout& objDescSetLayout) {
-  commandPool = new CommandPool(device, device->graphicsQueue->familyIndex);
-  commandBuffer = new CommandBuffer(device, commandPool);
+  commandPool = std::make_shared<CommandPool>(device, device->graphicsQueue->familyIndex);
+  commandBuffer = std::make_shared<CommandBuffer>(device, *commandPool);
 
-  swapchainSemaphore = new Semaphore(device);
-  renderSemaphore = new Semaphore(device);
-  renderFence = new Fence(device, true);
+  swapchainSemaphore = std::make_shared<Semaphore>(device);
+  renderSemaphore = std::make_shared<Semaphore>(device);
+  renderFence = std::make_shared<Fence>(device, true);
 
-  camDescSet = new DescriptorSet(device, pool, camDescSetLayout);
-  objDescSet = new DescriptorSet(device, pool, objDescSetLayout);
+  camDescSet = std::make_shared<DescriptorSet>(device, pool, camDescSetLayout);
+  objDescSet = std::make_shared<DescriptorSet>(device, pool, objDescSetLayout);
 }
 
-Frame::~Frame() {
-  delete commandPool;
-  delete commandBuffer;
-
-  delete swapchainSemaphore;
-  delete renderSemaphore;
-  delete renderFence;
-
-  delete camDescSet;
-  delete objDescSet;
-}
+Frame::~Frame() {}

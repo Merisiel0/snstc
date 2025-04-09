@@ -25,7 +25,7 @@ public:
 
   ~World();
 
-  void updateCamera(CommandBuffer* commandBuffer);
+  void updateCamera(std::shared_ptr<CommandBuffer> commandBuffer);
 
   Camera* camera() const { return _camera; }
 };

@@ -166,9 +166,9 @@ Image::Image(const char* path) {
   VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
     &_allocation, &_info));
 
-  immediateSubmitSptr->submit([&stagingBuffer, this](CommandBuffer* commandBuffer) {
+  immediateSubmitSptr->submit([&stagingBuffer, this](std::shared_ptr<CommandBuffer> commandBuffer) {
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    stagingBuffer->copyToImage(commandBuffer, this);
+    stagingBuffer->copyToImage(commandBuffer, std::shared_ptr<Image>(this));
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   });
   delete stagingBuffer;
@@ -190,7 +190,8 @@ Image::~Image() {
   }
 }
 
-void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayout) {
+void Image::transitionLayout(std::shared_ptr<CommandBuffer> commandBuffer,
+  VkImageLayout newLayout) {
   VkImageMemoryBarrier2 imageBarrier {};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
   // imageBarrier.pNext = nullptr;
@@ -227,7 +228,7 @@ void Image::transitionLayout(CommandBuffer* commandBuffer, VkImageLayout newLayo
   vkCmdPipelineBarrier2(commandBuffer->handle, &depInfo);
 }
 
-void Image::transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat) {
+void Image::transitionFormat(std::shared_ptr<CommandBuffer> commandBuffer, VkFormat newFormat) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
   std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
@@ -248,10 +249,11 @@ void Image::transitionFormat(CommandBuffer* commandBuffer, VkFormat newFormat) {
   VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
   VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 
-  immediateSubmitSptr->submit([&layout, &stagingImg, this](CommandBuffer* commandBuffer) {
-    this->transitionLayout(commandBuffer, layout);
-    stagingImg->blitTo(commandBuffer, std::shared_ptr<Image>(this));
-  });
+  immediateSubmitSptr->submit(
+    [&layout, &stagingImg, this](std::shared_ptr<CommandBuffer> commandBuffer) {
+      this->transitionLayout(commandBuffer, layout);
+      stagingImg->blitTo(commandBuffer, std::shared_ptr<Image>(this));
+    });
 
   delete stagingImg;
 }
@@ -371,7 +373,8 @@ VkImageSubresourceLayers Image::getSubresourceLayers() const {
   return layers;
 }
 
-void Image::blitTo(CommandBuffer* commandBuffer, std::shared_ptr<Image> image) const {
+void Image::blitTo(std::shared_ptr<CommandBuffer> commandBuffer,
+  std::shared_ptr<Image> image) const {
   VkImageBlit2 blitRegion {};
   blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
   // blitRegion.pNext = nullptr;
@@ -408,7 +411,8 @@ void Image::blitTo(CommandBuffer* commandBuffer, std::shared_ptr<Image> image) c
   vkCmdBlitImage2(commandBuffer->handle, &blitInfo);
 }
 
-void Image::copyTo(CommandBuffer* commandBuffer, Image* image) const {
+void Image::copyTo(std::shared_ptr<CommandBuffer> commandBuffer,
+  std::shared_ptr<Image> image) const {
   VkImageCopy region {};
   region.srcSubresource = getSubresourceLayers();
   // region.srcOffset = 0;
@@ -419,7 +423,8 @@ void Image::copyTo(CommandBuffer* commandBuffer, Image* image) const {
   vkCmdCopyImage(commandBuffer->handle, handle, _layout, image->handle, image->_layout, 1, &region);
 }
 
-void Image::copyToBuffer(CommandBuffer* commandBuffer, Buffer* buffer) const {
+void Image::copyToBuffer(std::shared_ptr<CommandBuffer> commandBuffer,
+  std::shared_ptr<Buffer> buffer) const {
   VkBufferImageCopy region {};
   // region.bufferOffset;
   // region.bufferRowLength;
@@ -444,12 +449,12 @@ void Image::save(const char* path) {
   Buffer* staging =
     new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 
-  immediateSubmitSptr->submit([&staging, this](CommandBuffer* cmd) {
+  immediateSubmitSptr->submit([&staging, this](std::shared_ptr<CommandBuffer> cmd) {
     VkImageLayout oldLayout = this->layout();
     if(oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
       this->transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-    this->copyToBuffer(cmd, staging);
+    this->copyToBuffer(cmd, std::shared_ptr<Buffer>(staging));
 
     if(oldLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) this->transitionLayout(cmd, oldLayout);
   });
@@ -464,7 +469,7 @@ void Image::save(const char* path) {
   }
 }
 
-void Image::clear(CommandBuffer* commandBuffer, Color color) {
+void Image::clear(std::shared_ptr<CommandBuffer> commandBuffer, Color color) {
   VkClearColorValue clearColor = {{color.r, color.g, color.b}};
   VkImageSubresourceRange clearRange = getSubresourceRange();
   vkCmdClearColorImage(commandBuffer->handle, handle, _layout, &clearColor, 1, &clearRange);

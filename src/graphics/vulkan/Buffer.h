@@ -21,7 +21,7 @@ private:
   VkBufferCreateInfo getCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage) const;
   VmaAllocationCreateInfo getAllocationCreateInfo(VmaMemoryUsage usage) const;
 
-  VkBufferImageCopy getBufferImageCopy(Image* image) const;
+  VkBufferImageCopy getBufferImageCopy(std::shared_ptr<Image> image) const;
 
 public:
   VkBuffer handle;
@@ -48,7 +48,7 @@ public:
       vmaMapMemory(allocatorSptr->handle, staging->_allocation, &staging->_info.pMappedData));
     memcpy(staging->_info.pMappedData, data.data(), bufferSize);
 
-    immediateSubmitSptr->submit([&](CommandBuffer* cmd) {
+    immediateSubmitSptr->submit([&](std::shared_ptr<CommandBuffer> cmd) {
       VkBufferCopy copy {};
       //copy.dstOffset = 0;
       //copy.srcOffset = 0;
@@ -66,10 +66,10 @@ public:
   uint32_t count() const { return _count; }
   VmaAllocation allocation() const { return _allocation; }
   VkBufferDeviceAddressInfo getDeviceAddressInfo() const;
-  void copyToImage(CommandBuffer* commandBuffer, Image* image) const;
+  void copyToImage(std::shared_ptr<CommandBuffer> commandBuffer, std::shared_ptr<Image> image) const;
 
   template<typename T>
-  void update(CommandBuffer* commandBuffer, std::vector<T> data) {
+  void update(std::shared_ptr<CommandBuffer> commandBuffer, std::vector<T> data) {
     vkCmdUpdateBuffer(commandBuffer->handle, handle, 0, data.size() * sizeof(T), data.data());
     _count = (uint32_t) data.size();
   }

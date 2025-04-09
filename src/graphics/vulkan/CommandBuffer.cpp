@@ -41,8 +41,8 @@ VkCommandBufferSubmitInfo CommandBuffer::getSubmitInfo() const {
   return info;
 }
 
-CommandBuffer::CommandBuffer(std::shared_ptr<Device> device, CommandPool* commandPool) {
-  VkCommandBufferAllocateInfo allocationInfo = getAllocateInfo(commandPool->handle);
+CommandBuffer::CommandBuffer(std::shared_ptr<Device> device, const CommandPool& commandPool) {
+  VkCommandBufferAllocateInfo allocationInfo = getAllocateInfo(commandPool.handle);
   VK_CHECK(vkAllocateCommandBuffers(device->handle, &allocationInfo, &handle));
 }
 
@@ -66,9 +66,9 @@ void CommandBuffer::bindPipeline(const GraphicsPipeline& pipeline) const {
   vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 }
 
-void CommandBuffer::bindDescriptorSet(DescriptorSet* set, uint32_t setNb,
+void CommandBuffer::bindDescriptorSet(const DescriptorSet& set, uint32_t setNb,
   const IPipeline& pipeline) const {
-  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &set->handle, 0,
+  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &set.handle, 0,
     nullptr);
 }
 
@@ -103,8 +103,8 @@ void CommandBuffer::drawVertices(uint32_t vertexCount) const {
   vkCmdDraw(handle, vertexCount, 1, 0, 0);
 }
 
-void CommandBuffer::submitToQueue(std::shared_ptr<Queue> queue, Fence* fence, Semaphore* wait,
-  Semaphore* signal) const {
+void CommandBuffer::submitToQueue(const Queue& queue, const Fence& fence,
+  std::shared_ptr<Semaphore> wait, std::shared_ptr<Semaphore> signal) const {
   VkSubmitInfo2 info2 {};
   info2.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
   //info2.pNext = nullptr;
@@ -128,5 +128,5 @@ void CommandBuffer::submitToQueue(std::shared_ptr<Queue> queue, Fence* fence, Se
   VkCommandBufferSubmitInfo submitInfo = getSubmitInfo();
   info2.pCommandBufferInfos = &submitInfo;
 
-  VK_CHECK(vkQueueSubmit2(queue->handle, 1, &info2, fence->handle));
+  VK_CHECK(vkQueueSubmit2(queue.handle, 1, &info2, fence.handle));
 }
