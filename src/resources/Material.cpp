@@ -26,7 +26,9 @@ Material::Material(const char* path) {
       completePath.append(supportedImageExtensions[j]);
       if(std::filesystem::exists(completePath)) {
         _maps[i] = ResourceManager::loadImage(completePath.c_str());
-        plainColor = false;
+        if(i == 0){
+          plainColor = false;
+        }
       }
     }
   }

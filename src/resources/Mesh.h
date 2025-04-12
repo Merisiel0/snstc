@@ -10,15 +10,9 @@ class ResourceManager;
 class Mesh {
 private:
   Mesh(const char* path) {}
+  Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
 
   friend class ResourceManager;
-
-public:
-  Buffer* vertices;
-  Buffer* indices;
-
-  Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
-  ~Mesh();
 
   static Mesh* generateCube(Color color = {0, 0, 0, 1});
   static Mesh* generatePlane(vec2 dimensions, vec2 vertexAmounts, Color color = {0, 0, 0, 1});
@@ -28,4 +22,10 @@ public:
 
   static Mesh* generateUVSphere(int nbSlices, int nbStacks, Color color = {0, 0, 0, 1});
   static Mesh* generateIcoSphere(int nbDivisions, Color color = {0, 0, 0, 1});
+
+public:
+  Buffer* vertices;
+  Buffer* indices;
+
+  ~Mesh();
 };

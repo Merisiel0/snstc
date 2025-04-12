@@ -12,34 +12,37 @@ struct MeshProperties {
 };
 
 struct MeshRenderer : public ECS::BaseComponent {
-  Mesh* mesh;
-  Material* material;
+  std::shared_ptr<Mesh> mesh;
+  std::shared_ptr<Material> material;
   VkCullModeFlags cullMode;
   VkPolygonMode polygonMode;
   float lineWidth = 1.0f;
   std::vector<mat4> instanceTransforms;
 
-  MeshRenderer(Mesh* mesh, Material* material) :
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) :
       mesh {mesh},
       material {material},
       cullMode {VK_CULL_MODE_BACK_BIT},
       polygonMode {VK_POLYGON_MODE_FILL} {};
 
-  MeshRenderer(Mesh* mesh, Material* material, VkCullModeFlags cullMode) :
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+    VkCullModeFlags cullMode) :
       mesh {mesh}, material {material}, cullMode {cullMode}, polygonMode {VK_POLYGON_MODE_FILL} {};
 
-  MeshRenderer(Mesh* mesh, Material* material, VkPolygonMode polygonMode) :
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+    VkPolygonMode polygonMode) :
       mesh {mesh},
       material {material},
       cullMode {VK_CULL_MODE_BACK_BIT},
       polygonMode {polygonMode} {};
 
-  MeshRenderer(Mesh* mesh, Material* material, VkCullModeFlags cullMode,
-    VkPolygonMode polygonMode) :
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+    VkCullModeFlags cullMode, VkPolygonMode polygonMode) :
       mesh {mesh}, material {material}, cullMode {cullMode}, polygonMode {polygonMode} {};
 
-  MeshRenderer(Mesh* mesh, Material* material, VkCullModeFlags cullMode, VkPolygonMode polygonMode,
-    float lineWidth, std::vector<mat4> instanceTransforms) :
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+    VkCullModeFlags cullMode, VkPolygonMode polygonMode, float lineWidth,
+    std::vector<mat4> instanceTransforms) :
       mesh {mesh},
       material {material},
       cullMode {cullMode},

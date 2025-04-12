@@ -68,7 +68,6 @@ public:
     if constexpr(std::is_same_v<Type, Camera>) { setWorldCamera(component); }
 
     return component;
-    ;
   }
 
   template<typename Type>

@@ -7,6 +7,4 @@
 #include "resources/Material.h"
 
 MeshRenderer::~MeshRenderer() {
-  delete mesh;
-  delete material;
 }
