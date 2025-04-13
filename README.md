@@ -1,3 +1,8 @@
+> ⚠️ **This project is currently undergoing a major refactor.**  
+> The code in the main branch will either not compile or not work as expected.
+> If you're looking for the last stable commit, you can find it [here](https://github.com/Merisiel0/snstc/tree/feab6744c0f2c791f61bf5dbf5d8fd259aa21a46).
+> Be aware that it will fail to load materials, since images are not included in this repository.
+
 # Sphere (name subject to change)
 
 snstc's a game engine developped during my studies. It's currently only a rendering engine with plans for ray tracing and physics simulation.
