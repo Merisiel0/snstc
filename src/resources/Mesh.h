@@ -9,7 +9,7 @@ class ResourceManager;
 
 class Mesh {
 private:
-  Mesh(const char* path) {}
+  Mesh(std::string path) {}
   Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
 
   friend class ResourceManager;

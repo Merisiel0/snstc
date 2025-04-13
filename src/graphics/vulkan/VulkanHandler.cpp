@@ -328,7 +328,7 @@ void VulkanHandler::render(World& world) {
 
     // choose which pipeline to use
     std::shared_ptr<GraphicsPipeline> currentPipeline;
-    if(!rd.material->plainColor) {
+    if(!rd.material->isPlainColor()) {
       if(rd.polygonMode == VK_POLYGON_MODE_LINE)
         currentPipeline = _pipelineLinePBR;
       else
@@ -341,7 +341,8 @@ void VulkanHandler::render(World& world) {
     currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write object descriptor set if needed
-    if(!rd.material->plainColor) {
+    if(!rd.material->isPlainColor()) {
+
       if(rd.material->hasMap(ALBEDO)) {
         currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
       }

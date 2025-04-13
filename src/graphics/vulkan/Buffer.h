@@ -21,7 +21,7 @@ private:
   VkBufferCreateInfo getCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage) const;
   VmaAllocationCreateInfo getAllocationCreateInfo(VmaMemoryUsage usage) const;
 
-  VkBufferImageCopy getBufferImageCopy(std::shared_ptr<Image> image) const;
+  VkBufferImageCopy getBufferImageCopy(const Image& image) const;
 
 public:
   VkBuffer handle;
@@ -66,7 +66,7 @@ public:
   uint32_t count() const { return _count; }
   VmaAllocation allocation() const { return _allocation; }
   VkBufferDeviceAddressInfo getDeviceAddressInfo() const;
-  void copyToImage(std::shared_ptr<CommandBuffer> commandBuffer, std::shared_ptr<Image> image) const;
+  void copyToImage(std::shared_ptr<CommandBuffer> commandBuffer, const Image& image) const;
 
   template<typename T>
   void update(std::shared_ptr<CommandBuffer> commandBuffer, std::vector<T> data) {

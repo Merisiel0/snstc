@@ -13,11 +13,20 @@ void GameObject::setWorldCamera(Camera& cam) {
   data.world->_camera = &cam;
 }
 
+GameObject::GameObject(entt::registry& registry) {
+  _registry = &registry;
+}
+
 GameObject::GameObject(World& world) {
   _registry = &world._registry;
   _id = _registry->create();
-  addComponent<ObjectData>();
+
+  ObjectData& data = addComponent<ObjectData>();
+  data.world = &world;
+
   addComponent<Transform>();
+
+  world.addChild(*this);
 }
 
 GameObject::~GameObject() {
@@ -120,7 +129,7 @@ void GameObject::addChild(GameObject& child) const {
     }
 
     _registry->get<ObjectData>(currentChild->_id).next = &child;
-    _registry->get<ObjectData>(child._id).prev = currentChild;
+    childData.prev = currentChild;
   }
 
   data.childCount++;

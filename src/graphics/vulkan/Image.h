@@ -36,7 +36,7 @@ private:
 
   VkImageSubresourceRange getSubresourceRange() const;
 
-  Image(const char* path);
+  Image(std::string path);
 
   friend class ResourceManager;
 

@@ -16,9 +16,9 @@ private:
   /// This means no user provided resource should start with this prefix.
   static constexpr const char* _generationPrefix = "dgyenn";
 
-  static std::unordered_map<const char*, std::weak_ptr<Image>> _images;
-  static std::unordered_map<const char*, std::weak_ptr<Material>> _materials;
-  static std::unordered_map<const char*, std::weak_ptr<Mesh>> _meshes;
+  static std::unordered_map<std::string, std::weak_ptr<Image>> _images;
+  static std::unordered_map<std::string, std::weak_ptr<Material>> _materials;
+  static std::unordered_map<std::string, std::weak_ptr<Mesh>> _meshes;
 
 public:
   /// @brief Cleans up pointers to expired resources.
@@ -27,19 +27,19 @@ public:
   /// @brief Loads an image from the provided path.
   /// @param path path to the image.
   /// @return an image.
-  static std::shared_ptr<Image> loadImage(const char* path);
+  static std::shared_ptr<Image> loadImage(std::string path);
 
   /// @brief Loads a material from the provided path.
   /// @param path path to the material.
   /// @return a PBR material if the path is valid, a default color material otherwise.
   ///
   /// In the second case, the color depends on the color attribute of the vertices of the mesh.
-  static std::shared_ptr<Material> loadMaterial(const char* path);
+  static std::shared_ptr<Material> loadMaterial(std::string path);
 
   /// @brief Loads a mesh from the provide path.
   /// @param path path to the mesh.
   /// @return a mesh.
-  static std::shared_ptr<Mesh> loadMesh(const char* path);
+  static std::shared_ptr<Mesh> loadMesh(std::string path);
 
   /// @brief Generates a cube mesh.
   /// @param color a color.

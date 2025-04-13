@@ -19,14 +19,28 @@ enum MapIndex {
 class Material {
 private:
   std::vector<std::shared_ptr<Image>> _maps {MAP_COUNT, nullptr};
+  bool plainColor = true;
 
-  Material(const char* name);
+  Material(std::string name);
 
   friend class ResourceManager;
 
 public:
-  bool plainColor = true;
+  /// @brief Checks if this material is only a plain color.
+  /// @return true if this material is a plain color, false otherwise.
+  bool isPlainColor() { return plainColor; }
 
-  bool hasMap(MapIndex i) { return !_maps[i]; }
+  /// @brief Checks if this material has a specific map.
+  /// @param i a map index to check.
+  /// @return true if this material has map of index i, false otherwise
+  bool hasMap(MapIndex i) { return (bool)_maps[i]; }
+
+  /// @brief Checks if this material has at least one map.
+  /// @return true if this material has at least one map, false otherwise.
+  bool hasAMap();
+
+  /// @brief Gets one of the maps of this material.
+  /// @param i a map index to return.
+  /// @return the map at map index i if it exists, nullptr otherwise.
   Image& getMap(MapIndex i) { return *_maps[i]; }
 };

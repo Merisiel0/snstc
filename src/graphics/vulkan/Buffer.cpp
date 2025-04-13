@@ -33,14 +33,14 @@ VmaAllocationCreateInfo Buffer::getAllocationCreateInfo(VmaMemoryUsage usage) co
   return info;
 }
 
-VkBufferImageCopy Buffer::getBufferImageCopy(std::shared_ptr<Image> image) const {
+VkBufferImageCopy Buffer::getBufferImageCopy(const Image& image) const {
   VkBufferImageCopy copyRegion {};
   //copyRegion.bufferOffset = 0;
   //copyRegion.bufferRowLength = 0;
   //copyRegion.bufferImageHeight = 0;
-  copyRegion.imageSubresource = image->getSubresourceLayers();
-  copyRegion.imageExtent.width = image->extent().width;
-  copyRegion.imageExtent.height = image->extent().height;
+  copyRegion.imageSubresource = image.getSubresourceLayers();
+  copyRegion.imageExtent.width = image.extent().width;
+  copyRegion.imageExtent.height = image.extent().height;
   copyRegion.imageExtent.depth = 1;
 
   return copyRegion;
@@ -83,8 +83,8 @@ VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {
   return info;
 }
 
-void Buffer::copyToImage(std::shared_ptr<CommandBuffer> commandBuffer, std::shared_ptr<Image> image) const {
+void Buffer::copyToImage(std::shared_ptr<CommandBuffer> commandBuffer, const Image& image) const {
   VkBufferImageCopy copyRegion = getBufferImageCopy(image);
-  vkCmdCopyBufferToImage(commandBuffer->handle, handle, image->handle, image->layout(), 1,
+  vkCmdCopyBufferToImage(commandBuffer->handle, handle, image.handle, image.layout(), 1,
     &copyRegion);
 }

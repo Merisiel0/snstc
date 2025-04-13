@@ -6,7 +6,7 @@
 #include "entt/entt.hpp"
 #include "graphics/vulkan/Buffer.h"
 
-World::World() {
+World::World() : GameObject(_registry) {
   _id = _registry.create();
 
   addComponent<ECS::ObjectData>();
@@ -39,11 +39,17 @@ void World::updateCamera(std::shared_ptr<CommandBuffer> commandBuffer) {
 
   LightBuffer lightBuf {};
   AmbiantLight* ambiant = getComponentInChildren<AmbiantLight>();
-  lightBuf.ambiantColor = ambiant->color;
+  lightBuf.ambiantColor = ambiant ? ambiant->color : Color {0, 0, 0, 0};
 
   Light* light = getComponentInChildren<Light>();
-  lightBuf.position = light->gameObject->getComponent<Transform>()->truePosition();
-  lightBuf.color = light->color;
+  if(light) {
+    lightBuf.position = light->gameObject->getComponent<Transform>()->truePosition();
+    lightBuf.color = light->color;
+  } else {
+    lightBuf.position = vec3 {0, 0, 0};
+    lightBuf.color = Color {0, 0, 0, 0};
+  }
+
   lightBuf.viewPosition = _camera->gameObject->getComponent<Transform>()->truePosition();
 
   lightsBuffer->update<LightBuffer>(commandBuffer, {lightBuf});

@@ -126,13 +126,13 @@ Image::Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usage
   VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
-Image::Image(const char* path) {
+Image::Image(std::string path) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
   std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
 
   int width, height;
-  stbi_uc* pixels = stbi_load(path, &width, &height, &_channelAmount, STBI_rgb_alpha);
+  stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &_channelAmount, STBI_rgb_alpha);
   _channelAmount = 4;
 
   if(!pixels) { throw std::runtime_error("Failed to find image file."); }
@@ -166,9 +166,10 @@ Image::Image(const char* path) {
   VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
     &_allocation, &_info));
 
+  view = VK_NULL_HANDLE;
   immediateSubmitSptr->submit([&stagingBuffer, this](std::shared_ptr<CommandBuffer> commandBuffer) {
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    stagingBuffer->copyToImage(commandBuffer, std::shared_ptr<Image>(this));
+    stagingBuffer->copyToImage(commandBuffer, *this);
     this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   });
   delete stagingBuffer;

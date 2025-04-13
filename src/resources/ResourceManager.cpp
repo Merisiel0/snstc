@@ -3,28 +3,28 @@
 #include <sstream>
 #include <unordered_map>
 
-std::unordered_map<const char*, std::weak_ptr<Image>> ResourceManager::_images;
-std::unordered_map<const char*, std::weak_ptr<Mesh>> ResourceManager::_meshes;
-std::unordered_map<const char*, std::weak_ptr<Material>> ResourceManager::_materials;
+std::unordered_map<std::string, std::weak_ptr<Image>> ResourceManager::_images;
+std::unordered_map<std::string, std::weak_ptr<Mesh>> ResourceManager::_meshes;
+std::unordered_map<std::string, std::weak_ptr<Material>> ResourceManager::_materials;
 
 void ResourceManager::cleanupResources() {
-  std::unordered_map<const char*, std::weak_ptr<Image>>::iterator it0;
+  std::unordered_map<std::string, std::weak_ptr<Image>>::iterator it0;
   for(it0 = _images.begin(); it0 != _images.end(); it0++) {
     if((*it0).second.expired()) { _images.erase(it0); }
   }
 
-  std::unordered_map<const char*, std::weak_ptr<Mesh>>::iterator it1;
+  std::unordered_map<std::string, std::weak_ptr<Mesh>>::iterator it1;
   for(it1 = _meshes.begin(); it1 != _meshes.end(); it1++) {
     if((*it1).second.expired()) { _meshes.erase(it1); }
   }
 
-  std::unordered_map<const char*, std::weak_ptr<Material>>::iterator it2;
+  std::unordered_map<std::string, std::weak_ptr<Material>>::iterator it2;
   for(it2 = _materials.begin(); it2 != _materials.end(); it2++) {
     if((*it2).second.expired()) { _materials.erase(it2); }
   }
 }
 
-std::shared_ptr<Image> ResourceManager::loadImage(const char* path) {
+std::shared_ptr<Image> ResourceManager::loadImage(std::string path) {
   auto it = _images.find(path);
   if(it != _images.end() && !it->second.expired()) { return it->second.lock(); }
 
@@ -34,7 +34,7 @@ std::shared_ptr<Image> ResourceManager::loadImage(const char* path) {
   return img;
 }
 
-std::shared_ptr<Material> ResourceManager::loadMaterial(const char* path) {
+std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
   auto it = _materials.find(path);
   if(it != _materials.end() && !it->second.expired()) { return it->second.lock(); }
 
@@ -44,7 +44,7 @@ std::shared_ptr<Material> ResourceManager::loadMaterial(const char* path) {
   return mat;
 }
 
-std::shared_ptr<Mesh> ResourceManager::loadMesh(const char* path) {
+std::shared_ptr<Mesh> ResourceManager::loadMesh(std::string path) {
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
 

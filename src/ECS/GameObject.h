@@ -34,7 +34,7 @@ private:
   entt::entity _id;
 
   // constructor worlds use
-  GameObject() {};
+  GameObject(entt::registry& registry);
   friend class World;
 
   void setWorldCamera(Camera& cam);

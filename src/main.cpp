@@ -34,7 +34,7 @@ int main() {
   try {
     vulkanHandler = std::make_shared<VulkanHandler>("SphereNSTC", 0, "SphereNSTC Engine", 0);
   } catch(std::runtime_error e) {
-    std::cout << "Failed to initialize Vulkan." << std::endl << e.what();
+    std::cerr << "Failed to initialize Vulkan." << std::endl << e.what();
   }
 
   World world = World();
@@ -48,14 +48,14 @@ int main() {
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
   cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
-  // GameObject lightObj = GameObject(world);
-  // lightObj.addTag("light");
-  // lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
-  // lightObj.addComponent<Light>(Color {1, 1, 1, 3});
-  // lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {1, 1, 1, 1}),
-  //   ResourceManager::loadMaterial(nullptr));
-  // lightObj.getComponent<Transform>()->scale = {.02f, .02f, .02f};
-  // lightObj.addComponent<PlayerController>(50.0f, radians(40.f));
+  GameObject lightObj = GameObject(world);
+  lightObj.addTag("light");
+  lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
+  lightObj.addComponent<Light>(Color {1, 1, 1, 3});
+  lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {1, 1, 1, 1}),
+    ResourceManager::loadMaterial(""));
+  lightObj.getComponent<Transform>()->scale = {.02f, .02f, .02f};
+  lightObj.addComponent<PlayerController>(50.0f, radians(40.f));
 
   // GameObject cubeObj = GameObject(world);
   // cubeObj.addTag("cube");
@@ -77,6 +77,7 @@ int main() {
   //   ResourceManager::loadMaterial(nullptr), VK_CULL_MODE_NONE, VK_POLYGON_MODE_LINE);
 
   // --- Game Loop ---
+  int frames = 0;
   while(!quit) {
     ResourceManager::cleanupResources();
     EventHandler::processEvents();
@@ -85,6 +86,11 @@ int main() {
     Time::update();
 
     vulkanHandler->render(world);
+
+    frames++;
+    if(frames == 1){
+      //quit = true;
+    }
   }
 
   // --- Game Cleanup ---
@@ -93,3 +99,17 @@ int main() {
 
   return 0;
 }
+
+
+/*
+Validation layer: Validation Error: 
+[ VUID-vkCmdDrawIndexed-None-02699 ] Object 0: handle = 0xd000000000d, type = VK_OBJECT_TYPE_DESCRIPTOR_SET;
+
+ Descriptor set VkDescriptorSet 0xd000000000d[] encountered the following validation error at vkCmdDrawIndexed time: 
+ Descriptor in binding #0 index 0 is being used in draw but has never been updated via vkUpdateDescriptorSets() or a similar call. 
+
+ The Vulkan spec states: Descriptors in each bound descriptor set, specified via vkCmdBindDescriptorSets, must be valid as described by 
+ descriptor validity if they are statically used by the VkPipeline bound to the pipeline bind point used by this command 
+ (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-vkCmdDrawIndexed-None-02699)
+
+*/
