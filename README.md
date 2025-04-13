@@ -28,3 +28,6 @@ Environment variables:
 2. Open with your code editor of choice (vscode and visual studio are confirmed to work)
 3. Wait for CMake to finish generating build files
 4. Press play!
+
+## Funky little accidents
+![damn-the-lighting](https://github.com/Merisiel0/snstc/blob/master/README_assets/2025-04-12%2022-47-07.gif)
