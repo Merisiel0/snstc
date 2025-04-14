@@ -17,6 +17,7 @@ CMakeUserPresets.json
 build
 vcpkg_installed
 valgrind/logoutput.txt
+ASan/
 
 # Ignore images, files too big (>100MB)
 *.png
