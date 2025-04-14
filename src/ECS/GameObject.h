@@ -43,7 +43,7 @@ public:
   GameObject(World& world);
   ~GameObject();
   
-  // GameObject should be unique, copying them is not allowed.
+  // GameObjects should be unique, copying them is not allowed.
   GameObject(const GameObject&) = delete;
   GameObject& operator=(const GameObject&) = delete;
 

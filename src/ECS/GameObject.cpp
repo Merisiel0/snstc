@@ -13,9 +13,7 @@ void GameObject::setWorldCamera(Camera& cam) {
   data.world->_camera = &cam;
 }
 
-GameObject::GameObject(entt::registry& registry) {
-  _registry = &registry;
-}
+GameObject::GameObject(entt::registry& registry) { _registry = &registry; }
 
 GameObject::GameObject(World& world) {
   _registry = &world._registry;
@@ -30,7 +28,8 @@ GameObject::GameObject(World& world) {
 }
 
 GameObject::~GameObject() {
-  std::cout << (uint32)_id << std::endl;
+  if(_id == entt::null) return;
+
   const ObjectData& data = _registry->get<ObjectData>(_id);
 
   // recursively destroy all children
@@ -45,9 +44,7 @@ GameObject::~GameObject() {
   }
 
   // remove from parent
-  data.parent->removeChild(*this);
-
-  std::cout << "Destroying object with id: " << (uint32_t) _id << std::endl;
+  if(data.parent) { data.parent->removeChild(*this); }
 
   _registry->destroy(_id);
   _registry = nullptr;
@@ -93,9 +90,7 @@ bool GameObject::hasParent() const {
 void GameObject::setParent(GameObject& parent) const {
   ObjectData& data = _registry->get<ObjectData>(_id);
 
-  if(data.parent){
-    data.parent->removeChild(*this);
-  }
+  if(data.parent) { data.parent->removeChild(*this); }
 
   data.parent = &parent;
 }
@@ -123,7 +118,7 @@ bool GameObject::isChild(const GameObject& object) const {
 }
 
 void GameObject::addChild(GameObject& child) const {
-  if(isChild(child)) return;
+  if(isChild(child) || this->operator==(child)) return;
 
   ObjectData& data = _registry->get<ObjectData>(_id);
 
@@ -146,12 +141,13 @@ void GameObject::addChild(GameObject& child) const {
 }
 
 void GameObject::removeChild(const GameObject& child) const {
-  if(isChild(child)) return;
+  if(!isChild(child)) return;
 
   ObjectData& data = _registry->get<ObjectData>(_id);
 
   if(child.operator==(data.first)) {
     data.first = _registry->get<ObjectData>(child._id).next;
+    data.childCount--;
     return;
   }
 
@@ -161,13 +157,12 @@ void GameObject::removeChild(const GameObject& child) const {
     if(nextChild->operator==(child)) {
       _registry->get<ObjectData>(currentChild->_id).next =
         _registry->get<ObjectData>(nextChild->_id).next;
+      data.childCount--;
       return;
     }
     currentChild = _registry->get<ObjectData>(currentChild->_id).next;
     nextChild = _registry->get<ObjectData>(currentChild->_id).next;
   }
-
-  data.childCount--;
 }
 
 GameObject* GameObject::getChild(uint32_t index) const {

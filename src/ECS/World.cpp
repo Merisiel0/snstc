@@ -6,6 +6,8 @@
 #include "entt/entt.hpp"
 #include "graphics/vulkan/Buffer.h"
 
+using namespace ECS;
+
 World::World() : GameObject(_registry) {
   _id = _registry.create();
 
@@ -23,6 +25,22 @@ World::World() : GameObject(_registry) {
 }
 
 World::~World() {
+  const ObjectData& data = _registry.get<ObjectData>(_id);
+
+  // recursively destroy all children
+  GameObject* currentChild = data.first;
+  GameObject* nextChild {nullptr};
+  for(uint32_t i = 0; i < data.childCount; i++) {
+    nextChild = _registry.get<ObjectData>(currentChild->_id).next;
+
+    currentChild->~GameObject();
+
+    currentChild = nextChild;
+  }
+
+  _registry.destroy(_id);
+  _id = entt::null;
+
   delete camBuffer;
   delete lightsBuffer;
 }
