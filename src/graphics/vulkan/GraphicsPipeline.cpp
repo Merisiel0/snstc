@@ -212,5 +212,5 @@ GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device,
 
   VkGraphicsPipelineCreateInfo createInfo =
     getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode);
-  vkCreateGraphicsPipelines(device->handle, VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle);
+  VK_CHECK(vkCreateGraphicsPipelines(device->handle, VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle));
 }

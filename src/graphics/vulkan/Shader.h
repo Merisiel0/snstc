@@ -9,7 +9,7 @@ private:
   std::shared_ptr<Device> _device;
   VkShaderStageFlagBits _stage;
 
-  VkShaderModuleCreateInfo getCreateInfo(std::vector<uint32_t> data) const;
+  VkShaderModuleCreateInfo getCreateInfo(std::vector<uint32_t>& data) const;
 
 public:
   VkShaderModule handle;
