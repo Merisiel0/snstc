@@ -99,17 +99,3 @@ int main() {
 
   return 0;
 }
-
-
-/*
-Validation layer: Validation Error: 
-[ VUID-vkCmdDrawIndexed-None-02699 ] Object 0: handle = 0xd000000000d, type = VK_OBJECT_TYPE_DESCRIPTOR_SET;
-
- Descriptor set VkDescriptorSet 0xd000000000d[] encountered the following validation error at vkCmdDrawIndexed time: 
- Descriptor in binding #0 index 0 is being used in draw but has never been updated via vkUpdateDescriptorSets() or a similar call. 
-
- The Vulkan spec states: Descriptors in each bound descriptor set, specified via vkCmdBindDescriptorSets, must be valid as described by 
- descriptor validity if they are statically used by the VkPipeline bound to the pipeline bind point used by this command 
- (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-vkCmdDrawIndexed-None-02699)
-
-*/

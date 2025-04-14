@@ -42,6 +42,10 @@ private:
 public:
   GameObject(World& world);
   ~GameObject();
+  
+  // GameObject should be unique, copying them is not allowed.
+  GameObject(const GameObject&) = delete;
+  GameObject& operator=(const GameObject&) = delete;
 
   template<typename Type>
   Type* getComponent() const {
@@ -81,13 +85,13 @@ public:
 
     if(data.childCount == 0) return nullptr;
 
-    GameObject& currentChild = *data.first;
+    GameObject* currentChild = data.first;
 
     for(std::uint32_t i = 0; i < data.childCount; ++i) {
-      if(_registry->all_of<Type>(currentChild._id)) {
-        return &_registry->get<Type>(currentChild._id);
+      if(_registry->all_of<Type>(currentChild->_id)) {
+        return &_registry->get<Type>(currentChild->_id);
       }
-      currentChild = *_registry->get<ECS::ObjectData>(currentChild._id).next;
+      currentChild = _registry->get<ECS::ObjectData>(currentChild->_id).next;
     }
 
     return nullptr;
@@ -128,7 +132,7 @@ public:
   entt::entity getId() const;
 
   bool hasParent() const;
-  void setParent(GameObject* parent) const;
+  void setParent(GameObject& parent) const;
   void removeParent() const;
 
   int getChildrenCount() const;

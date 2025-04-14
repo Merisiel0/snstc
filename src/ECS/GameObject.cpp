@@ -30,9 +30,10 @@ GameObject::GameObject(World& world) {
 }
 
 GameObject::~GameObject() {
+  std::cout << (uint32)_id << std::endl;
   const ObjectData& data = _registry->get<ObjectData>(_id);
 
-  // recur through children
+  // recursively destroy all children
   GameObject* currentChild = data.first;
   GameObject* nextChild {nullptr};
   for(uint32_t i = 0; i < data.childCount; i++) {
@@ -42,6 +43,9 @@ GameObject::~GameObject() {
 
     currentChild = nextChild;
   }
+
+  // remove from parent
+  data.parent->removeChild(*this);
 
   std::cout << "Destroying object with id: " << (uint32_t) _id << std::endl;
 
@@ -86,8 +90,14 @@ bool GameObject::hasParent() const {
   return data.parent != data.world && data.parent != nullptr;
 }
 
-void GameObject::setParent(GameObject* parent) const {
-  _registry->get<ObjectData>(_id).parent = parent;
+void GameObject::setParent(GameObject& parent) const {
+  ObjectData& data = _registry->get<ObjectData>(_id);
+
+  if(data.parent){
+    data.parent->removeChild(*this);
+  }
+
+  data.parent = &parent;
 }
 
 void GameObject::removeParent() const {
