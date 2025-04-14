@@ -53,16 +53,16 @@ int main() {
   lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
   lightObj.addComponent<Light>(Color {1, 1, 1, 3});
   lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {1, 1, 1, 1}),
-    ResourceManager::loadMaterial(""));
+    ResourceManager::loadMaterial());
   lightObj.getComponent<Transform>()->scale = {.02f, .02f, .02f};
-  lightObj.addComponent<PlayerController>(50.0f, radians(40.f));
+  //lightObj.addComponent<PlayerController>(50.0f, radians(40.f));
 
-  // GameObject cubeObj = GameObject(world);
-  // cubeObj.addTag("cube");
-  // cubeObj.getComponent<Transform>()->position = {-5, 0, 0};
-  // cubeObj.getComponent<Transform>()->rotate(radians(45.f), radians(45.f), 0);
-  // cubeObj.addComponent<MeshRenderer>(ResourceManager::generateCube({1, 1, 0, .5f}),
-  //   ResourceManager::loadMaterial(nullptr), VK_CULL_MODE_FRONT_BIT);
+  GameObject cubeObj = GameObject(world);
+  cubeObj.addTag("cube");
+  cubeObj.getComponent<Transform>()->position = {-5, 0, 0};
+  cubeObj.getComponent<Transform>()->rotate(radians(45.f), radians(45.f), 0);
+  cubeObj.addComponent<MeshRenderer>(ResourceManager::generateCube({1, 1, 0, .5f}),
+    ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
 
   GameObject planeObj = GameObject(world);
   planeObj.addTag("plane");
@@ -70,11 +70,11 @@ int main() {
   planeObj.addComponent<MeshRenderer>(ResourceManager::generatePlane({1, 1}, {2, 2}),
     ResourceManager::loadMaterial("../src/assets/materials/checkered_wood_4k"));
 
-  // GameObject sphereObjUV = GameObject(world);
-  // sphereObjUV.addTag("sphere");
-  // sphereObjUV.getComponent<Transform>()->position = {5, 0, 0};
-  // sphereObjUV.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0),
-  //   ResourceManager::loadMaterial(nullptr), VK_CULL_MODE_NONE, VK_POLYGON_MODE_LINE);
+  GameObject sphereObjUV = GameObject(world);
+  sphereObjUV.addTag("sphere");
+  sphereObjUV.getComponent<Transform>()->position = {5, 0, 0};
+  sphereObjUV.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {0.1f, 1, 0.1f, 1}),
+    ResourceManager::loadMaterial(), VK_CULL_MODE_NONE, VK_POLYGON_MODE_LINE);
 
   // --- Game Loop ---
   int frames = 0;
@@ -88,8 +88,8 @@ int main() {
     vulkanHandler->render(world);
 
     frames++;
-    if(frames == 1){
-      //quit = true;
+    if(frames == 1) {
+      quit = true;
     }
   }
 

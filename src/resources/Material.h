@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 class Image;
 class ResourceManager;
@@ -21,7 +22,7 @@ private:
   std::vector<std::shared_ptr<Image>> _maps {MAP_COUNT, nullptr};
   bool plainColor = true;
 
-  Material(std::string name);
+  Material(std::string path = "");
 
   friend class ResourceManager;
 

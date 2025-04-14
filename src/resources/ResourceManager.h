@@ -31,10 +31,10 @@ public:
 
   /// @brief Loads a material from the provided path.
   /// @param path path to the material.
-  /// @return a PBR material if the path is valid, a default color material otherwise.
+  /// @return a PBR material if a path is provided, a default color material otherwise.
   ///
   /// In the second case, the color depends on the color attribute of the vertices of the mesh.
-  static std::shared_ptr<Material> loadMaterial(std::string path);
+  static std::shared_ptr<Material> loadMaterial(std::string path = "");
 
   /// @brief Loads a mesh from the provide path.
   /// @param path path to the mesh.

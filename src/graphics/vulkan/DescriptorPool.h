@@ -9,7 +9,7 @@ class DescriptorPool {
 private:
   std::shared_ptr<Device> _device;
 
-  VkDescriptorPoolCreateInfo getCreateInfo(std::vector<VkDescriptorPoolSize> poolSizes) const;
+  VkDescriptorPoolCreateInfo getCreateInfo(std::vector<VkDescriptorPoolSize>& poolSizes) const;
 
 public:
   VkDescriptorPool handle;

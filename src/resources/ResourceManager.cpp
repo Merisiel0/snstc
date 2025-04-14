@@ -58,7 +58,7 @@ std::shared_ptr<Mesh> ResourceManager::generateCube(Color color) {
   std::stringstream ss;
   ss << _generationPrefix << "cube" << color.r << color.g << color.b << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
@@ -75,7 +75,7 @@ std::shared_ptr<Mesh> ResourceManager::generatePlane(vec2 dimensions, vec2 verte
   ss << _generationPrefix << "plane" << dimensions.x << dimensions.y << vertexAmounts.x
      << vertexAmounts.y << color.r << color.g << color.b << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
@@ -93,7 +93,7 @@ std::shared_ptr<Mesh> ResourceManager::generateCone(float radius, float height, 
   ss << _generationPrefix << "cone" << radius << height << resolution << color.r << color.g
      << color.b << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
@@ -111,7 +111,7 @@ std::shared_ptr<Mesh> ResourceManager::generateCylinder(float radius, float heig
   ss << _generationPrefix << "cylinder" << radius << height << resolution << color.r << color.g
      << color.b << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
@@ -128,7 +128,7 @@ std::shared_ptr<Mesh> ResourceManager::generateUVSphere(int nbSlices, int nbStac
   ss << _generationPrefix << "cylinder" << nbSlices << nbStacks << color.r << color.g << color.b
      << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
@@ -144,13 +144,12 @@ std::shared_ptr<Mesh> ResourceManager::generateIcoSphere(int nbDivisions, Color 
   std::stringstream ss;
   ss << _generationPrefix << "cylinder" << nbDivisions << color.r << color.g << color.b << color.a;
 
-  const char* path = ss.str().c_str();
+  std::string path = ss.str();
 
   auto it = _meshes.find(path);
   if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
 
-  std::shared_ptr<Mesh> mesh =
-    std::shared_ptr<Mesh>(Mesh::generateIcoSphere(nbDivisions, color));
+  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateIcoSphere(nbDivisions, color));
   _meshes.insert({path, mesh});
 
   return mesh;

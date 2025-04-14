@@ -4,7 +4,7 @@
 #include "Device.h"
 
 VkDescriptorPoolCreateInfo DescriptorPool::getCreateInfo(
-  std::vector<VkDescriptorPoolSize> poolSizes) const {
+  std::vector<VkDescriptorPoolSize>& poolSizes) const {
   VkDescriptorPoolCreateInfo info {};
   info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
   //info.pNext = nullptr;
@@ -15,9 +15,7 @@ VkDescriptorPoolCreateInfo DescriptorPool::getCreateInfo(
   }
 
   info.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-  VkDescriptorPoolSize* poolSizesPtr = new VkDescriptorPoolSize[info.poolSizeCount];
-  std::copy(poolSizes.begin(), poolSizes.end(), poolSizesPtr);
-  info.pPoolSizes = poolSizesPtr;
+  info.pPoolSizes = poolSizes.data();
 
   return info;
 }
