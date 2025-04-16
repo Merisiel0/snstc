@@ -13,11 +13,11 @@ VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t>& data) cons
   return info;
 }
 
-Shader::Shader(std::shared_ptr<Device> device, const char* path, VkShaderStageFlagBits stage) {
+Shader::Shader(std::shared_ptr<Device> device, std::string path, VkShaderStageFlagBits stage) {
   _device = device;
   _stage = stage;
 
-  std::vector<uint32_t> data = readFileBytes(path);
+  std::vector<uint32_t> data = readFileBytes(path.c_str());
 
   VkShaderModuleCreateInfo moduleCreateInfo = getCreateInfo(data);
   VK_CHECK(vkCreateShaderModule(device->handle, &moduleCreateInfo, nullptr, &handle));

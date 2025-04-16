@@ -9,8 +9,6 @@
 #include "resources/ResourceManager.h"
 #include "utils/Utils.h"
 
-#include <filesystem>
-
 std::shared_ptr<VulkanHandler> vulkanHandler;
 bool quit = false;
 
@@ -24,7 +22,8 @@ int main() {
   //--- Engine Initialization ---
   SDL_SetMainReady();
   SDL_CHECK(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD));
-
+  
+  ResourceManager::assetsPath = "../..";
   Time::init();
   InputHandler::init();
 
@@ -65,7 +64,7 @@ int main() {
     ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
 
   GameObject planeObj = GameObject::createPrimitive(world, PLANE,
-    ResourceManager::loadMaterial("../src/assets/materials/checkered_wood_4k"));
+    ResourceManager::loadMaterial(ResourceManager::assetsPath + "/src/assets/materials/checkered_wood_4k"));
   planeObj.addTag("plane");
   planeObj.getComponent<Transform>()->rotate(radians(45.f), 0, 0);
   // planeObj.addComponent<MeshRenderer>(ResourceManager::generatePlane({1, 1}, {2, 2}),

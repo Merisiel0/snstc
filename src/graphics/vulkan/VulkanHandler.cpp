@@ -24,6 +24,7 @@
 #include "VulkanUtils.h"
 #include "graphics/Window.h"
 #include "resources/Material.h"
+#include "resources/ResourceManager.h"
 
 #include <array>
 #include <optional>
@@ -144,7 +145,7 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   // window
   _window = std::make_shared<Window>("SphereNSTC", _instance);
-  _window->setIcon("../src/assets/sprites/icon.png");
+  _window->setIcon(ResourceManager::assetsPath + "/src/assets/sprites/icon.png");
 
   // debug messenger
 #ifdef VKDEBUG
@@ -232,9 +233,9 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   // PBR pipelines
   try {
-    Shader* vertexShader = new Shader(_device, "../src/assets/shaders/PBR_material_vert.spv",
+    Shader* vertexShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_vert.spv",
       VK_SHADER_STAGE_VERTEX_BIT);
-    Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
+    Shader* fragmentShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
@@ -260,9 +261,9 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   // plain color pipelines
   try {
-    Shader* vertexShader = new Shader(_device, "../src/assets/shaders/color_material_vert.spv",
+    Shader* vertexShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/color_material_vert.spv",
       VK_SHADER_STAGE_VERTEX_BIT);
-    Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
+    Shader* fragmentShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/color_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),

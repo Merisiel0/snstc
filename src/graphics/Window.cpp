@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "vulkan/Instance.h"
 
-Window::Window(const char* title, std::shared_ptr<Instance> instance) {
+Window::Window(std::string title, std::shared_ptr<Instance> instance) {
   _instance = instance;
   _iconSurface = nullptr;
 
@@ -13,7 +13,7 @@ Window::Window(const char* title, std::shared_ptr<Instance> instance) {
   //extent = { dm->w * .8f, dm->h * .8f };
 
   handle =
-    SDL_CreateWindow(title, extent.x, extent.y, SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    SDL_CreateWindow(title.c_str(), extent.x, extent.y, SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
   if(!handle) { std::clog << SDL_GetError(); }
 
@@ -34,9 +34,9 @@ Window::~Window() {
   SDL_DestroySurface(_iconSurface);
 }
 
-void Window::setIcon(const char* path) {
+void Window::setIcon(std::string path) {
   int width, height, channels;
-  unsigned char* data = stbi_load(path, &width, &height, &channels, 4);
+  unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
   if(!data) {
     std::cerr << "Failed to load image: " << path << std::endl;

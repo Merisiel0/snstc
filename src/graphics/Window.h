@@ -15,8 +15,8 @@ public:
   glm::uvec2 extent;
   VkSurfaceKHR surface;
 
-  Window(const char* title, std::shared_ptr<Instance> instance);
+  Window(std::string title, std::shared_ptr<Instance> instance);
   ~Window();
 
-  void setIcon(const char* path);
+  void setIcon(std::string path);
 };

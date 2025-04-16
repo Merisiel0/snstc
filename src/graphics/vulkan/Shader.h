@@ -14,7 +14,7 @@ private:
 public:
   VkShaderModule handle;
 
-  Shader(std::shared_ptr<Device> device, const char* path, VkShaderStageFlagBits stage);
+  Shader(std::shared_ptr<Device> device, std::string path, VkShaderStageFlagBits stage);
   ~Shader();
 
   VkPipelineShaderStageCreateInfo getStageCreateInfo() const;

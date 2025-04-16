@@ -21,6 +21,13 @@ private:
   static std::unordered_map<std::string, std::weak_ptr<Mesh>> _meshes;
 
 public:
+  static std::string assetsPath;
+
+  /// @brief Converts a partial path (from the source directory) to a complete path (from root).
+  /// @param partialPath a path to convert.
+  /// @return the complete path: ${sourceDir} + partialPath.
+  static std::string getCompletePath(std::string partialPath);
+
   /// @brief Cleans up pointers to expired resources.
   static void cleanupResources();
 

@@ -1,11 +1,18 @@
 #include "ResourceManager.h"
 
+#include <filesystem>
 #include <sstream>
 #include <unordered_map>
 
 std::unordered_map<std::string, std::weak_ptr<Image>> ResourceManager::_images;
 std::unordered_map<std::string, std::weak_ptr<Mesh>> ResourceManager::_meshes;
 std::unordered_map<std::string, std::weak_ptr<Material>> ResourceManager::_materials;
+
+std::string ResourceManager::assetsPath = "";
+
+std::string ResourceManager::getCompletePath(std::string partialPath) {
+  return assetsPath + partialPath;
+}
 
 void ResourceManager::cleanupResources() {
   std::unordered_map<std::string, std::weak_ptr<Image>>::iterator it0;
@@ -26,7 +33,13 @@ void ResourceManager::cleanupResources() {
 
 std::shared_ptr<Image> ResourceManager::loadImage(std::string path) {
   auto it = _images.find(path);
-  if(it != _images.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _images.end()) {
+    if(it->second.expired()) {
+      _images.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Image> img = std::shared_ptr<Image>(new Image(path));
   _images.insert({path, img});
@@ -36,7 +49,13 @@ std::shared_ptr<Image> ResourceManager::loadImage(std::string path) {
 
 std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
   auto it = _materials.find(path);
-  if(it != _materials.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _materials.end()) {
+    if(it->second.expired()) {
+      _materials.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material(path));
   _materials.insert({path, mat});
@@ -46,7 +65,13 @@ std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
 
 std::shared_ptr<Mesh> ResourceManager::loadMesh(std::string path) {
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh(path));
   _meshes.insert({path, mesh});
@@ -61,7 +86,13 @@ std::shared_ptr<Mesh> ResourceManager::generateCube(Color color) {
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateCube(color));
   _meshes.insert({path, mesh});
@@ -78,7 +109,13 @@ std::shared_ptr<Mesh> ResourceManager::generatePlane(vec2 dimensions, vec2 verte
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh =
     std::shared_ptr<Mesh>(Mesh::generatePlane(dimensions, vertexAmounts, color));
@@ -96,7 +133,13 @@ std::shared_ptr<Mesh> ResourceManager::generateCone(float radius, float height, 
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh =
     std::shared_ptr<Mesh>(Mesh::generateCone(radius, height, resolution, color));
@@ -114,7 +157,13 @@ std::shared_ptr<Mesh> ResourceManager::generateCylinder(float radius, float heig
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh =
     std::shared_ptr<Mesh>(Mesh::generateCylinder(radius, height, resolution, color));
@@ -131,7 +180,13 @@ std::shared_ptr<Mesh> ResourceManager::generateUVSphere(int nbSlices, int nbStac
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh =
     std::shared_ptr<Mesh>(Mesh::generateUVSphere(nbSlices, nbStacks, color));
@@ -147,7 +202,13 @@ std::shared_ptr<Mesh> ResourceManager::generateIcoSphere(int nbDivisions, Color 
   std::string path = ss.str();
 
   auto it = _meshes.find(path);
-  if(it != _meshes.end() && !it->second.expired()) { return it->second.lock(); }
+  if(it != _meshes.end()) {
+    if(it->second.expired()) {
+      _meshes.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
 
   std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateIcoSphere(nbDivisions, color));
   _meshes.insert({path, mesh});
