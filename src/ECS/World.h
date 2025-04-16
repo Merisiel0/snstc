@@ -10,7 +10,7 @@ class CommandBuffer;
 
 class World : public GameObject {
 private:
-  using GameObject::addChild;
+  using GameObject::setParent;
   friend class GameObject;
 
   entt::registry _registry;

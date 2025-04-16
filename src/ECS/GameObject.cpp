@@ -50,7 +50,7 @@ GameObject::~GameObject() {
   _registry = nullptr;
 }
 
-bool GameObject::hasTag(const char* tag) const {
+bool GameObject::hasTag(std::string tag) const {
   const ObjectData& data = _registry->get<ObjectData>(_id);
 
   if(data.tags.size() == 0) return false;
@@ -59,13 +59,13 @@ bool GameObject::hasTag(const char* tag) const {
   return it != data.tags.end();
 }
 
-void GameObject::addTag(const char* tag) const {
+void GameObject::addTag(std::string tag) const {
   if(hasTag(tag)) return;
 
   _registry->get<ObjectData>(_id).tags.push_back(tag);
 }
 
-void GameObject::removeTag(const char* tag) const {
+void GameObject::removeTag(std::string tag) const {
   if(!hasTag(tag)) return;
 
   ObjectData& data = _registry->get<ObjectData>(_id);
@@ -89,10 +89,11 @@ bool GameObject::hasParent() const {
 
 void GameObject::setParent(GameObject& parent) const {
   ObjectData& data = _registry->get<ObjectData>(_id);
+  ObjectData& newParentData = _registry->get<ObjectData>(parent._id);
 
-  if(data.parent) { data.parent->removeChild(*this); }
-
+  data.parent->removeChild(*this);
   data.parent = &parent;
+  data.world = newParentData.world;
 }
 
 void GameObject::removeParent() const {
