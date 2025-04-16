@@ -5,6 +5,7 @@
 #include "Components/Transform.h"
 #include "World.h"
 #include "resources/Material.h"
+#include "resources/ResourceManager.h"
 
 using namespace ECS;
 
@@ -178,4 +179,22 @@ GameObject* GameObject::getChild(uint32_t index) const {
   }
 
   return data.next;
+}
+
+GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primitive,
+  std::shared_ptr<Material> material) {
+  GameObject obj = GameObject(world);
+
+  if(!material) { material = ResourceManager::loadMaterial(); }
+
+  std::shared_ptr<Mesh> mesh;
+  switch(primitive) {
+    case PLANE:
+      mesh = ResourceManager::generatePlane({1, 1}, {2, 2}, {0, 0, 0, 1});
+      break;
+  }
+
+  obj.addComponent<MeshRenderer>(mesh, material);
+
+  return obj;
 }

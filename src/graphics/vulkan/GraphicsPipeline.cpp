@@ -194,7 +194,7 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   // fill pipeline create info
   data.info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   data.info.pNext = &data.rendering;
-  //data.info.flags = 0;
+  data.info.flags = 0;
 
   data.info.stageCount = (uint32_t) shaderStageCreateInfos.size();
   data.info.pStages = shaderStageCreateInfos.data();

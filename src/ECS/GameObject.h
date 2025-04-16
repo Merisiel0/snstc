@@ -9,6 +9,7 @@
 class GameObject;
 class World;
 class Camera;
+class Material;
 
 namespace ECS {
   struct ObjectData : public BaseComponent {
@@ -28,9 +29,7 @@ namespace ECS {
   };
 } // namespace ECS
 
-enum GameObjectPrimitives {
-  PLANE, CUBE, SPHERE
-};
+enum GameObjectPrimitives { PLANE, CUBE, SPHERE };
 
 /// @brief A GameObject entity inside a digital World.
 class GameObject {
@@ -61,6 +60,9 @@ public:
   ///
   /// Thist operator is deleted.
   GameObject& operator=(const GameObject&) = delete;
+
+  GameObject(GameObject&&) noexcept = default;
+  GameObject& operator=(GameObject&&) noexcept = default;
 
   /// @brief Gets a component on this GameObject.
   /// @tparam Type type of the component to get.
@@ -230,7 +232,8 @@ public:
 
   /// @brief Creates a GameObject primitive.
   /// @return a GameObject.
-  //static GameObject& createPrimitive(World& world, GameObjectPrimitives primitive);
+  static GameObject createPrimitive(World& world, GameObjectPrimitives primitive,
+    std::shared_ptr<Material> material = nullptr);
 
   // static GameObject find();
   // static GameObject findWithTag();

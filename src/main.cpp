@@ -64,11 +64,12 @@ int main() {
   cubeObj.addComponent<MeshRenderer>(ResourceManager::generateCube({1, 1, 0, .5f}),
     ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
 
-  GameObject planeObj = GameObject(world);
+  GameObject planeObj = GameObject::createPrimitive(world, PLANE,
+    ResourceManager::loadMaterial("../src/assets/materials/checkered_wood_4k"));
   planeObj.addTag("plane");
   planeObj.getComponent<Transform>()->rotate(radians(45.f), 0, 0);
-  planeObj.addComponent<MeshRenderer>(ResourceManager::generatePlane({1, 1}, {2, 2}),
-    ResourceManager::loadMaterial("../src/assets/materials/checkered_wood_4k"));
+  // planeObj.addComponent<MeshRenderer>(ResourceManager::generatePlane({1, 1}, {2, 2}),
+  //   ResourceManager::loadMaterial("../src/assets/materials/checkered_wood_4k"));
 
   GameObject sphereObjUV = GameObject(world);
   sphereObjUV.addTag("sphere");
