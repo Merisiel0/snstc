@@ -2,6 +2,7 @@
 
 #include "Pipeline.h"
 #include "VulkanUtils.h"
+#include "utils/FunctionQueue.h"
 
 class Device;
 
@@ -23,15 +24,14 @@ private:
   VkPipelineRasterizationStateCreateInfo getRasterizationState(VkPolygonMode polygonMode) const;
   VkPipelineMultisampleStateCreateInfo getMultisampleState() const;
   VkPipelineDepthStencilStateCreateInfo getDepthStencilState() const;
-  VkPipelineColorBlendStateCreateInfo getColorBlendState() const;
-  VkPipelineDynamicStateCreateInfo getDynamicState() const;
+  PipelineColorBlendStateCreateInfoData getColorBlendState() const;
+  PipelineDynamicStateCreateInfoData getDynamicState() const;
 
-  VkGraphicsPipelineCreateInfo getCreateInfo(
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
+  GraphicsPipelineCreateInfoData getCreateInfo(std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
     VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const;
 
 public:
   GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology,
-    VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos,
-    std::vector<VkDescriptorSetLayout> setLayouts);
+    VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
+    std::vector<VkDescriptorSetLayout>& setLayouts);
 };

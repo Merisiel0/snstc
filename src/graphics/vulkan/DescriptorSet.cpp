@@ -14,42 +14,48 @@ VkDescriptorSetAllocateInfo DescriptorSet::getSetAllocateInfo(const DescriptorPo
   //info.pNext;
   info.descriptorPool = pool.handle;
   info.descriptorSetCount = 1;
-  info.pSetLayouts = new VkDescriptorSetLayout(layout.handle);
+  info.pSetLayouts = &layout.handle;
 
   return info;
 }
 
-VkWriteDescriptorSet DescriptorSet::getWriteInfo(uint32_t binding, const Image& image,
+WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, const Image& image,
   const Sampler& sampler) const {
-  VkWriteDescriptorSet write {};
-  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  //write.pNext;
-  write.dstSet = handle;
-  write.dstBinding = binding;
-  //write.dstArrayElement = 0;
-  write.descriptorCount = 1;
-  write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  write.pImageInfo = new VkDescriptorImageInfo(getImageInfo(image, sampler));
-  //write.pBufferInfo;
-  //write.pTexelBufferView;
+  WriteDescriptorSetData data;
 
-  return write;
+  data.imageInfo = getImageInfo(image, sampler);
+
+  data.info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  data.info.pNext = nullptr;
+  data.info.dstSet = handle;
+  data.info.dstBinding = binding;
+  data.info.dstArrayElement = 0;
+  data.info.descriptorCount = 1;
+  data.info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  data.info.pImageInfo = &data.imageInfo;
+  data.info.pBufferInfo = nullptr;
+  data.info.pTexelBufferView = nullptr;
+
+  return data;
 }
 
-VkWriteDescriptorSet DescriptorSet::getWriteInfo(uint32_t binding, Buffer* buffer) const {
-  VkWriteDescriptorSet write {};
-  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  //write.pNext;
-  write.dstSet = handle;
-  write.dstBinding = binding;
-  //write.dstArrayElement = 0;
-  write.descriptorCount = 1;
-  write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  //write.pImageInfo;
-  write.pBufferInfo = new VkDescriptorBufferInfo(getBufferInfo(buffer));
-  //write.pTexelBufferView;
+WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, Buffer* buffer) const {
+  WriteDescriptorSetData data;
 
-  return write;
+  data.bufferInfo = getBufferInfo(buffer);
+
+  data.info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  data.info.pNext = nullptr;
+  data.info.dstSet = handle;
+  data.info.dstBinding = binding;
+  data.info.dstArrayElement = 0;
+  data.info.descriptorCount = 1;
+  data.info.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  data.info.pImageInfo = nullptr;
+  data.info.pBufferInfo = &data.bufferInfo;
+  data.info.pTexelBufferView = nullptr;
+
+  return data;
 }
 
 VkDescriptorImageInfo DescriptorSet::getImageInfo(const Image& image,
@@ -81,11 +87,11 @@ DescriptorSet::DescriptorSet(std::shared_ptr<Device> device, const DescriptorPoo
 }
 
 void DescriptorSet::write(uint32_t binding, const Image& image, const Sampler& sampler) {
-  VkWriteDescriptorSet writeInfo = getWriteInfo(binding, image, sampler);
-  vkUpdateDescriptorSets(_device->handle, 1, &writeInfo, 0, nullptr);
+  WriteDescriptorSetData writeData = getWriteInfo(binding, image, sampler);
+  vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
 }
 
 void DescriptorSet::write(uint32_t binding, Buffer* buffer) {
-  VkWriteDescriptorSet writeInfo = getWriteInfo(binding, buffer);
-  vkUpdateDescriptorSets(_device->handle, 1, &writeInfo, 0, nullptr);
+  WriteDescriptorSetData writeData = getWriteInfo(binding, buffer);
+  vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
 }

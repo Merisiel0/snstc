@@ -237,17 +237,19 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
     Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/PBR_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
-    _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-      VK_POLYGON_MODE_FILL,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
-        fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle, _objDescSetLayout->handle});
+    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
+      fragmentShader->getStageCreateInfo()};
 
+    std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle,
+      _objDescSetLayout->handle};
+
+    // create normal pbr pipeline
+    _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+      VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+
+    // create line pbr pipeline
     _pipelineLinePBR = std::make_shared<GraphicsPipeline>(_device,
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
-        fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle, _objDescSetLayout->handle});
+      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
 
     delete vertexShader;
     delete fragmentShader;
@@ -263,17 +265,18 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
     Shader* fragmentShader = new Shader(_device, "../src/assets/shaders/color_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
-    _pipelineColor = std::make_shared<GraphicsPipeline>(_device,
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
-        fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle});
+    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
+      fragmentShader->getStageCreateInfo()};
 
+    std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle};
+
+    // create normal color pipeline
+    _pipelineColor = std::make_shared<GraphicsPipeline>(_device,
+      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+
+    // create line color pipeline
     _pipelineLineColor = std::make_shared<GraphicsPipeline>(_device,
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
-      std::vector<VkPipelineShaderStageCreateInfo> {vertexShader->getStageCreateInfo(),
-        fragmentShader->getStageCreateInfo()},
-      std::vector<VkDescriptorSetLayout> {_camDescSetLayout->handle});
+      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
 
     delete vertexShader;
     delete fragmentShader;
@@ -342,7 +345,6 @@ void VulkanHandler::render(World& world) {
 
     // write object descriptor set if needed
     if(!rd.material->isPlainColor()) {
-
       if(rd.material->hasMap(ALBEDO)) {
         currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
       }
@@ -367,7 +369,8 @@ void VulkanHandler::render(World& world) {
       _defaultSampler);
       }*/
 
-      currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1, *currentPipeline);
+      currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1,
+        *currentPipeline);
     }
 
     // push vertices and model matrix inside pushconstants

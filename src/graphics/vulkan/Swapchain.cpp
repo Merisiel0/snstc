@@ -141,7 +141,7 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device,
     VK_CHECK(vkCreateImageView(device->handle, &createInfo, nullptr, &imageViews[i]));
 
     _images[i] =
-      std::shared_ptr<Image>(new Image(vkImages[i], imageViews[i], extent), [](Image* i) {});
+      std::make_shared<Image>(vkImages[i], imageViews[i], extent);
   }
 }
 

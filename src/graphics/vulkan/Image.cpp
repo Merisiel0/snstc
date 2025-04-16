@@ -14,6 +14,8 @@
 #define STB_IMAGE_RESIZE2_IMPLEMENTATION
 #include "stb_image_resize2.h"
 
+const std::string Image::SWAPCHAIN_IMAGE_TAG {"swapchain_image"};
+
 void Image::init(std::shared_ptr<Device> device, std::weak_ptr<Allocator> allocator,
   std::weak_ptr<ImmediateSubmit> immediateSubmit) {
   _device = device;
@@ -88,6 +90,7 @@ Image::Image(VkImage image, VkImageView view, VkExtent2D extent) {
 
   _allocation = {};
   _info = {};
+  _info.pName = SWAPCHAIN_IMAGE_TAG.c_str();
   _channelAmount = {4};
   _usage = 0;
 }
@@ -179,6 +182,9 @@ Image::Image(std::string path) {
 }
 
 Image::~Image() {
+  // swapchain owned images are destroyed by swapchain
+  if(_info.pName && SWAPCHAIN_IMAGE_TAG.compare(_info.pName) == 0) return;
+
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
 
@@ -333,24 +339,26 @@ VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(const VkClearValue& 
   return attachmentInfo;
 }
 
-VkRenderingInfo Image::getRenderingInfo(const Image& color, const Image& depth,
+RenderingInfoData Image::getRenderingInfo(const Image& color, const Image& depth,
   const VkClearValue& clear, bool doClear) {
-  VkRenderingInfo renderInfo {};
-  renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-  // renderInfo.pNext = nullptr;
-  // renderInfo.flags = 0;
-  renderInfo.renderArea.extent = color._extent;
-  renderInfo.renderArea.offset = {0, 0};
-  renderInfo.layerCount = 1;
-  // renderInfo.viewMask = 0;
-  renderInfo.colorAttachmentCount = 1;
-  renderInfo.pColorAttachments =
-    new VkRenderingAttachmentInfo(color.getRenderingAttachmentInfo(clear, true));
-  renderInfo.pDepthAttachment =
-    new VkRenderingAttachmentInfo(depth.getRenderingAttachmentInfo(VkClearValue {1.0f, 0}, true));
-  // renderInfo.pStencilAttachment = nullptr;
+  RenderingInfoData data;
 
-  return renderInfo;
+  data.colorAttachments.push_back(color.getRenderingAttachmentInfo(clear, true));
+  data.depthAttachment = depth.getRenderingAttachmentInfo(VkClearValue {1, 0}, true);
+
+  data.info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+  data.info.pNext = nullptr;
+  data.info.flags = 0;
+  data.info.renderArea.extent = color._extent;
+  data.info.renderArea.offset = {0, 0};
+  data.info.layerCount = 1;
+  data.info.viewMask = 0;
+  data.info.colorAttachmentCount = (uint32_t)data.colorAttachments.size();
+  data.info.pColorAttachments = data.colorAttachments.data();
+  data.info.pDepthAttachment = &data.depthAttachment;
+  data.info.pStencilAttachment = nullptr;
+
+  return data;
 }
 
 VkImageSubresourceRange Image::getSubresourceRange() const {

@@ -4,6 +4,7 @@
 #include "SDL3/SDL_vulkan.h"
 #include "vk_mem_alloc.h"
 #include "vulkan/vulkan.h"
+#include "DataStructures.h"
 
 #include <iostream>
 #include <memory>

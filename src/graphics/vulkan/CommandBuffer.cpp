@@ -54,8 +54,8 @@ void CommandBuffer::begin() const {
 }
 
 void CommandBuffer::beginRendering(const Image& colorImage, const Image& depthImage) const {
-  VkRenderingInfo renderingInfo = Image::getRenderingInfo(colorImage, depthImage);
-  vkCmdBeginRendering(handle, &renderingInfo);
+  RenderingInfoData renderingInfo = Image::getRenderingInfo(colorImage, depthImage);
+  vkCmdBeginRendering(handle, &renderingInfo.info);
 }
 
 void CommandBuffer::endRendering() const { vkCmdEndRendering(handle); }
@@ -105,28 +105,29 @@ void CommandBuffer::drawVertices(uint32_t vertexCount) const {
 
 void CommandBuffer::submitToQueue(const Queue& queue, const Fence& fence,
   std::shared_ptr<Semaphore> wait, std::shared_ptr<Semaphore> signal) const {
-  VkSubmitInfo2 info2 {};
-  info2.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-  //info2.pNext = nullptr;
-  //info2.flags = 0;
+  SubmitInfo2Data data;
 
   if(wait) {
-    info2.waitSemaphoreInfoCount = 1;
-    VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo =
-      wait->getSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
-    info2.pWaitSemaphoreInfos = new VkSemaphoreSubmitInfo(waitSemaphoreSubmitInfo);
+    data.waitSemaphoreInfos.push_back(
+      wait->getSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR));
   }
+
+  data.commandBufferSubmitInfos.push_back(getSubmitInfo());
 
   if(signal) {
-    info2.signalSemaphoreInfoCount = 1;
-    VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo =
-      signal->getSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
-    info2.pSignalSemaphoreInfos = new VkSemaphoreSubmitInfo(signalSemaphoreSubmitInfo);
+    data.signalSemaphoreInfos.push_back(
+      signal->getSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT));
   }
 
-  info2.commandBufferInfoCount = 1;
-  VkCommandBufferSubmitInfo submitInfo = getSubmitInfo();
-  info2.pCommandBufferInfos = &submitInfo;
+  data.info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+  data.info.pNext = nullptr;
+  data.info.flags = 0;
+  data.info.waitSemaphoreInfoCount = (uint32_t) data.waitSemaphoreInfos.size();
+  data.info.pWaitSemaphoreInfos = data.waitSemaphoreInfos.data();
+  data.info.signalSemaphoreInfoCount = (uint32_t) data.signalSemaphoreInfos.size();
+  data.info.pSignalSemaphoreInfos = data.signalSemaphoreInfos.data();
+  data.info.commandBufferInfoCount = (uint32_t)data.commandBufferSubmitInfos.size();
+  data.info.pCommandBufferInfos = data.commandBufferSubmitInfos.data();
 
-  VK_CHECK(vkQueueSubmit2(queue.handle, 1, &info2, fence.handle));
+  VK_CHECK(vkQueueSubmit2(queue.handle, 1, &data.info, fence.handle));
 }

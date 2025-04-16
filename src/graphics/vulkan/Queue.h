@@ -10,7 +10,7 @@ class Swapchain;
 
 class Queue {
 private:
-  VkPresentInfoKHR getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex,
+  VkPresentInfoKHR getPresentInfo(const Swapchain& swapchain, uint32_t& imageIndex,
     const Semaphore& wait) const;
 
 public:

@@ -15,6 +15,8 @@ enum ImageType { COLOR, DEPTH };
 
 class Image {
 private:
+static const std::string SWAPCHAIN_IMAGE_TAG;
+
   static inline std::weak_ptr<Device> _device;
   static inline std::weak_ptr<Allocator> _allocator;
   static inline std::weak_ptr<ImmediateSubmit> _immediateSubmit;
@@ -63,7 +65,7 @@ public:
   VkExtent2D extent() const { return _extent; }
   VkFormat format() const { return _format; }
 
-  static VkRenderingInfo getRenderingInfo(const Image& color, const Image& depth,
+  static RenderingInfoData getRenderingInfo(const Image& color, const Image& depth,
     const VkClearValue& clear = VkClearValue {}, bool doClear = false);
 
   void transitionLayout(std::shared_ptr<CommandBuffer> commandBuffer, VkImageLayout newLayout);

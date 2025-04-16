@@ -9,12 +9,12 @@ private:
   std::shared_ptr<Device> _device;
 
   VkDescriptorSetLayoutCreateInfo getCreateInfo(
-    std::vector<VkDescriptorSetLayoutBinding> bindings) const;
+    std::vector<VkDescriptorSetLayoutBinding>& bindings) const;
 
 public:
   VkDescriptorSetLayout handle;
 
   DescriptorSetLayout(std::shared_ptr<Device> device,
-    std::vector<VkDescriptorSetLayoutBinding> bindings);
+    std::vector<VkDescriptorSetLayoutBinding>& bindings);
   ~DescriptorSetLayout();
 };

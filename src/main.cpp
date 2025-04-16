@@ -73,7 +73,7 @@ int main() {
   GameObject sphereObjUV = GameObject(world);
   sphereObjUV.addTag("sphere");
   sphereObjUV.getComponent<Transform>()->position = {5, 0, 0};
-  sphereObjUV.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {0.1f, 1, 0.1f, 1}),
+  sphereObjUV.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {0.0f, 1, 0.0f, 1}),
     ResourceManager::loadMaterial(), VK_CULL_MODE_NONE, VK_POLYGON_MODE_LINE);
 
   // --- Game Loop ---
@@ -89,7 +89,7 @@ int main() {
 
     frames++;
     if(frames == 1) {
-      quit = true;
+      //quit = true;
     }
   }
 

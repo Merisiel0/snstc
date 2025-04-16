@@ -7,7 +7,7 @@
 #include "Semaphore.h"
 #include "Swapchain.h"
 
-VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t imageIndex,
+VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t& imageIndex,
   const Semaphore& wait) const {
   VkPresentInfoKHR info {};
   info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -19,7 +19,7 @@ VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t imag
   info.pSwapchains = &swapchain.handle;
   info.swapchainCount = 1;
 
-  info.pImageIndices = new uint32_t(imageIndex);
+  info.pImageIndices = &imageIndex;
 
   //info.pResults = nullptr;
 

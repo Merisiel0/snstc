@@ -15,9 +15,9 @@ private:
 
   VkDescriptorSetAllocateInfo getSetAllocateInfo(const DescriptorPool& pool,
     const DescriptorSetLayout& layout) const;
-  VkWriteDescriptorSet getWriteInfo(uint32_t binding, const Image& image,
+  WriteDescriptorSetData getWriteInfo(uint32_t binding, const Image& image,
     const Sampler& sampler) const;
-  VkWriteDescriptorSet getWriteInfo(uint32_t binding, Buffer* buffer) const;
+  WriteDescriptorSetData getWriteInfo(uint32_t binding, Buffer* buffer) const;
   VkDescriptorImageInfo getImageInfo(const Image& image, const Sampler& sampler) const;
   VkDescriptorBufferInfo getBufferInfo(Buffer* buffer) const;
 
