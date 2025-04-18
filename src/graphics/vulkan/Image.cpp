@@ -479,7 +479,7 @@ void Image::save(const char* path) {
 }
 
 void Image::clear(std::shared_ptr<CommandBuffer> commandBuffer, Color color) {
-  VkClearColorValue clearColor = {{color.r, color.g, color.b}};
+  VkClearColorValue clearColor = {color.r, color.g, color.b, color.a};
   VkImageSubresourceRange clearRange = getSubresourceRange();
   vkCmdClearColorImage(commandBuffer->handle, handle, _layout, &clearColor, 1, &clearRange);
 }

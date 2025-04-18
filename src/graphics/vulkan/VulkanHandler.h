@@ -68,4 +68,6 @@ public:
 
   void render(World& world);
   void waitForEndOfWork() const;
+
+  void oldRender(World& world);
 };

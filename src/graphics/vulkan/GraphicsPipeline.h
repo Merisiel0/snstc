@@ -7,8 +7,9 @@
 class Device;
 
 struct PushConstants {
-  glm::mat4 transform;
+  mat4 transform;
   VkDeviceAddress vertexBuffer;
+  VkDeviceAddress instanceBuffer;
 };
 
 class GraphicsPipeline : public IPipeline {
@@ -27,7 +28,8 @@ private:
   PipelineColorBlendStateCreateInfoData getColorBlendState() const;
   PipelineDynamicStateCreateInfoData getDynamicState() const;
 
-  GraphicsPipelineCreateInfoData getCreateInfo(std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
+  GraphicsPipelineCreateInfoData getCreateInfo(
+    std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
     VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const;
 
 public:

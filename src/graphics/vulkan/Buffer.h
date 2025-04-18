@@ -70,7 +70,8 @@ public:
 
   template<typename T>
   void update(std::shared_ptr<CommandBuffer> commandBuffer, std::vector<T> data) {
-    vkCmdUpdateBuffer(commandBuffer->handle, handle, 0, data.size() * sizeof(T), data.data());
+    uint32_t size = data.size() * sizeof(T);
+    vkCmdUpdateBuffer(commandBuffer->handle, handle, 0, size, data.data());
     _count = (uint32_t) data.size();
   }
 };

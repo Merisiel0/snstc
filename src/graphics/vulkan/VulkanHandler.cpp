@@ -42,6 +42,14 @@ void VulkanHandler::beginDrawing(World& world) {
   // begin recording command buffer
   currentFrame->commandBuffer->begin();
 
+  // update all instance buffers in MeshRenderers
+
+  auto renderers = world.getComponentsInChildren<MeshRenderer>();
+  for(const auto& renderer : renderers) {
+    MeshRenderer& rd = renderer.get();
+    rd.updateInstanceBuffer(currentFrame->commandBuffer);
+  }
+
   // clear image with color - todo: insert skybox here
   _drawImage->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
   _drawImage->clear(currentFrame->commandBuffer, {1, 1, 1, 1});
@@ -232,38 +240,42 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   _defaultSampler = std::make_shared<Sampler>(_device);
 
   // PBR pipelines
-  try {
-    Shader* vertexShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_vert.spv",
-      VK_SHADER_STAGE_VERTEX_BIT);
-    Shader* fragmentShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_frag.spv",
-      VK_SHADER_STAGE_FRAGMENT_BIT);
+  // try {
+  //   Shader* vertexShader =
+  //     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_vert.spv",
+  //       VK_SHADER_STAGE_VERTEX_BIT);
+  //   Shader* fragmentShader =
+  //     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_frag.spv",
+  //       VK_SHADER_STAGE_FRAGMENT_BIT);
 
-    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
-      fragmentShader->getStageCreateInfo()};
+  //   std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
+  //     fragmentShader->getStageCreateInfo()};
 
-    std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle,
-      _objDescSetLayout->handle};
+  //   std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle,
+  //     _objDescSetLayout->handle};
 
-    // create normal pbr pipeline
-    _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-      VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+  //   // create normal pbr pipeline
+  //   _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+  //     VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
 
-    // create line pbr pipeline
-    _pipelineLinePBR = std::make_shared<GraphicsPipeline>(_device,
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
+  //   // create line pbr pipeline
+  //   _pipelineLinePBR = std::make_shared<GraphicsPipeline>(_device,
+  //     VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
 
-    delete vertexShader;
-    delete fragmentShader;
-  } catch(const std::runtime_error& e) {
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Failed to instantiate PBR pipeline." << std::endl;
-  }
+  //   delete vertexShader;
+  //   delete fragmentShader;
+  // } catch(const std::runtime_error& e) {
+  //   std::cerr << e.what() << std::endl;
+  //   std::cerr << "Failed to instantiate PBR pipeline." << std::endl;
+  // }
 
   // plain color pipelines
   try {
-    Shader* vertexShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/color_material_vert.spv",
+    Shader* vertexShader = new Shader(_device,
+      ResourceManager::assetsPath + "/src/assets/shaders/color_material_vert.spv",
       VK_SHADER_STAGE_VERTEX_BIT);
-    Shader* fragmentShader = new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/color_material_frag.spv",
+    Shader* fragmentShader = new Shader(_device,
+      ResourceManager::assetsPath + "/src/assets/shaders/color_material_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
@@ -325,6 +337,43 @@ void VulkanHandler::render(World& world) {
 
   std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
+  auto renderers = world.getComponentsInChildren<MeshRenderer>();
+  for(const auto& renderer : renderers) {
+    MeshRenderer& rd = renderer.get();
+
+    // find and bind pipeline to use
+    std::shared_ptr<GraphicsPipeline> currentPipeline = _pipelineColor;
+    currentFrame->commandBuffer->bindPipeline(*currentPipeline);
+
+    // skipped object descriptor binding
+
+    // push vertices and model matrix inside pushconstants
+    PushConstants constants {};
+    constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
+    constants.vertexBuffer = rd.mesh->vertices->address;
+    std::shared_ptr<Buffer> instanceBuffer = rd.getInstancesBuffer();
+    constants.instanceBuffer = instanceBuffer->address;
+    currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
+      VK_SHADER_STAGE_VERTEX_BIT);
+
+    // set dynamic states
+    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
+    currentFrame->commandBuffer->setCullMode(rd.cullMode);
+
+    // draw
+    currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
+    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), rd.getInstanceCount());
+  }
+
+  // end
+  endDrawing();
+}
+
+void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }
+
+void VulkanHandler::oldRender(World& world) {
+  std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
+
   // for each renderers in the scene..
   auto renderers = world.getComponentsInChildren<MeshRenderer>();
   for(const auto& renderer : renderers) {
@@ -376,9 +425,8 @@ void VulkanHandler::render(World& world) {
 
     // push vertices and model matrix inside pushconstants
     PushConstants constants {};
-    constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
-    // constants.transform = world->camera()->projection * world->camera()->view
-    // * renderer->gameObject->getComponent<Transform>()->modelMatrix();
+    // constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
+    // constants.instanceBuffer = rd.getInstanceTransformsBuffer()->address;
     constants.vertexBuffer = rd.mesh->vertices->address;
     currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
       VK_SHADER_STAGE_VERTEX_BIT);
@@ -389,11 +437,6 @@ void VulkanHandler::render(World& world) {
 
     // draw
     currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
-    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count());
+    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), 1);
   }
-
-  // end
-  endDrawing();
 }
-
-void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }

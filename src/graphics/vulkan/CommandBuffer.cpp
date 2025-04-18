@@ -95,8 +95,8 @@ void CommandBuffer::bindIndexBuffer(Buffer* buffer) const {
   vkCmdBindIndexBuffer(handle, buffer->handle, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void CommandBuffer::drawIndexed(uint32_t indexCount) const {
-  vkCmdDrawIndexed(handle, indexCount, 1, 0, 0, 0);
+void CommandBuffer::drawIndexed(uint32_t indexCount, uint32_t instanceCount) const {
+  vkCmdDrawIndexed(handle, indexCount, instanceCount, 0, 0, 0);
 }
 
 void CommandBuffer::drawVertices(uint32_t vertexCount) const {

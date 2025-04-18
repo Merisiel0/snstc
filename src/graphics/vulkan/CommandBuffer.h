@@ -43,7 +43,7 @@ public:
   void pushConstants(PushConstants constants, VkPipelineLayout layout,
     VkShaderStageFlags stage) const;
   void bindIndexBuffer(Buffer* buffer) const;
-  void drawIndexed(uint32_t indexCount) const;
+  void drawIndexed(uint32_t indexCount, uint32_t instanceCount) const;
   void drawVertices(uint32_t vertexCount) const;
 
   void submitToQueue(const Queue& queue, const Fence& fence, std::shared_ptr<Semaphore> wait,
