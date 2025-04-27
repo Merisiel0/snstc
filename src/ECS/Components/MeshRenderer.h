@@ -60,6 +60,8 @@ public:
   /// This does not clear the memory, call `setMaxInstanceCount(0)` for that.
   void clearInstances();
 
+  bool isInstancing() { return _maxInstances != 0; }
+
   MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) :
       mesh {mesh},
       material {material},

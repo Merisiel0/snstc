@@ -32,13 +32,12 @@ void main()
 	vec3 diffuse = diff * lights.color.xyz / dist * lights.color.w;
 
 	float spec = 0.0;
-
-	if (diff > 0) {
+	// if (diff > 0) {
 		vec3 viewDir = normalize(lights.viewPosition - inFragPos);
-		vec3 reflectDir = reflect(-lightDir, norm);
-		spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-	}
+		vec3 halfwayDir = normalize(lightDir + viewDir);
+		spec = pow(max(dot(norm, halfwayDir), 0.0), 32);
+	// }
 	vec3 specular = spec * lights.color.xyz / dist * lights.color.w;
-
+	
 	outFragColor = texture(colorTexture, inUV) * vec4(ambiant + specular, 1.0f);
 }

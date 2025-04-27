@@ -42,31 +42,18 @@ int main() {
   // --- Game Initialization ---
   GameObject cameraObj = GameObject(world);
   cameraObj.addTag("camera");
-  cameraObj.getComponent<Transform>()->position = {0, 0, 2};
+  cameraObj.getComponent<Transform>()->position = {0, 0, 5};
   Camera& cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
-  cameraObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
-  cameraObj.addComponent<Light>(Color {1, 1, 1, 3});
-  cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
   cubeObj.addTag("cube");
-  // cubeObj.getComponent<Transform>()->position = {-5, 0, 0};
-  // cubeObj.getComponent<Transform>()->rotate(radians(45.f), radians(45.f), 0);
-  // cubeObj.addComponent<MeshRenderer>(ResourceManager::generateCube({1, 1, 0, .5f}),
-  // //   ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
-  // cubeObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
-  // GameObject planeObj = GameObject::createPrimitive(world, PLANE,
-  //   ResourceManager::loadMaterial(ResourceManager::assetsPath + "/src/assets/materials/checkered_wood_4k"));
-  // planeObj.addTag("plane");
-  // planeObj.getComponent<Transform>()->rotate(radians(45.f), 0, 0);
-
-  // GameObject sphereObjUV = GameObject(world);
-  // sphereObjUV.addTag("sphere");
-  // sphereObjUV.getComponent<Transform>()->position = {5, 0, 0};
-  // sphereObjUV.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(0, {0.0f, 1, 0.0f, 1}),
-  //   ResourceManager::loadMaterial(), VK_CULL_MODE_NONE, VK_POLYGON_MODE_LINE);
+  GameObject lightObj = GameObject(world);
+  lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(1, Color {0, 0, 1, 1}), ResourceManager::loadMaterial(Color{0, 0, 1, 1}));
+  lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
+  lightObj.addComponent<Light>(Color {1, 1, 1, 3});
+  lightObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   // --- Game Loop ---
   int frames = 0;

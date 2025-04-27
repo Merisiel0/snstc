@@ -7,7 +7,9 @@
 #include "resources/Material.h"
 
 void MeshRenderer::updateInstanceBuffer(std::shared_ptr<CommandBuffer> commandBuffer) {
-  _instanceBuffer->update(commandBuffer, _instances);
+  if(isInstancing()){
+    _instanceBuffer->update(commandBuffer, _instances);
+  }
 }
 
 std::shared_ptr<Buffer> MeshRenderer::getInstancesBuffer() { return _instanceBuffer; }
@@ -27,7 +29,10 @@ void MeshRenderer::setMaxInstanceCount(int max) {
   }
 }
 
-int MeshRenderer::getInstanceCount() { return (int) _instances.size(); }
+int MeshRenderer::getInstanceCount() {
+  if(isInstancing()) return 1;
+  return (int) _instances.size(); 
+}
 
 void MeshRenderer::addInstance(InstanceProperties instance) {
   if(_instances.size() < _maxInstances) { _instances.push_back(instance); }
