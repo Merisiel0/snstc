@@ -31,3 +31,4 @@ Environment variables:
 
 ## Funky little accidents
 ![damn-the-lighting](https://github.com/Merisiel0/snstc/blob/master/README_assets/2025-04-12%2022-47-07.gif)
+![is-this-color-theory-?](https://github.com/Merisiel0/snstc/blob/master/README_assets/color_theory_i_guess.gif)
