@@ -21,16 +21,29 @@ layout(buffer_reference, std430) readonly buffer VertexBuffer {
 	Vertex vertices[];
 };
 
+struct Instance {
+  mat4 model;
+};
+
+layout(buffer_reference, std430) readonly buffer InstanceBuffer {
+  Instance instances[];
+};
+
 layout( push_constant ) uniform constants {
-	mat4 modelMatrix;
+  mat4 transform;
 	VertexBuffer vertexBuffer;
+  InstanceBuffer instanceBuffer;
 } PushConstants;
 
 void main()  {	
 	Vertex v = PushConstants.vertexBuffer.vertices[gl_VertexIndex];
-	gl_Position = cam.projView * PushConstants.modelMatrix * vec4(v.position, 1.0f);
+  Instance instance = PushConstants.instanceBuffer.instances[gl_InstanceIndex];
+
+  mat4 model = PushConstants.transform * instance.model;
+
+	gl_Position = cam.projView * model * vec4(v.position, 1.0f);
 
 	outUV = vec2(v.u, v.v);
-	outFragPos = vec3(PushConstants.modelMatrix * vec4(v.position, 1.0));
-	outNormal = mat3(transpose(inverse(PushConstants.modelMatrix))) * v.normal;
+	outFragPos = vec3(model * vec4(v.position, 1.0));
+	outNormal = mat3(transpose(inverse(model))) * v.normal;
 }

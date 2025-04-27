@@ -33,15 +33,25 @@ public:
 
   /// @brief Loads an image from the provided path.
   /// @param path path to the image.
-  /// @return an image.
+  /// @return an image if the path exist, nullptr otherwise.
   static std::shared_ptr<Image> loadImage(std::string path);
+
+  /// @brief Loads an image of the provided dimensions and color.
+  /// @param width the width of the image.
+  /// @param height the height of the image.
+  /// @param color the color of the image.
+  /// @return an image.
+  static std::shared_ptr<Image> loadImage(int width, int height, Color color);
 
   /// @brief Loads a material from the provided path.
   /// @param path path to the material.
-  /// @return a PBR material if a path is provided, a default color material otherwise.
-  ///
-  /// In the second case, the color depends on the color attribute of the vertices of the mesh.
+  /// @return a PBR material the path exists, nullptr otherwise.
   static std::shared_ptr<Material> loadMaterial(std::string path = "");
+
+  /// @brief Loads a color material of the provided color.
+  /// @param color a color.
+  /// @return a PBR material with a single albedo map.
+  static std::shared_ptr<Material> loadMaterial(Color color);
 
   /// @brief Loads a mesh from the provide path.
   /// @param path path to the mesh.

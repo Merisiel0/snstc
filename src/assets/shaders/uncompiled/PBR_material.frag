@@ -40,5 +40,6 @@ void main()
 	}
 	vec3 specular = spec * lights.color.w * lights.color.xyz / dist;
 
-	outFragColor = texture(colorTexture, inUV) * vec4(ambiant + diffuse + specular, 1.0f);
+  outFragColor = texture(colorTexture, inUV);// * vec4(ambiant + specular, 1.0f);
+	// outFragColor = texture(colorTexture, inUV) * vec4(ambiant + diffuse + specular, 1.0f);
 }

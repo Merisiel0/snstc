@@ -185,7 +185,7 @@ GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primit
   std::shared_ptr<Material> material) {
   GameObject obj = GameObject(world);
 
-  if(!material) { material = ResourceManager::loadMaterial(); }
+  if(!material) { material = ResourceManager::loadMaterial(Color{0, 1, 0, 1}); }
 
   std::shared_ptr<Mesh> mesh;
   switch(primitive) {

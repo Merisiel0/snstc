@@ -38,6 +38,10 @@ Material::Material(std::string path) {
   }
 }
 
+Material::Material(Color color){
+  _maps[ALBEDO] = ResourceManager::loadImage(1, 1, color);
+}
+
 bool Material::hasAMap() {
   for(int i = 0; i < MapIndex::MAP_COUNT; i++) {
     if(hasMap((MapIndex) i)) { return true; }

@@ -47,15 +47,15 @@ int main() {
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
   cameraObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
   cameraObj.addComponent<Light>(Color {1, 1, 1, 3});
-  // cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
+  cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
   cubeObj.addTag("cube");
   // cubeObj.getComponent<Transform>()->position = {-5, 0, 0};
   // cubeObj.getComponent<Transform>()->rotate(radians(45.f), radians(45.f), 0);
   // cubeObj.addComponent<MeshRenderer>(ResourceManager::generateCube({1, 1, 0, .5f}),
-  //   ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
-  cubeObj.addComponent<PlayerController>(3.0f, radians(40.f));
+  // //   ResourceManager::loadMaterial(), VK_CULL_MODE_FRONT_BIT);
+  // cubeObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   // GameObject planeObj = GameObject::createPrimitive(world, PLANE,
   //   ResourceManager::loadMaterial(ResourceManager::assetsPath + "/src/assets/materials/checkered_wood_4k"));

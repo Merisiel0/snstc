@@ -181,6 +181,57 @@ Image::Image(std::string path) {
   VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
+Image::Image(int width, int height, Color color) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
+
+  if(width < 1) width = 1;
+  if(height < 1) height = 1;
+
+  _channelAmount = 4;
+
+  std::vector<uint8_t> pixels{};
+  int pixelQty = width * height;
+  for(int i = 0; i < pixelQty; i++){
+    pixels.push_back(255 * color.r);
+    pixels.push_back(255 * color.g);
+    pixels.push_back(255 * color.b);
+    pixels.push_back(255 * color.a);
+  }
+
+  _extent.width = (uint32_t)width;
+  _extent.height = (uint32_t)height;
+  _format = VK_FORMAT_R8G8B8A8_SRGB;
+  _usage =
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+  _aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+
+  size_t imageSize = static_cast<size_t>(_extent.width * _extent.height * _channelAmount);
+  Buffer* stagingBuffer =
+    new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+  void* data;
+  vmaMapMemory(allocatorSptr->handle, stagingBuffer->allocation(), &data);
+  memcpy(data, pixels.data(), imageSize);
+  vmaUnmapMemory(allocatorSptr->handle, stagingBuffer->allocation());
+
+  VkImageCreateInfo createInfo = getCreateInfo();
+  VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
+    &_allocation, &_info));
+
+  view = VK_NULL_HANDLE;
+  immediateSubmitSptr->submit([&stagingBuffer, this](std::shared_ptr<CommandBuffer> commandBuffer) {
+    this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    stagingBuffer->copyToImage(commandBuffer, *this);
+    this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  });
+  delete stagingBuffer;
+
+  VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
+}
+
 Image::~Image() {
   // swapchain owned images are destroyed by swapchain
   if(_info.pName && SWAPCHAIN_IMAGE_TAG.compare(_info.pName) == 0) return;
@@ -353,7 +404,7 @@ RenderingInfoData Image::getRenderingInfo(const Image& color, const Image& depth
   data.info.renderArea.offset = {0, 0};
   data.info.layerCount = 1;
   data.info.viewMask = 0;
-  data.info.colorAttachmentCount = (uint32_t)data.colorAttachments.size();
+  data.info.colorAttachmentCount = (uint32_t) data.colorAttachments.size();
   data.info.pColorAttachments = data.colorAttachments.data();
   data.info.pDepthAttachment = &data.depthAttachment;
   data.info.pStencilAttachment = nullptr;

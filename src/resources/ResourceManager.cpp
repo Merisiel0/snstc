@@ -41,7 +41,32 @@ std::shared_ptr<Image> ResourceManager::loadImage(std::string path) {
     }
   }
 
+  if(!std::filesystem::exists(path)){
+    return nullptr;
+  }
+
   std::shared_ptr<Image> img = std::shared_ptr<Image>(new Image(path));
+  _images.insert({path, img});
+
+  return img;
+}
+
+std::shared_ptr<Image> ResourceManager::loadImage(int width, int height, Color color) {
+  std::stringstream ss;
+  ss << _generationPrefix << "image" << width << height << color.r << color.g << color.b << color.a;
+
+  std::string path = ss.str();
+
+  auto it = _images.find(path);
+  if(it != _images.end()) {
+    if(it->second.expired()) {
+      _images.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
+
+  std::shared_ptr<Image> img = std::shared_ptr<Image>(new Image(width, height, color));
   _images.insert({path, img});
 
   return img;
@@ -57,7 +82,32 @@ std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
     }
   }
 
+  if(!std::filesystem::exists(path)){
+    return nullptr;
+  }
+
   std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material(path));
+  _materials.insert({path, mat});
+
+  return mat;
+}
+
+std::shared_ptr<Material> ResourceManager::loadMaterial(Color color) {
+  std::stringstream ss;
+  ss << _generationPrefix << "color" << color.r << color.g << color.b << color.a;
+
+  std::string path = ss.str();
+
+  auto it = _materials.find(path);
+  if(it != _materials.end()) {
+    if(it->second.expired()) {
+      _materials.erase(path);
+    } else {
+      return it->second.lock();
+    }
+  }
+
+  std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material(color));
   _materials.insert({path, mat});
 
   return mat;

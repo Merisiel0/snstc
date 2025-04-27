@@ -1,8 +1,10 @@
 #pragma once
 
+#include "utils/Utils.h"
+
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 class Image;
 class ResourceManager;
@@ -23,6 +25,7 @@ private:
   bool plainColor = true;
 
   Material(std::string path = "");
+  Material(Color color);
 
   friend class ResourceManager;
 
@@ -34,7 +37,7 @@ public:
   /// @brief Checks if this material has a specific map.
   /// @param i a map index to check.
   /// @return true if this material has map of index i, false otherwise
-  bool hasMap(MapIndex i) { return (bool)_maps[i]; }
+  bool hasMap(MapIndex i) { return (bool) _maps[i]; }
 
   /// @brief Checks if this material has at least one map.
   /// @return true if this material has at least one map, false otherwise.

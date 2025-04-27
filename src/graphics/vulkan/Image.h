@@ -39,6 +39,7 @@ static const std::string SWAPCHAIN_IMAGE_TAG;
   VkImageSubresourceRange getSubresourceRange() const;
 
   Image(std::string path);
+  Image(int width, int height, Color color);
 
   friend class ResourceManager;
 
