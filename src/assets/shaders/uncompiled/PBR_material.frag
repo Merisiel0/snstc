@@ -24,22 +24,21 @@ void main()
 {
 	vec3 ambiant = lights.ambiantColor.w * lights.ambiantColor.xyz;
 
-	vec3 dist = lights.viewPosition - inFragPos;
+	float dist = length(lights.viewPosition - inFragPos);
 
 	vec3 norm = normalize(inNormal);
 	vec3 lightDir = normalize(lights.position - inFragPos);
-	float diff = max(dot(norm, lightDir), 0.0); // inverse the two
-	vec3 diffuse = diff * lights.color.w * lights.color.xyz / dist;
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = diff * lights.color.xyz / dist * lights.color.w;
 
 	float spec = 0.0;
 
 	if (diff > 0) {
 		vec3 viewDir = normalize(lights.viewPosition - inFragPos);
 		vec3 reflectDir = reflect(-lightDir, norm);
-		spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // inver the two
+		spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 	}
-	vec3 specular = spec * lights.color.w * lights.color.xyz / dist;
+	vec3 specular = spec * lights.color.xyz / dist * lights.color.w;
 
-  outFragColor = texture(colorTexture, inUV);// * vec4(ambiant + specular, 1.0f);
-	// outFragColor = texture(colorTexture, inUV) * vec4(ambiant + diffuse + specular, 1.0f);
+	outFragColor = texture(colorTexture, inUV) * vec4(ambiant + specular, 1.0f);
 }
