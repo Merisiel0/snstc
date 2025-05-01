@@ -3,10 +3,10 @@
 #include "Device.h"
 
 VkSamplerCreateInfo Sampler::getCreateInfo() const {
-  VkSamplerCreateInfo info {};
+  VkSamplerCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  //info.pNext;
-  //info.flags;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.magFilter = VK_FILTER_LINEAR;
   info.minFilter = VK_FILTER_LINEAR;
   info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -15,7 +15,7 @@ VkSamplerCreateInfo Sampler::getCreateInfo() const {
   info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
   info.mipLodBias = 0.0f;
   info.anisotropyEnable = VK_FALSE;
-  info.maxAnisotropy = 1.0f; // _devicePtr->physicalDeviceLimits().maxSamplerAnisotropy;
+  info.maxAnisotropy = 1.0f;
   info.compareEnable = VK_FALSE;
   info.compareOp = VK_COMPARE_OP_ALWAYS;
   info.minLod = 0.0f;

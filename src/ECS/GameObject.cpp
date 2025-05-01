@@ -190,12 +190,12 @@ GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primit
   std::shared_ptr<Mesh> mesh;
   switch(primitive) {
     case PLANE:
-      mesh = ResourceManager::generatePlane({1, 1}, {2, 2}, {0, 1, 0, 1});
+      mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
       obj.addComponent<MeshRenderer>(mesh, material);
       break;
 
     case CUBE:
-      mesh = ResourceManager::generatePlane({1, 1}, {2, 2}, {0, 1, 0, 1});
+      mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
       MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
       
       mr.setMaxInstanceCount(6);

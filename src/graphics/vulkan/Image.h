@@ -29,8 +29,9 @@ static const std::string SWAPCHAIN_IMAGE_TAG;
   VkFormat _format;
   VkImageAspectFlags _aspect;
   VkImageUsageFlags _usage;
+  uint _layerCount;
 
-  VkImageCreateInfo getCreateInfo() const;
+  VkImageCreateInfo getCreateInfo(VkImageCreateFlagBits flags = (VkImageCreateFlagBits)0) const;
   VkImageViewCreateInfo getViewCreateInfo() const;
   VmaAllocationCreateInfo getAllocationInfo() const;
   VkRenderingAttachmentInfo getRenderingAttachmentInfo(const VkClearValue& clear = VkClearValue {},
@@ -39,6 +40,7 @@ static const std::string SWAPCHAIN_IMAGE_TAG;
   VkImageSubresourceRange getSubresourceRange() const;
 
   Image(std::string path);
+  Image(std::vector<std::string> faces);
   Image(int width, int height, Color color);
 
   friend class ResourceManager;

@@ -7,9 +7,8 @@
 class Device;
 
 struct PushConstants {
-  mat4 transform;
+  mat4 model;
   VkDeviceAddress vertexBuffer;
-  VkDeviceAddress instanceBuffer;
 };
 
 class GraphicsPipeline : public IPipeline {

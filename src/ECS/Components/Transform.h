@@ -3,6 +3,11 @@
 #include "../../utils/Math.h"
 #include "BaseComponent.h"
 
+#include <memory>
+
+class Buffer;
+class CommandBuffer;
+
 enum Space { WORLD, SELF };
 
 struct Transform : public ECS::BaseComponent {
@@ -10,13 +15,18 @@ struct Transform : public ECS::BaseComponent {
   quat rotation;
   vec3 scale;
 
-  Transform(vec3 position, quat rotation, vec3 scale) :
-      position {position}, rotation {rotation}, scale {scale} {}
+  Transform(vec3 position, quat rotation, vec3 scale);
   Transform() : Transform({0, 0, 0}, {glm::identity<quat>()}, {1, 1, 1}) {}
-  Transform(const Transform& t) : position {t.position}, rotation {t.rotation}, scale {t.scale} {}
 
-  mat4 modelMatrix() const;
-  vec3 truePosition() const;
+  mat4 getTranslationMatrix(Space space = WORLD) const;
+  mat4 getRotationMatrix(Space space = WORLD) const;
+  mat4 getScaleMatrix(Space space = WORLD) const;
+
+  mat4 getModelMatrix() const;
+
+  vec3 getPosition(Space space = SELF) const;
+  quat getRotation(Space space = SELF) const;
+  vec3 getScale(Space space = SELF) const;
 
   void getDirections(vec3& right, vec3& up, vec3& forward, Space space = SELF) const;
   void translate(vec3 movement, Space space = SELF);

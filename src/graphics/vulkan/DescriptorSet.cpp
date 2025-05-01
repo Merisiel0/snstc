@@ -9,9 +9,9 @@
 
 VkDescriptorSetAllocateInfo DescriptorSet::getSetAllocateInfo(const DescriptorPool& pool,
   const DescriptorSetLayout& layout) const {
-  VkDescriptorSetAllocateInfo info {};
+  VkDescriptorSetAllocateInfo info;
   info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  //info.pNext;
+  info.pNext = nullptr;
   info.descriptorPool = pool.handle;
   info.descriptorSetCount = 1;
   info.pSetLayouts = &layout.handle;
@@ -39,7 +39,7 @@ WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, const Image
   return data;
 }
 
-WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, Buffer* buffer) const {
+WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, const Buffer& buffer) const {
   WriteDescriptorSetData data;
 
   data.bufferInfo = getBufferInfo(buffer);
@@ -60,7 +60,7 @@ WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, Buffer* buf
 
 VkDescriptorImageInfo DescriptorSet::getImageInfo(const Image& image,
   const Sampler& sampler) const {
-  VkDescriptorImageInfo info {};
+  VkDescriptorImageInfo info;
   info.sampler = sampler.handle;
   info.imageView = image.view;
   info.imageLayout = image.layout();
@@ -68,9 +68,9 @@ VkDescriptorImageInfo DescriptorSet::getImageInfo(const Image& image,
   return info;
 }
 
-VkDescriptorBufferInfo DescriptorSet::getBufferInfo(Buffer* buffer) const {
-  VkDescriptorBufferInfo info {};
-  info.buffer = buffer->handle;
+VkDescriptorBufferInfo DescriptorSet::getBufferInfo(const Buffer& buffer) const {
+  VkDescriptorBufferInfo info;
+  info.buffer = buffer.handle;
   info.offset = 0;
   info.range = VK_WHOLE_SIZE;
 
@@ -91,7 +91,7 @@ void DescriptorSet::write(uint32_t binding, const Image& image, const Sampler& s
   vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
 }
 
-void DescriptorSet::write(uint32_t binding, Buffer* buffer) {
+void DescriptorSet::write(uint32_t binding, const Buffer& buffer) {
   WriteDescriptorSetData writeData = getWriteInfo(binding, buffer);
   vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
 }

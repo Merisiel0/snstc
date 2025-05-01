@@ -9,9 +9,9 @@
 
 VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t& imageIndex,
   const Semaphore& wait) const {
-  VkPresentInfoKHR info {};
+  VkPresentInfoKHR info;
   info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  //info.pNext = nullptr;
+  info.pNext = nullptr;
 
   info.pWaitSemaphores = &wait.handle;
   info.waitSemaphoreCount = 1;
@@ -21,7 +21,7 @@ VkPresentInfoKHR Queue::getPresentInfo(const Swapchain& swapchain, uint32_t& ima
 
   info.pImageIndices = &imageIndex;
 
-  //info.pResults = nullptr;
+  info.pResults = nullptr;
 
   return info;
 }

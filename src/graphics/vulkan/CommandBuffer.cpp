@@ -11,9 +11,9 @@
 #include "Semaphore.h"
 
 VkCommandBufferAllocateInfo CommandBuffer::getAllocateInfo(VkCommandPool commandPool) const {
-  VkCommandBufferAllocateInfo info {};
+  VkCommandBufferAllocateInfo info;
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  //info.pNext = nullptr;
+  info.pNext = nullptr;
   info.commandPool = commandPool;
   info.commandBufferCount = 1;
   info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -22,21 +22,21 @@ VkCommandBufferAllocateInfo CommandBuffer::getAllocateInfo(VkCommandPool command
 }
 
 VkCommandBufferBeginInfo CommandBuffer::getBeginInfo(VkCommandBufferUsageFlags flags) const {
-  VkCommandBufferBeginInfo info {};
+  VkCommandBufferBeginInfo info;
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  //info.pNext = nullptr;
+  info.pNext = nullptr;
   info.flags = flags;
-  //info.pInheritanceInfo = nullptr;
+  info.pInheritanceInfo = nullptr;
 
   return info;
 }
 
 VkCommandBufferSubmitInfo CommandBuffer::getSubmitInfo() const {
-  VkCommandBufferSubmitInfo info {};
+  VkCommandBufferSubmitInfo info;
   info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-  //info.pNext = nullptr;
+  info.pNext = nullptr;
   info.commandBuffer = handle;
-  //info.deviceMask = 0;
+  info.deviceMask = 0;
 
   return info;
 }

@@ -41,12 +41,34 @@ std::shared_ptr<Image> ResourceManager::loadImage(std::string path) {
     }
   }
 
-  if(!std::filesystem::exists(path)){
-    return nullptr;
-  }
+  if(!std::filesystem::exists(path)) { return nullptr; }
 
   std::shared_ptr<Image> img = std::shared_ptr<Image>(new Image(path));
   _images.insert({path, img});
+
+  return img;
+}
+
+std::shared_ptr<Image> ResourceManager::loadImage(std::vector<std::string> paths) {
+  if(paths.size() < 6) return nullptr;
+
+  std::string pathKey = "";
+  for(int i = 0; i < 6; i++) {
+    if(!std::filesystem::exists(paths[i])) return nullptr;
+    pathKey.append(paths[i]);
+  }
+
+  auto it = _images.find(pathKey);
+  if(it != _images.end()) {
+    if(it->second.expired()) {
+      _images.erase(pathKey);
+    } else {
+      return it->second.lock();
+    }
+  }
+
+  std::shared_ptr<Image> img = std::shared_ptr<Image>(new Image(paths));
+  _images.insert({pathKey, img});
 
   return img;
 }
@@ -82,9 +104,7 @@ std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
     }
   }
 
-  if(!std::filesystem::exists(path)){
-    return nullptr;
-  }
+  if(!std::filesystem::exists(path)) { return nullptr; }
 
   std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material(path));
   _materials.insert({path, mat});
@@ -129,9 +149,9 @@ std::shared_ptr<Mesh> ResourceManager::loadMesh(std::string path) {
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generateCube(Color color) {
+std::shared_ptr<Mesh> ResourceManager::generateCube() {
   std::stringstream ss;
-  ss << _generationPrefix << "cube" << color.r << color.g << color.b << color.a;
+  ss << _generationPrefix << "cube";
 
   std::string path = ss.str();
 
@@ -144,17 +164,16 @@ std::shared_ptr<Mesh> ResourceManager::generateCube(Color color) {
     }
   }
 
-  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateCube(color));
+  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateCube());
   _meshes.insert({path, mesh});
 
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generatePlane(vec2 dimensions, vec2 vertexAmounts,
-  Color color) {
+std::shared_ptr<Mesh> ResourceManager::generatePlane(vec2 dimensions, vec2 vertexAmounts) {
   std::stringstream ss;
   ss << _generationPrefix << "plane" << dimensions.x << dimensions.y << vertexAmounts.x
-     << vertexAmounts.y << color.r << color.g << color.b << color.a;
+     << vertexAmounts.y;
 
   std::string path = ss.str();
 
@@ -168,17 +187,15 @@ std::shared_ptr<Mesh> ResourceManager::generatePlane(vec2 dimensions, vec2 verte
   }
 
   std::shared_ptr<Mesh> mesh =
-    std::shared_ptr<Mesh>(Mesh::generatePlane(dimensions, vertexAmounts, color));
+    std::shared_ptr<Mesh>(Mesh::generatePlane(dimensions, vertexAmounts));
   _meshes.insert({path, mesh});
 
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generateCone(float radius, float height, int resolution,
-  Color color) {
+std::shared_ptr<Mesh> ResourceManager::generateCone(float radius, float height, int resolution) {
   std::stringstream ss;
-  ss << _generationPrefix << "cone" << radius << height << resolution << color.r << color.g
-     << color.b << color.a;
+  ss << _generationPrefix << "cone" << radius << height << resolution;
 
   std::string path = ss.str();
 
@@ -192,17 +209,16 @@ std::shared_ptr<Mesh> ResourceManager::generateCone(float radius, float height, 
   }
 
   std::shared_ptr<Mesh> mesh =
-    std::shared_ptr<Mesh>(Mesh::generateCone(radius, height, resolution, color));
+    std::shared_ptr<Mesh>(Mesh::generateCone(radius, height, resolution));
   _meshes.insert({path, mesh});
 
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generateCylinder(float radius, float height, int resolution,
-  Color color) {
+std::shared_ptr<Mesh> ResourceManager::generateCylinder(float radius, float height,
+  int resolution) {
   std::stringstream ss;
-  ss << _generationPrefix << "cylinder" << radius << height << resolution << color.r << color.g
-     << color.b << color.a;
+  ss << _generationPrefix << "cylinder" << radius << height << resolution;
 
   std::string path = ss.str();
 
@@ -216,16 +232,15 @@ std::shared_ptr<Mesh> ResourceManager::generateCylinder(float radius, float heig
   }
 
   std::shared_ptr<Mesh> mesh =
-    std::shared_ptr<Mesh>(Mesh::generateCylinder(radius, height, resolution, color));
+    std::shared_ptr<Mesh>(Mesh::generateCylinder(radius, height, resolution));
   _meshes.insert({path, mesh});
 
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generateUVSphere(int nbSlices, int nbStacks, Color color) {
+std::shared_ptr<Mesh> ResourceManager::generateUVSphere(int nbSlices, int nbStacks) {
   std::stringstream ss;
-  ss << _generationPrefix << "cylinder" << nbSlices << nbStacks << color.r << color.g << color.b
-     << color.a;
+  ss << _generationPrefix << "cylinder" << nbSlices << nbStacks;
 
   std::string path = ss.str();
 
@@ -238,16 +253,15 @@ std::shared_ptr<Mesh> ResourceManager::generateUVSphere(int nbSlices, int nbStac
     }
   }
 
-  std::shared_ptr<Mesh> mesh =
-    std::shared_ptr<Mesh>(Mesh::generateUVSphere(nbSlices, nbStacks, color));
+  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateUVSphere(nbSlices, nbStacks));
   _meshes.insert({path, mesh});
 
   return mesh;
 }
 
-std::shared_ptr<Mesh> ResourceManager::generateIcoSphere(int nbDivisions, Color color) {
+std::shared_ptr<Mesh> ResourceManager::generateIcoSphere(int nbDivisions) {
   std::stringstream ss;
-  ss << _generationPrefix << "cylinder" << nbDivisions << color.r << color.g << color.b << color.a;
+  ss << _generationPrefix << "cylinder" << nbDivisions;
 
   std::string path = ss.str();
 
@@ -260,7 +274,7 @@ std::shared_ptr<Mesh> ResourceManager::generateIcoSphere(int nbDivisions, Color 
     }
   }
 
-  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateIcoSphere(nbDivisions, color));
+  std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(Mesh::generateIcoSphere(nbDivisions));
   _meshes.insert({path, mesh});
 
   return mesh;

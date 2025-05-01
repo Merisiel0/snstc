@@ -6,39 +6,42 @@
 #include "Image.h"
 
 VkBufferCreateInfo Buffer::getCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage) const {
-  VkBufferCreateInfo info {};
+  VkBufferCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  //info.pNext = nullptr;
-  //info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.size = size;
   info.usage = usage;
   info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  //info.queueFamilyIndexCount = 0;
-  //info.pQueueFamilyIndices = nullptr;
+  info.queueFamilyIndexCount = 0;
+  info.pQueueFamilyIndices = nullptr;
 
   return info;
 }
 
 VmaAllocationCreateInfo Buffer::getAllocationCreateInfo(VmaMemoryUsage usage) const {
-  VmaAllocationCreateInfo info {};
+  VmaAllocationCreateInfo info;
   info.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
   info.usage = usage;
-  //info.requiredFlags = 0;
-  //info.preferredFlags = 0;
-  //info.memoryTypeBits = 0;
-  //info.pool = VK_NULL_HANDLE;
-  //info.pUserData = nullptr;
-  //info.priority = 0;
+  info.requiredFlags = 0;
+  info.preferredFlags = 0;
+  info.memoryTypeBits = 0;
+  info.pool = VK_NULL_HANDLE;
+  info.pUserData = nullptr;
+  info.priority = 0;
 
   return info;
 }
 
 VkBufferImageCopy Buffer::getBufferImageCopy(const Image& image) const {
-  VkBufferImageCopy copyRegion {};
-  //copyRegion.bufferOffset = 0;
-  //copyRegion.bufferRowLength = 0;
-  //copyRegion.bufferImageHeight = 0;
+  VkBufferImageCopy copyRegion;
+  copyRegion.bufferOffset = 0;
+  copyRegion.bufferRowLength = 0;
+  copyRegion.bufferImageHeight = 0;
   copyRegion.imageSubresource = image.getSubresourceLayers();
+  copyRegion.imageOffset.x = 0;
+  copyRegion.imageOffset.y = 0;
+  copyRegion.imageOffset.z = 0;
   copyRegion.imageExtent.width = image.extent().width;
   copyRegion.imageExtent.height = image.extent().height;
   copyRegion.imageExtent.depth = 1;
@@ -75,9 +78,9 @@ Buffer::~Buffer() {
 }
 
 VkBufferDeviceAddressInfo Buffer::getDeviceAddressInfo() const {
-  VkBufferDeviceAddressInfo info {};
+  VkBufferDeviceAddressInfo info;
   info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-  //info->pNext = nullptr;
+  info.pNext = nullptr;
   info.buffer = handle;
 
   return info;

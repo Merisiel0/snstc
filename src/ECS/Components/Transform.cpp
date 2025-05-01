@@ -1,8 +1,25 @@
 #include "Transform.h"
 
-#include "../GameObject.h"
+#include "ECS/GameObject.h"
+#include "graphics/vulkan/Buffer.h"
 
-mat4 Transform::modelMatrix() const {
+Transform::Transform(vec3 position, quat rotation, vec3 scale) :
+    position {position}, rotation {rotation}, scale {scale} {}
+
+mat4 Transform::getTranslationMatrix(Space space) const {
+  return glm::translate(mat4(1.0f), getPosition(space));
+}
+
+mat4 Transform::getRotationMatrix(Space space) const {
+  quat rot = getRotation(space);
+  return glm::rotate(mat4(1.0f), angle(rot), axis(rot));
+}
+
+mat4 Transform::getScaleMatrix(Space space) const {
+  return glm::scale(mat4(1.0f), getScale(space));
+}
+
+mat4 Transform::getModelMatrix() const {
   vec3 pos = position;
   quat rot = rotation;
   vec3 scl = scale;
@@ -25,16 +42,34 @@ mat4 Transform::modelMatrix() const {
   return mat;
 }
 
-vec3 Transform::truePosition() const {
-  vec3 pos = position;
+vec3 Transform::getPosition(Space space) const {
+  if(space == SELF) { return position; }
 
   ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
-  while(data->parent && data->parent->hasComponent<Transform>()) {
-    pos += data->parent->getComponent<Transform>()->truePosition();
-    data = data->parent->getComponent<ECS::ObjectData>();
+  if(data->parent) {
+    return position + data->parent->getComponent<Transform>()->getPosition(WORLD);
   }
+  return position;
+}
 
-  return pos;
+quat Transform::getRotation(Space space) const {
+  if(space == SELF) { return rotation; }
+
+  ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
+  if(data->parent) {
+    return data->parent->getComponent<Transform>()->getRotation(WORLD) * rotation;
+  }
+  return rotation;
+}
+
+vec3 Transform::getScale(Space space) const {
+  if(space == SELF) { return scale; }
+
+  ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
+  if(data->parent) {
+    return scale * data->parent->getComponent<Transform>()->getScale(WORLD);
+  }
+  return scale;
 }
 
 void Transform::getDirections(vec3& right, vec3& up, vec3& forward, Space space) const {
@@ -72,14 +107,14 @@ void Transform::rotate(vec3 angles, Space space) {
 void Transform::rotate(float x, float y, float z, Space space) { this->rotate({x, y, z}, space); }
 
 vec3 Transform::right() const {
-  mat4 mat = modelMatrix();
+  mat4 mat = getModelMatrix();
   return {mat[0].x, mat[0].y, mat[0].z};
 }
 
 vec3 Transform::left() const { return right() * -1.0f; }
 
 vec3 Transform::up() const {
-  mat4 mat = modelMatrix();
+  mat4 mat = getModelMatrix();
   return {mat[1].x, mat[1].y, mat[1].z};
 }
 
@@ -88,6 +123,6 @@ vec3 Transform::down() const { return up() * -1.0f; }
 vec3 Transform::forward() const { return backward() * -1.0f; }
 
 vec3 Transform::backward() const {
-  mat4 mat = modelMatrix();
+  mat4 mat = getModelMatrix();
   return {mat[2].x, mat[2].y, mat[2].z};
 }

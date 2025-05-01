@@ -3,10 +3,10 @@
 #include "Device.h"
 
 VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t>& data) const {
-  VkShaderModuleCreateInfo info {};
+  VkShaderModuleCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-  //info.pNext;
-  //info.flags;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.codeSize = data.size() * sizeof(uint32_t);
   info.pCode = data.data();
 
@@ -26,14 +26,14 @@ Shader::Shader(std::shared_ptr<Device> device, std::string path, VkShaderStageFl
 Shader::~Shader() { vkDestroyShaderModule(_device->handle, handle, nullptr); }
 
 VkPipelineShaderStageCreateInfo Shader::getStageCreateInfo() const {
-  VkPipelineShaderStageCreateInfo info {};
+  VkPipelineShaderStageCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  //info.pNext;
-  //info.flags;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.stage = _stage;
   info.module = handle;
   info.pName = "main";
-  //info.pSpecializationInfo;
+  info.pSpecializationInfo = nullptr;
 
   return info;
 }

@@ -22,3 +22,4 @@ ASan/
 # Ignore images, files too big (>100MB)
 *.png
 *.jpg
+*.hdr

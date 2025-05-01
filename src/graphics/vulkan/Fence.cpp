@@ -3,9 +3,9 @@
 #include "Device.h"
 
 VkFenceCreateInfo Fence::getCreateInfo(bool signaled) const {
-  VkFenceCreateInfo info {};
+  VkFenceCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-  //info.pNext = nullptr;
+  info.pNext = nullptr;
   info.flags = signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 
   return info;

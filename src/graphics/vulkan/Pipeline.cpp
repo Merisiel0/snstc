@@ -5,10 +5,10 @@
 VkPipelineLayoutCreateInfo IPipeline::getLayoutCreateInfo(
   std::vector<VkPushConstantRange>& pushConstantRanges,
   std::vector<VkDescriptorSetLayout>& setLayouts) const {
-  VkPipelineLayoutCreateInfo info {};
+  VkPipelineLayoutCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  //info.pNext = nullptr;
-  //info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
 
   if(setLayouts.size() > 0) {
     info.setLayoutCount = (uint32_t) setLayouts.size();

@@ -16,7 +16,7 @@ Camera::Camera(Camera&& c) noexcept :
   c.transform = nullptr;
 }
 
-void Camera::updateView() { view = glm::inverse(transform->modelMatrix()); }
+void Camera::updateView() { view = glm::inverse(transform->getModelMatrix()); }
 
 void Camera::updateProjectionPerspective(float fovY, float aspect, float zNear, float zFar) {
   projectionType = PERSPECTIVE;

@@ -4,7 +4,7 @@
 
 VmaAllocatorCreateInfo Allocator::getCreateInfo(VkInstance instance,
   VkPhysicalDevice physicalDevice, VkDevice device) {
-  VmaAllocatorCreateInfo info {};
+  VmaAllocatorCreateInfo info;
   info.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
   info.physicalDevice = physicalDevice;
   info.device = device;

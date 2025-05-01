@@ -4,9 +4,9 @@
 
 VkApplicationInfo Instance::getApplicationInfo(const char* applicationName,
   uint32_t applicationVersion, const char* engineName, uint32_t engineVersion) const {
-  VkApplicationInfo info {};
+  VkApplicationInfo info;
   info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  // info.pNext = nullptr;
+  info.pNext = nullptr;
   info.pApplicationName = applicationName;
   info.applicationVersion = applicationVersion;
   info.pEngineName = engineName;
@@ -18,9 +18,9 @@ VkApplicationInfo Instance::getApplicationInfo(const char* applicationName,
 
 VkInstanceCreateInfo Instance::getCreateInfo(VkApplicationInfo* appInfo,
   std::vector<const char*>& requiredLayers, std::vector<const char*>& requiredExtensions) const {
-  VkInstanceCreateInfo info {};
+  VkInstanceCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  // info.flags = 0;
+  info.flags = 0;
   info.pApplicationInfo = appInfo;
   info.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
   info.ppEnabledLayerNames = requiredLayers.data();

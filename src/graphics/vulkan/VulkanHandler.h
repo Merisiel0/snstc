@@ -24,6 +24,62 @@ class World;
 
 enum WindowScreenMode { WINDOWED = 0, FULLSCREEN = SDL_WINDOW_FULLSCREEN };
 
+/// @brief List containing all implemented graphics pipelines.
+enum GraphicsPipelineId {
+  /// @brief Reserved for skyboxes.
+  GRAPHICS_PIPELINE_SKYBOX,
+
+  // UNLIT_POINT_LIST,
+  // UNLIT_LINE_LIST,
+  // UNLIT_LINE_STRIP,
+
+  // UNLIT_POINT_TRIANGLE_LIST,
+  // UNLIT_LINE_TRIANGLE_LIST,
+  // UNLIT_FILL_TRIANGLE_LIST,
+
+  // UNLIT_POINT_TRIANGLE_STRIP,
+  // UNLIT_LINE_TRIANGLE_STRIP,
+  // UNLIT_FILL_TRIANGLE_STRIP,
+
+  // UNLIT_POINT_TRIANGLE_FAN,
+  // UNLIT_LINE_TRIANGLE_FAN,
+  // UNLIT_FILL_TRIANGLE_FAN,
+
+  // UNLIT_INSTANCE_POINT_LIST,
+  // UNLIT_INSTANCE_LINE_LIST,
+  // UNLIT_INSTANCE_LINE_STRIP,
+
+  // UNLIT_INSTANCE_POINT_TRIANGLE_LIST,
+  // UNLIT_INSTANCE_LINE_TRIANGLE_LIST,
+  // UNLIT_INSTANCE_FILL_TRIANGLE_LIST,
+
+  // UNLIT_INSTANCE_POINT_TRIANGLE_STRIP,
+  // UNLIT_INSTANCE_LINE_TRIANGLE_STRIP,
+  // UNLIT_INSTANCE_FILL_TRIANGLE_STRIP,
+
+  // UNLIT_INSTANCE_POINT_TRIANGLE_FAN,
+  // UNLIT_INSTANCE_LINE_TRIANGLE_FAN,
+  // UNLIT_INSTANCE_FILL_TRIANGLE_FAN,
+
+  // UNLIT_PARTICLE_POINT_LIST,
+  // UNLIT_PARTICLE_LINE_LIST,
+  // UNLIT_PARTICLE_LINE_STRIP,
+
+  // UNLIT_PARTICLE_POINT_TRIANGLE_LIST,
+  // UNLIT_PARTICLE_LINE_TRIANGLE_LIST,
+  // UNLIT_PARTICLE_FILL_TRIANGLE_LIST,
+
+  // UNLIT_PARTICLE_POINT_TRIANGLE_STRIP,
+  // UNLIT_PARTICLE_LINE_TRIANGLE_STRIP,
+  // UNLIT_PARTICLE_FILL_TRIANGLE_STRIP,
+
+  // UNLIT_PARTICLE_POINT_TRIANGLE_FAN,
+  // UNLIT_PARTICLE_LINE_TRIANGLE_FAN,
+  // UNLIT_PARTICLE_FILL_TRIANGLE_FAN,
+
+  GRAPHICS_PIPELINE_ID_COUNT
+};
+
 // Opens a window and renders worlds on it.
 class VulkanHandler {
 private:
@@ -47,15 +103,13 @@ private:
   std::shared_ptr<Image> _drawImage;
   std::shared_ptr<Image> _depthImage;
 
-  std::shared_ptr<GraphicsPipeline> _pipelinePBR;
-  std::shared_ptr<GraphicsPipeline> _pipelineLinePBR;
-  std::shared_ptr<GraphicsPipeline> _pipelineColor;
-  std::shared_ptr<GraphicsPipeline> _pipelineLineColor;
+  std::vector<std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
 
   std::shared_ptr<Sampler> _defaultSampler;
 
   std::shared_ptr<DescriptorPool> _descriptorPool;
-  std::shared_ptr<DescriptorSetLayout> _camDescSetLayout;
+  std::shared_ptr<DescriptorSetLayout> _sceneDescSetLayout;
+  std::shared_ptr<DescriptorSetLayout> _skyboxDescSetLayout;
   std::shared_ptr<DescriptorSetLayout> _objDescSetLayout;
 
   void beginDrawing(World& world);
@@ -68,6 +122,4 @@ public:
 
   void render(World& world);
   void waitForEndOfWork() const;
-
-  void oldRender(World& world);
 };

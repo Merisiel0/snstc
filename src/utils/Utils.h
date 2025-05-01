@@ -25,7 +25,6 @@ struct Vertex {
   float u;
   glm::vec3 normal;
   float v;
-  Color color;
 };
 
 static inline std::string readFileText(const char* path) {

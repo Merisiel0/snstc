@@ -1,6 +1,7 @@
 #include "Mesh.h"
 
 #include "graphics/vulkan/Buffer.h"
+#include "utils/Utils.h"
 
 #include <vector>
 
@@ -21,19 +22,69 @@ Mesh::~Mesh() {
   delete indices;
 }
 
-Mesh* Mesh::generateCube(Color color) {
-  std::vector<Vertex> vertices;
-  for(float i = -0.5f; i <= 0.5f; i++) {
-    for(float j = -0.5f; j <= 0.5f; j++) {
-      for(float k = -0.5f; k <= 0.5f; k++) {
-        Vertex v {};
-        v.position = {i, j, k};
-        v.normal = normalize(v.position);
-        v.color = color;
-        vertices.push_back(v);
-      }
+Mesh* Mesh::generateCube() {
+  // TODO: actual good procedural cube
+  std::vector<vec3> positions = { // 0,2,1
+    {-1.0f, 1.0f, -1.0f},
+    {-1.0f, -1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f},
+    {1.0f, 1.0f, -1.0f},
+    {-1.0f, 1.0f, -1.0f},
+
+    {-1.0f, -1.0f, 1.0f},
+    {-1.0f, -1.0f, -1.0f},
+    {-1.0f, 1.0f, -1.0f},
+    {-1.0f, 1.0f, -1.0f},
+    {-1.0f, 1.0f, 1.0f},
+    {-1.0f, -1.0f, 1.0f},
+
+    {1.0f, -1.0f, -1.0f},
+    {1.0f, -1.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f},
+
+    {-1.0f, -1.0f, 1.0f},
+    {-1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {1.0f, -1.0f, 1.0f},
+    {-1.0f, -1.0f, 1.0f},
+
+    {-1.0f, 1.0f, -1.0f},
+    {1.0f, 1.0f, -1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+    {-1.0f, 1.0f, 1.0f},
+    {-1.0f, 1.0f, -1.0f},
+
+    {-1.0f, -1.0f, -1.0f},
+    {-1.0f, -1.0f, 1.0f},
+    {1.0f, -1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f},
+    {-1.0f, -1.0f, 1.0f},
+    {1.0f, -1.0f, 1.0f}};
+
+    std::vector<Vertex> vertices;
+    for(int i = 0; i < positions.size(); i++){
+      Vertex v{};
+      v.position = positions[i];
+      vertices.push_back(v);
     }
-  }
+
+  // std::vector<Vertex> vertices;
+  // for(float i = -0.5f; i <= 0.5f; i++) {
+  //   for(float j = -0.5f; j <= 0.5f; j++) {
+  //     for(float k = -0.5f; k <= 0.5f; k++) {
+  //       Vertex v {};
+  //       v.position = {i, j, k};
+  //       v.normal = normalize(v.position);
+  //       vertices.push_back(v);
+  //     }
+  //   }
+  // }
 
   std::vector<Index> indices = {0, 1, 2, 2, 1, 3, 1, 5, 3, 3, 5, 7, 5, 4, 7, 7, 4, 6, 4, 0, 6, 6, 0,
     2, 5, 1, 4, 4, 1, 0, 6, 2, 7, 7, 2, 3};
@@ -41,7 +92,7 @@ Mesh* Mesh::generateCube(Color color) {
   return new Mesh(vertices, indices);
 }
 
-Mesh* Mesh::generatePlane(vec2 dimensions, vec2 vertexAmounts, Color color) {
+Mesh* Mesh::generatePlane(vec2 dimensions, vec2 vertexAmounts) {
   if(vertexAmounts.x < 2) vertexAmounts.x = 2;
   if(vertexAmounts.y < 2) vertexAmounts.y = 2;
 
@@ -56,7 +107,6 @@ Mesh* Mesh::generatePlane(vec2 dimensions, vec2 vertexAmounts, Color color) {
     for(float j = -halfLength; j <= halfLength; j += lengthFoot) {
       Vertex v {};
       v.position = {i, 0, j};
-      v.color = color;
       v.u = (i + halfWidth) / dimensions.x;
       v.v = (j + halfLength) / dimensions.y;
       v.normal = {0, 1, 0};
@@ -77,7 +127,7 @@ Mesh* Mesh::generatePlane(vec2 dimensions, vec2 vertexAmounts, Color color) {
   return new Mesh(vertices, indices);
 }
 
-Mesh* Mesh::generateCone(float radius, float height, int resolution, Color color) {
+Mesh* Mesh::generateCone(float radius, float height, int resolution) {
   std::vector<Vertex> vertices;
   std::vector<Index> indices;
 
@@ -90,14 +140,12 @@ Mesh* Mesh::generateCone(float radius, float height, int resolution, Color color
 
     Vertex v {};
     v.position = {x, 0, z};
-    v.color = color;
     vertices.push_back(v);
   }
 
   // add the tip of the cone
   Vertex v {};
   v.position = {0, 0, height};
-  v.color = color;
   Index tipIndex = (uint32_t) vertices.size();
   vertices.push_back(v);
 
@@ -118,7 +166,7 @@ Mesh* Mesh::generateCone(float radius, float height, int resolution, Color color
   return new Mesh(vertices, indices);
 }
 
-Mesh* Mesh::generateCylinder(float radius, float height, int resolution, Color color) {
+Mesh* Mesh::generateCylinder(float radius, float height, int resolution) {
   std::vector<Vertex> vertices;
   std::vector<Index> indices;
 
@@ -130,7 +178,6 @@ Mesh* Mesh::generateCylinder(float radius, float height, int resolution, Color c
     float y = std::sin(r) * radius;
 
     Vertex v {};
-    v.color = color;
     v.position = {x, y, 0};
     vertices.push_back(v);
     v.position = {x, y, height};
@@ -138,7 +185,6 @@ Mesh* Mesh::generateCylinder(float radius, float height, int resolution, Color c
   }
 
   Vertex v {};
-  v.color = color;
   v.position = {0, 0, 0};
   Index bottomCenterIndex = (uint32_t) vertices.size();
   vertices.push_back(v);
@@ -164,13 +210,12 @@ Mesh* Mesh::generateCylinder(float radius, float height, int resolution, Color c
   return new Mesh(vertices, indices);
 }
 
-Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks, Color color) {
+Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks) {
   std::vector<Vertex> vertices;
   std::vector<Index> indices;
 
   // add top vertex
   Vertex v0 {};
-  v0.color = color;
   v0.position = {0, 1, 0};
   vertices.push_back(v0);
 
@@ -180,7 +225,6 @@ Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks, Color color) {
     for(int j = 0; j < nbSlices; j++) {
       double theta = 2.0 * glm::pi<double>() * double(j) / double(nbSlices);
       Vertex v1 {};
-      v1.color = color;
       v1.position = {std::sin(phi) * std::cos(theta), std::cos(phi),
         std::sin(phi) * std::sin(theta)};
       vertices.push_back(v1);
@@ -189,7 +233,6 @@ Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks, Color color) {
 
   // add bottom vertex
   Vertex v1 {};
-  v1.color = color;
   v1.position = {0, -1, 0};
   int v1Index = (int) vertices.size();
   vertices.push_back(v1);
@@ -221,13 +264,12 @@ Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks, Color color) {
   return new Mesh(vertices, indices);
 }
 
-Mesh* Mesh::generateIcoSphere(int nbDivisions, Color color) {
+Mesh* Mesh::generateIcoSphere(int nbDivisions) {
   std::vector<Vertex> vertices;
 
   float t = (1.0f + glm::sqrt(5.0f)) / 2.0f;
 
   Vertex v {};
-  v.color = color;
   v.position = glm::normalize(vec3 {-1, t, 0});
   vertices.push_back(v);
   v.position = glm::normalize(vec3 {1, t, 0});

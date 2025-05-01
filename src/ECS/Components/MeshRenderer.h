@@ -92,7 +92,7 @@ public:
       polygonMode {polygonMode},
       lineWidth {lineWidth},
       _instances {instances} {};
-  
+
   MeshRenderer(MeshRenderer&&) noexcept = default;
   MeshRenderer& operator=(MeshRenderer&&) noexcept = default;
 

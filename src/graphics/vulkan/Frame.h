@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 class Device;
 class CommandPool;
@@ -20,10 +21,11 @@ public:
   std::shared_ptr<Semaphore> renderSemaphore;
   std::shared_ptr<Fence> renderFence;
 
-  std::shared_ptr<DescriptorSet> camDescSet;
-  std::shared_ptr<DescriptorSet> objDescSet;
+  std::shared_ptr<DescriptorSet> sceneDescSet;
+  std::shared_ptr<DescriptorSet> skyboxDescSet;
+  std::shared_ptr<DescriptorSet> objectDescSet;
 
   Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
-    const DescriptorSetLayout& camDescSetLayout, const DescriptorSetLayout& objDescSetLayout);
+    std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts);
   ~Frame();
 };

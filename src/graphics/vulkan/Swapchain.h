@@ -5,6 +5,7 @@
 #include "VulkanUtils.h"
 
 #include <array>
+#include <vector>
 
 class Window;
 class Instance;
@@ -36,8 +37,7 @@ public:
   std::shared_ptr<Frame> getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
 
   Swapchain(const Window& window, std::shared_ptr<Device> device,
-    const DescriptorPool& descriptorPool, const DescriptorSetLayout& vertLayout,
-    const DescriptorSetLayout& fragLayout);
+    const DescriptorPool& descriptorPool, std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts);
 
   ~Swapchain();
 

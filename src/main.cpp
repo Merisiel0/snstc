@@ -22,7 +22,7 @@ int main() {
   //--- Engine Initialization ---
   SDL_SetMainReady();
   SDL_CHECK(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD));
-  
+
   ResourceManager::assetsPath = "../..";
   Time::init();
   InputHandler::init();
@@ -46,14 +46,24 @@ int main() {
   Camera& cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
 
-  GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
-  cubeObj.addTag("cube");
+  GameObject skyboxObj = GameObject(world);
+  skyboxObj.addComponent<Skybox>(
+    std::vector<std::string> {ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/right.jpg",
+      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/left.jpg",
+      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/top.jpg",
+      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/bottom.jpg",
+      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/front.jpg",
+      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/back.jpg"});
+  skyboxObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
-  GameObject lightObj = GameObject(world);
-  lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(1, Color {0, 0, 1, 1}), ResourceManager::loadMaterial(Color{0, 0, 1, 1}));
-  lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
-  lightObj.addComponent<Light>(Color {1, 1, 1, 3});
-  lightObj.addComponent<PlayerController>(3.0f, radians(40.f));
+  // GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
+  // cubeObj.addTag("cube");
+
+  // GameObject lightObj = GameObject(world);
+  // lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(1), ResourceManager::loadMaterial(Color{0, 0, 1, 1}));
+  // lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
+  // lightObj.addComponent<Light>(Color {1, 1, 1, 3});
+  // lightObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   // --- Game Loop ---
   int frames = 0;

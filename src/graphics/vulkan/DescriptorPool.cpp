@@ -5,10 +5,10 @@
 
 VkDescriptorPoolCreateInfo DescriptorPool::getCreateInfo(
   std::vector<VkDescriptorPoolSize>& poolSizes) const {
-  VkDescriptorPoolCreateInfo info {};
+  VkDescriptorPoolCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  //info.pNext = nullptr;
-  //info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
 
   for(const VkDescriptorPoolSize& poolSize : poolSizes) {
     info.maxSets += poolSize.descriptorCount;

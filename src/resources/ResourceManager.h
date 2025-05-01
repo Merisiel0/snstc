@@ -36,17 +36,22 @@ public:
   /// @return an image if the path exist, nullptr otherwise.
   static std::shared_ptr<Image> loadImage(std::string path);
 
+  /// @brief Loads a cubemap image with the six faces found at the 6 paths provided.
+  /// @param paths 6 paths to the 6 faces of a cubemap.
+  /// @return a cubemap if the every path exist and there are at least 6, nullptr otherwise.
+  static std::shared_ptr<Image> loadImage(std::vector<std::string> paths);
+
   /// @brief Loads an image of the provided dimensions and color.
   /// @param width the width of the image.
   /// @param height the height of the image.
   /// @param color the color of the image.
-  /// @return an image.
+  /// @return an image if the path exist, nullptr otherwise.
   static std::shared_ptr<Image> loadImage(int width, int height, Color color);
 
   /// @brief Loads a material from the provided path.
   /// @param path path to the material.
   /// @return a PBR material the path exists, nullptr otherwise.
-  static std::shared_ptr<Material> loadMaterial(std::string path = "");
+  static std::shared_ptr<Material> loadMaterial(std::string path);
 
   /// @brief Loads a color material of the provided color.
   /// @param color a color.
@@ -55,21 +60,20 @@ public:
 
   /// @brief Loads a mesh from the provide path.
   /// @param path path to the mesh.
-  /// @return a mesh.
+  /// @return a mesh if the path exist, nullptr otherwise.
   static std::shared_ptr<Mesh> loadMesh(std::string path);
 
   /// @brief Generates a cube mesh.
   /// @param color a color.
   /// @return a shared pointer to a cube mesh.
-  static std::shared_ptr<Mesh> generateCube(Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generateCube();
 
   /// @brief Generates a plane mesh.
   /// @param dimensions extent of the plane in x and y.
   /// @param vertexAmounts amount of vertices in x and y. Minimum of {2, 2}.
   /// @param color a color.
   /// @return a shared pointer to a plane mesh.
-  static std::shared_ptr<Mesh> generatePlane(vec2 dimensions, vec2 vertexAmounts,
-    Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generatePlane(vec2 dimensions, vec2 vertexAmounts);
 
   /// @brief Generates a cone mesh.
   /// @param radius radius of the base.
@@ -77,8 +81,7 @@ public:
   /// @param resolution amount of vertices on the circumference.
   /// @param color a color.
   /// @return a shared pointer to a cone mesh.
-  static std::shared_ptr<Mesh> generateCone(float radius, float height, int resolution,
-    Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generateCone(float radius, float height, int resolution);
 
   /// @brief Generates a cylinder mesh.
   /// @param radius radius of the base.
@@ -86,20 +89,18 @@ public:
   /// @param resolution amount of vertices on the circumference.
   /// @param color a color.
   /// @return a shared pointer to a cylinder mesh.
-  static std::shared_ptr<Mesh> generateCylinder(float radius, float height, int resolution,
-    Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generateCylinder(float radius, float height, int resolution);
 
   /// @brief Generates a UV sphere mesh.
   /// @param nbSlices amount of vertices on the horizontal circumference.
   /// @param nbStacks amount of vertices on the vertical circumference.
   /// @param color a color.
   /// @return a shared pointer to a UV sphere mesh.
-  static std::shared_ptr<Mesh> generateUVSphere(int nbSlices, int nbStacks,
-    Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generateUVSphere(int nbSlices, int nbStacks);
 
   /// @brief Generates an icosphere mesh.
   /// @param nbDivisions how many times it should be divided. 0 is a D20.
   /// @param color a color.
   /// @return a shared pointer to an icosphere mesh.
-  static std::shared_ptr<Mesh> generateIcoSphere(int nbDivisions, Color color = {0, 0, 0, 1});
+  static std::shared_ptr<Mesh> generateIcoSphere(int nbDivisions);
 };

@@ -83,9 +83,10 @@ void VulkanHandler::beginDrawing(World& world) {
   currentFrame->commandBuffer->setScissor(&scissor);
 
   // write camera descriptor set
-  currentFrame->camDescSet->write(0, world.camBuffer);
-  currentFrame->camDescSet->write(1, world.lightsBuffer);
-  currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->camDescSet, 0, *_pipelinePBR);
+  currentFrame->sceneDescSet->write(0, *world.camBuffer);
+  currentFrame->sceneDescSet->write(1, *world.lightsBuffer);
+  currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->sceneDescSet, 0,
+    *_graphicsPipelines[0]);
 }
 
 void VulkanHandler::endDrawing() {
@@ -168,6 +169,7 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   _immediateSubmit = std::make_shared<ImmediateSubmit>(_device);
 
+  // init classes
   Buffer::init(_device, _allocator, _immediateSubmit);
   Image::init(_device, _allocator, _immediateSubmit);
 
@@ -185,26 +187,40 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   _descriptorPool = std::make_shared<DescriptorPool>(_device, poolSizes);
 
-  // cam shader stage descriptor set layout
+  // descriptor set layouts
   std::vector<VkDescriptorSetLayoutBinding> bindings;
 
-  VkDescriptorSetLayoutBinding binding {};
-  binding.binding = 0;
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // camera buffer
+  // camera descriptor set layout
+  VkDescriptorSetLayoutBinding binding;
+  binding.binding = 0; // camera buffer
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   binding.descriptorCount = 1;
   binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  binding.pImmutableSamplers = nullptr;
   bindings.push_back(binding);
 
   binding.binding = 1; // lights buffer
   binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
   bindings.push_back(binding);
 
-  _camDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
+  _sceneDescSetLayout =
+    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_SCENE);
 
+  // skybox descriptor set layout
   bindings.clear();
 
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // color texture
-  binding.binding = 0;
+  binding.binding = 0; // cubemap
+  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  bindings.push_back(binding);
+
+  _skyboxDescSetLayout =
+    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_SKYBOX);
+
+  // object descriptor set layout
+  bindings.clear();
+
+  binding.binding = 0; // albedo texture
   bindings.push_back(binding);
 
   binding.binding = 1; // normal texture
@@ -222,10 +238,12 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   binding.binding = 5; // ambiant occlusion texture
   bindings.push_back(binding);
 
-  _objDescSetLayout = std::make_shared<DescriptorSetLayout>(_device, bindings);
+  _objDescSetLayout =
+    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_OBJECT);
 
-  _swapchain = std::make_shared<Swapchain>(*_window, _device, *_descriptorPool, *_camDescSetLayout,
-    *_objDescSetLayout);
+  _swapchain = std::make_shared<Swapchain>(*_window, _device, *_descriptorPool,
+    std::vector<std::shared_ptr<DescriptorSetLayout>> {_sceneDescSetLayout, _skyboxDescSetLayout,
+      _objDescSetLayout});
 
   _drawImage = std::make_shared<Image>(*_swapchain, COLOR,
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
@@ -239,74 +257,66 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   _defaultSampler = std::make_shared<Sampler>(_device);
 
-  // PBR pipelines
-  try {
-    Shader* vertexShader =
-      new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_vert.spv",
-        VK_SHADER_STAGE_VERTEX_BIT);
-    Shader* fragmentShader =
-      new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_frag.spv",
-        VK_SHADER_STAGE_FRAGMENT_BIT);
+  // create pipelines
+  _graphicsPipelines.resize(GRAPHICS_PIPELINE_ID_COUNT);
 
-    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
-      fragmentShader->getStageCreateInfo()};
+  // skybox pipeline
+  Shader* vertexShader =
+    new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/skybox_vert.spv",
+      VK_SHADER_STAGE_VERTEX_BIT);
+  Shader* fragmentShader =
+    new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/skybox_frag.spv",
+      VK_SHADER_STAGE_FRAGMENT_BIT);
 
-    std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle,
-      _objDescSetLayout->handle};
+  std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
+    fragmentShader->getStageCreateInfo()};
 
-    // create normal pbr pipeline
-    _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-      VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+  std::vector<VkDescriptorSetLayout> setLayouts = {_sceneDescSetLayout->handle,
+    _skyboxDescSetLayout->handle};
 
-    // create line pbr pipeline
-    _pipelineLinePBR = std::make_shared<GraphicsPipeline>(_device,
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
+  _graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX] = std::make_shared<GraphicsPipeline>(_device,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
 
-    delete vertexShader;
-    delete fragmentShader;
-  } catch(const std::runtime_error& e) {
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Failed to instantiate PBR pipeline." << std::endl;
-  }
+  delete vertexShader;
+  delete fragmentShader;
 
-  // // plain color pipelines
   // try {
-  //   Shader* vertexShader = new Shader(_device,
-  //     ResourceManager::assetsPath + "/src/assets/shaders/color_material_vert.spv",
-  //     VK_SHADER_STAGE_VERTEX_BIT);
-  //   Shader* fragmentShader = new Shader(_device,
-  //     ResourceManager::assetsPath + "/src/assets/shaders/color_material_frag.spv",
-  //     VK_SHADER_STAGE_FRAGMENT_BIT);
+  //   // load shaders
+  //   Shader* vertexShader =
+  //     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_vert.spv",
+  //       VK_SHADER_STAGE_VERTEX_BIT);
+  //   Shader* fragmentShader =
+  //     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/PBR_material_frag.spv",
+  //       VK_SHADER_STAGE_FRAGMENT_BIT);
 
   //   std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {vertexShader->getStageCreateInfo(),
   //     fragmentShader->getStageCreateInfo()};
 
-  //   std::vector<VkDescriptorSetLayout> setLayouts = {_camDescSetLayout->handle};
+  //   std::vector<VkDescriptorSetLayout> setLayouts = {_sceneDescSetLayout->handle,
+  //     _skyboxDescSetLayout->handle, _objDescSetLayout->handle};
 
-  //   // create normal color pipeline
-  //   _pipelineColor = std::make_shared<GraphicsPipeline>(_device,
-  //     VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+  //   // create normal pbr pipeline
+  //   _pipelinePBR = std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+  //     VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
 
-  //   // create line color pipeline
-  //   _pipelineLineColor = std::make_shared<GraphicsPipeline>(_device,
+  //   // create line pbr pipeline
+  //   _pipelineLinePBR = std::make_shared<GraphicsPipeline>(_device,
   //     VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, shaderInfos, setLayouts);
 
   //   delete vertexShader;
   //   delete fragmentShader;
-
   // } catch(const std::runtime_error& e) {
   //   std::cerr << e.what() << std::endl;
-  //   std::cerr << "Failed to instantiate plain color pipeline." << std::endl;
+  //   std::cerr << "Failed to instantiate PBR pipeline." << std::endl;
   // }
 }
 
 VulkanHandler::~VulkanHandler() {
   _device->waitIdle();
 
-  _pipelineLineColor.reset();
-  _pipelineColor.reset();
-  _pipelineLinePBR.reset();
-  _pipelinePBR.reset();
+  for(int i = 0; i < GRAPHICS_PIPELINE_ID_COUNT; i++) {
+    _graphicsPipelines[i].reset();
+  }
 
   _defaultSampler.reset();
 
@@ -314,7 +324,8 @@ VulkanHandler::~VulkanHandler() {
   _drawImage.reset();
   _swapchain.reset();
 
-  _camDescSetLayout.reset();
+  _sceneDescSetLayout.reset();
+  _skyboxDescSetLayout.reset();
   _objDescSetLayout.reset();
   _descriptorPool.reset();
 
@@ -337,34 +348,61 @@ void VulkanHandler::render(World& world) {
 
   std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
-  auto renderers = world.getComponentsInChildren<MeshRenderer>();
-  for(const auto& renderer : renderers) {
-    MeshRenderer& rd = renderer.get();
+  // draw mesh renderers
+  // auto renderers = world.getComponentsInChildren<MeshRenderer>();
+  // for(const auto& renderer : renderers) {
+  //   MeshRenderer& rd = renderer.get();
 
-    // find and bind pipeline to use
-    std::shared_ptr<GraphicsPipeline> currentPipeline = _pipelinePBR;
-    currentFrame->commandBuffer->bindPipeline(*currentPipeline);
+  //   // find and bind pipeline to use
+  //   std::shared_ptr<GraphicsPipeline> currentPipeline = _pipelinePBR;
+  //   currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
-    // skipped object descriptor binding
-    currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
-    currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1, *currentPipeline);
+  //   // skipped object descriptor binding
+  //   currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
+  //   currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1, *currentPipeline);
 
-    // push vertices and model matrix inside pushconstants
-    PushConstants constants {};
-    constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
-    constants.vertexBuffer = rd.mesh->vertices->address;
-    std::shared_ptr<Buffer> instanceBuffer = rd.getInstancesBuffer();
-    constants.instanceBuffer = instanceBuffer->address;
-    currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
-      VK_SHADER_STAGE_VERTEX_BIT);
+  //   // push vertices and model matrix inside pushconstants
+  //   PushConstants constants {};
+  //   constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
+  //   constants.vertexBuffer = rd.mesh->vertices->address;
+  //   std::shared_ptr<Buffer> instanceBuffer = rd.getInstancesBuffer();
+  //   constants.instanceBuffer = instanceBuffer->address;
+  //   currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
+  //     VK_SHADER_STAGE_VERTEX_BIT);
+
+  //   // set dynamic states
+  //   currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
+  //   currentFrame->commandBuffer->setCullMode(rd.cullMode);
+
+  //   // draw
+  //   currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
+  //   currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), rd.getInstanceCount());
+  // }
+
+  // draw skybox
+  Skybox* skybox = world.getComponentInChildren<Skybox>();
+  if(skybox) {
+    // bind pipeline
+    currentFrame->commandBuffer->bindPipeline(*_graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]);
+
+    // write and bind descriptor sets
+    Transform* skyboxTransform = skybox->gameObject->getComponent<Transform>();
+    currentFrame->skyboxDescSet->write(0, *skybox->getCubeMap(), *_defaultSampler);
+    currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->skyboxDescSet, 1,
+      *_graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]);
+
+    // push constants
+    PushConstants constants;
+    constants.model = skyboxTransform->getRotationMatrix(WORLD);
+    constants.vertexBuffer = skybox->getMesh()->vertices->address;
+    currentFrame->commandBuffer->pushConstants(constants,
+      _graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]->layout(), VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
-    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
-    currentFrame->commandBuffer->setCullMode(rd.cullMode);
+    currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);
 
     // draw
-    currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
-    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), rd.getInstanceCount());
+    currentFrame->commandBuffer->drawVertices(skybox->getMesh()->vertices->count());
   }
 
   // end
@@ -372,73 +410,3 @@ void VulkanHandler::render(World& world) {
 }
 
 void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }
-
-void VulkanHandler::oldRender(World& world) {
-  std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
-
-  // for each renderers in the scene..
-  auto renderers = world.getComponentsInChildren<MeshRenderer>();
-  for(const auto& renderer : renderers) {
-    MeshRenderer& rd = renderer.get();
-
-    // choose which pipeline to use
-    std::shared_ptr<GraphicsPipeline> currentPipeline;
-    if(!rd.material->isPlainColor()) {
-      if(rd.polygonMode == VK_POLYGON_MODE_LINE)
-        currentPipeline = _pipelineLinePBR;
-      else
-        currentPipeline = _pipelinePBR;
-    } else if(rd.polygonMode == VK_POLYGON_MODE_LINE) {
-      currentPipeline = _pipelineLineColor;
-    } else {
-      currentPipeline = _pipelineColor;
-    }
-    currentFrame->commandBuffer->bindPipeline(*currentPipeline);
-
-    // write object descriptor set if needed
-    if(!rd.material->isPlainColor()) {
-      if(rd.material->hasMap(ALBEDO)) {
-        currentFrame->objDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
-      }
-      /*if (renderer->material->getNormal()) {
-        currentFrame->objDescSet->write(1, renderer->material->getNormal(),
-      _defaultSampler);
-      }
-      if (renderer->material->getRoughness()) {
-        currentFrame->objDescSet->write(2, renderer->material->getRoughness(),
-      _defaultSampler);
-      }
-      if (renderer->material->getMetalness()) {
-        currentFrame->objDescSet->write(3, renderer->material->getMetalness(),
-      _defaultSampler);
-      }
-      if (renderer->material->getHeight()) {
-        currentFrame->objDescSet->write(4, renderer->material->getHeight(),
-      _defaultSampler);
-      }
-      if (renderer->material->getAO()) {
-        currentFrame->objDescSet->write(5, renderer->material->getAO(),
-      _defaultSampler);
-      }*/
-
-      currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->objDescSet, 1,
-        *currentPipeline);
-    }
-
-    // push vertices and model matrix inside pushconstants
-    PushConstants constants {};
-    // constants.transform = rd.gameObject->getComponent<Transform>()->modelMatrix();
-    // constants.instanceBuffer = rd.getInstanceTransformsBuffer()->address;
-    constants.vertexBuffer = rd.mesh->vertices->address;
-    currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
-      VK_SHADER_STAGE_VERTEX_BIT);
-
-    // set dynamic states
-    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
-    currentFrame->commandBuffer->setCullMode(rd.cullMode);
-
-    // draw
-    currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
-    currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), 1);
-  }
-}

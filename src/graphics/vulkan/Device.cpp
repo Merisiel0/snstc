@@ -5,17 +5,17 @@
 
 VkDeviceCreateInfo Device::getCreateInfo(VkPhysicalDeviceFeatures2& features,
   std::vector<VkDeviceQueueCreateInfo>& queues, std::vector<const char*>& extensions) const {
-  VkDeviceCreateInfo info {};
+  VkDeviceCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   info.pNext = &features;
-  // info.flags = 0;
+  info.flags = 0;
   info.queueCreateInfoCount = static_cast<uint32_t>(queues.size());
-  // info.enabledLayerCount = 0;
-  // info.ppEnabledLayerNames = nullptr;
+  info.enabledLayerCount = 0;
+  info.ppEnabledLayerNames = nullptr;
   info.pQueueCreateInfos = queues.data();
   info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   info.ppEnabledExtensionNames = extensions.data();
-  // info.pEnabledFeatures = nullptr;
+  info.pEnabledFeatures = nullptr;
 
   return info;
 }
@@ -30,10 +30,10 @@ Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice,
   float queuePriority = 1.0f;
 
   for(size_t i = 0; i < queueFamilyIndexes.size(); i++) {
-    VkDeviceQueueCreateInfo createInfo {};
+    VkDeviceQueueCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    // createInfo.pNext;
-    // createInfo.flags;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
     createInfo.queueFamilyIndex = queueFamilyIndexes[i];
     createInfo.queueCount = 1;
     createInfo.pQueuePriorities = &queuePriority;

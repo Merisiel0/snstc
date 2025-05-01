@@ -51,7 +51,8 @@ void World::updateCamera(std::shared_ptr<CommandBuffer> commandBuffer) {
   _camera->updateView();
 
   CameraBuffer camBuf {};
-  camBuf.projView = _camera->projection * _camera->view;
+  camBuf.projection = _camera->projection;
+  camBuf.view = _camera->view;
 
   camBuffer->update<CameraBuffer>(commandBuffer, {camBuf});
 
@@ -61,14 +62,14 @@ void World::updateCamera(std::shared_ptr<CommandBuffer> commandBuffer) {
 
   Light* light = getComponentInChildren<Light>();
   if(light) {
-    lightBuf.position = light->gameObject->getComponent<Transform>()->truePosition();
+    lightBuf.position = light->gameObject->getComponent<Transform>()->getPosition(WORLD);
     lightBuf.color = light->color;
   } else {
     lightBuf.position = vec3 {0, 0, 0};
     lightBuf.color = Color {0, 0, 0, 0};
   }
 
-  lightBuf.viewPosition = _camera->gameObject->getComponent<Transform>()->truePosition();
+  lightBuf.viewPosition = _camera->gameObject->getComponent<Transform>()->getPosition(WORLD);
 
   lightsBuffer->update<LightBuffer>(commandBuffer, {lightBuf});
 }

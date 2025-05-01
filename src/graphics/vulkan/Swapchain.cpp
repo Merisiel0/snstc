@@ -10,10 +10,10 @@
 
 VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t imageCount,
   VkSurfaceCapabilitiesKHR capabilities, VkPresentModeKHR presentMode) const {
-  VkSwapchainCreateInfoKHR info {};
+  VkSwapchainCreateInfoKHR info;
   info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  // info.pNext = nullptr;
-  // info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.surface = surface;
   info.minImageCount = imageCount;
   info.imageFormat = _surfaceFormat.format;
@@ -22,24 +22,24 @@ VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t
   info.imageArrayLayers = 1;
   info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
   info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  // info.queueFamilyIndexCount = 0;
-  // info.pQueueFamilyIndices = nullptr;
+  info.queueFamilyIndexCount = 0;
+  info.pQueueFamilyIndices = nullptr;
   info.preTransform = capabilities.currentTransform;
   info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
   info.presentMode = presentMode;
   info.clipped = VK_TRUE;
-  // info.oldSwapchain = nullptr;
+  info.oldSwapchain = nullptr;
 
   return info;
 }
 
 Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device,
-  const DescriptorPool& descriptorPool, const DescriptorSetLayout& vertLayout,
-  const DescriptorSetLayout& fragLayout) {
+  const DescriptorPool& descriptorPool,
+  std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts) {
   _device = device;
 
   for(int i = 0; i < FRAME_OVERLAP; i++) {
-    frames[i] = std::make_shared<Frame>(device, descriptorPool, vertLayout, fragLayout);
+    frames[i] = std::make_shared<Frame>(device, descriptorPool, descriptorSetLayouts);
   }
 
   extent.width = window.extent.x;
@@ -121,27 +121,26 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device,
   // get swapchain image views
   std::vector<VkImageView> imageViews(_imageCount);
   for(uint32_t i = 0; i < _imageCount; i++) {
-    VkImageViewCreateInfo createInfo {};
+    VkImageViewCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    // createInfo.pNext = nullptr;
-    // createInfo.flags = 0;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
     createInfo.image = vkImages[i];
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     createInfo.format = _surfaceFormat.format;
-    // createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    // createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    // createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    // createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
     createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    // createInfo.subresourceRange.baseMipLevel = 0;
+    createInfo.subresourceRange.baseMipLevel = 0;
     createInfo.subresourceRange.levelCount = 1;
-    // createInfo.subresourceRange.baseArrayLayer = 0;
+    createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount = 1;
 
     VK_CHECK(vkCreateImageView(device->handle, &createInfo, nullptr, &imageViews[i]));
 
-    _images[i] =
-      std::make_shared<Image>(vkImages[i], imageViews[i], extent);
+    _images[i] = std::make_shared<Image>(vkImages[i], imageViews[i], extent);
   }
 }
 

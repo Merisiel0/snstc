@@ -93,6 +93,7 @@ Image::Image(VkImage image, VkImageView view, VkExtent2D extent) {
   _info.pName = SWAPCHAIN_IMAGE_TAG.c_str();
   _channelAmount = {4};
   _usage = 0;
+  _layerCount = 1;
 }
 
 Image::Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usageFlags) {
@@ -101,6 +102,7 @@ Image::Image(const Swapchain& swapchain, ImageType type, VkImageUsageFlags usage
 
   _extent = {swapchain.extent.width, swapchain.extent.height};
   _usage = usageFlags;
+  _layerCount = 1;
 
   switch(type) {
     case COLOR: {
@@ -146,6 +148,7 @@ Image::Image(std::string path) {
   _usage =
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
   _aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+  _layerCount = 1;
 
   // VkPhysicalDeviceLimits limits = _devicePtr->limits();
   // if (_extent.width > limits.maxImageDimension2D || _extent.height >
@@ -181,6 +184,74 @@ Image::Image(std::string path) {
   VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
 }
 
+Image::Image(std::vector<std::string> faces) {
+  std::shared_ptr<Device> deviceSptr = getShared(_device);
+  std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
+  std::shared_ptr<ImmediateSubmit> immediateSubmitSptr = getShared(_immediateSubmit);
+  
+  _format = VK_FORMAT_R8G8B8A8_SRGB;
+  _usage =
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+  _aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+  _layerCount = 6;
+
+  // load all 6 faces in cpu memory
+  int previousWidth = 0, previousHeight = 0;
+  std::vector<stbi_uc*> pixelsArray{};
+  for(int i = 0; i < _layerCount; i++) {
+    int width, height;
+    pixelsArray.push_back(stbi_load(faces[i].c_str(), &width, &height, &_channelAmount, STBI_rgb_alpha));
+    _channelAmount = 4;
+
+    if(!pixelsArray[i]) { throw std::runtime_error("Failed to find image file."); }
+    if(i > 0 && (width != previousWidth || height != previousHeight)) {
+      throw std::runtime_error("All 6 faces of the cubemap aren't of the same dimensions.");
+    }
+
+    previousWidth = width;
+    previousHeight = height;
+  }
+
+  // copy all 6 faces inside staging buffer
+  uint imageSize = static_cast<uint>(previousWidth * previousHeight * _channelAmount * _layerCount);
+  uint layerSize = imageSize / 6;
+
+  Buffer* stagingBuffer =
+    new Buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+
+  void* data;
+  vmaMapMemory(allocatorSptr->handle, stagingBuffer->allocation(), &data);
+
+  for(int i = 0; i < _layerCount; i++){
+    memcpy(static_cast<char*>(data) + (layerSize * i), pixelsArray[i], layerSize);
+    stbi_image_free(pixelsArray[i]);
+  }
+
+  vmaUnmapMemory(allocatorSptr->handle, stagingBuffer->allocation());
+
+  _extent.width = static_cast<uint32_t>(previousWidth);
+  _extent.height = static_cast<uint32_t>(previousHeight);
+
+  // create image
+  VkImageCreateInfo createInfo = getCreateInfo(VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
+  VmaAllocationCreateInfo allocationCreateInfo = getAllocationInfo();
+  VK_CHECK(vmaCreateImage(allocatorSptr->handle, &createInfo, &allocationCreateInfo, &handle,
+    &_allocation, &_info));
+
+  // upload all 6 faces into gpu memory
+  view = VK_NULL_HANDLE;
+  immediateSubmitSptr->submit([&stagingBuffer, this](std::shared_ptr<CommandBuffer> commandBuffer) {
+    this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    stagingBuffer->copyToImage(commandBuffer, *this);
+    this->transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  });
+  delete stagingBuffer;
+
+  // create image view
+  VkImageViewCreateInfo viewCreateInfo = getViewCreateInfo();
+  VK_CHECK(vkCreateImageView(deviceSptr->handle, &viewCreateInfo, nullptr, &view));
+}
+
 Image::Image(int width, int height, Color color) {
   std::shared_ptr<Device> deviceSptr = getShared(_device);
   std::shared_ptr<Allocator> allocatorSptr = getShared(_allocator);
@@ -191,21 +262,22 @@ Image::Image(int width, int height, Color color) {
 
   _channelAmount = 4;
 
-  std::vector<uint8_t> pixels{};
+  std::vector<uint8_t> pixels {};
   int pixelQty = width * height;
-  for(int i = 0; i < pixelQty; i++){
+  for(int i = 0; i < pixelQty; i++) {
     pixels.push_back(255 * color.r);
     pixels.push_back(255 * color.g);
     pixels.push_back(255 * color.b);
     pixels.push_back(255 * color.a);
   }
 
-  _extent.width = (uint32_t)width;
-  _extent.height = (uint32_t)height;
+  _extent.width = (uint32_t) width;
+  _extent.height = (uint32_t) height;
   _format = VK_FORMAT_R8G8B8A8_SRGB;
   _usage =
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
   _aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+  _layerCount = 1;
 
   size_t imageSize = static_cast<size_t>(_extent.width * _extent.height * _channelAmount);
   Buffer* stagingBuffer =
@@ -250,9 +322,9 @@ Image::~Image() {
 
 void Image::transitionLayout(std::shared_ptr<CommandBuffer> commandBuffer,
   VkImageLayout newLayout) {
-  VkImageMemoryBarrier2 imageBarrier {};
+  VkImageMemoryBarrier2 imageBarrier;
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-  // imageBarrier.pNext = nullptr;
+  imageBarrier.pNext = nullptr;
 
   imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
   imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
@@ -263,22 +335,22 @@ void Image::transitionLayout(std::shared_ptr<CommandBuffer> commandBuffer,
   imageBarrier.newLayout = newLayout;
   _layout = newLayout;
 
-  // imageBarrier.srcQueueFamilyIndex = 0;
-  // imageBarrier.dstQueueFamilyIndex = 0;
+  imageBarrier.srcQueueFamilyIndex = 0;
+  imageBarrier.dstQueueFamilyIndex = 0;
 
   imageBarrier.image = handle;
   imageBarrier.subresourceRange = getSubresourceRange();
 
   VkDependencyInfo depInfo {};
   depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-  // depInfo.pNext = nullptr;
-  // depInfo.dependencyFlags = 0;
+  depInfo.pNext = nullptr;
+  depInfo.dependencyFlags = 0;
 
-  // depInfo.memoryBarrierCount = 0;
-  // depInfo.pBufferMemoryBarriers = nullptr;
+  depInfo.memoryBarrierCount = 0;
+  depInfo.pBufferMemoryBarriers = nullptr;
 
-  // depInfo.bufferMemoryBarrierCount = 0;
-  // depInfo.pBufferMemoryBarriers = nullptr;
+  depInfo.bufferMemoryBarrierCount = 0;
+  depInfo.pBufferMemoryBarriers = nullptr;
 
   depInfo.imageMemoryBarrierCount = 1;
   depInfo.pImageMemoryBarriers = &imageBarrier;
@@ -316,34 +388,34 @@ void Image::transitionFormat(std::shared_ptr<CommandBuffer> commandBuffer, VkFor
   delete stagingImg;
 }
 
-VkImageCreateInfo Image::getCreateInfo() const {
-  VkImageCreateInfo info {};
+VkImageCreateInfo Image::getCreateInfo(VkImageCreateFlagBits flags) const {
+  VkImageCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-  // info.pNext = nullptr;
-  // info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = flags;
   info.imageType = VK_IMAGE_TYPE_2D;
   info.format = _format;
   info.extent = {_extent.width, _extent.height, 1};
   info.mipLevels = 1;
-  info.arrayLayers = 1;
+  info.arrayLayers = _layerCount;
   info.samples = VK_SAMPLE_COUNT_1_BIT;
   info.tiling = VK_IMAGE_TILING_OPTIMAL;
   info.usage = _usage;
   info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  // info.queueFamilyIndexCount = 0;
-  // info.pQueueFamilyIndices = nullptr;
+  info.queueFamilyIndexCount = 0;
+  info.pQueueFamilyIndices = nullptr;
   info.initialLayout = _layout;
 
   return info;
 }
 
 VkImageViewCreateInfo Image::getViewCreateInfo() const {
-  VkImageViewCreateInfo info {};
+  VkImageViewCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  // info.pNext = nullptr;
-  // info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.image = handle;
-  info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  info.viewType = _layerCount == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_CUBE;
   info.format = _format;
   info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
   info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -355,24 +427,24 @@ VkImageViewCreateInfo Image::getViewCreateInfo() const {
 }
 
 VmaAllocationCreateInfo Image::getAllocationInfo() const {
-  VmaAllocationCreateInfo info {};
-  // info.flags = 0;
+  VmaAllocationCreateInfo info;
+  info.flags = 0;
   info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
   info.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-  // info.preferredFlags = 0;
-  // info.memoryTypeBits = 0;
+  info.preferredFlags = 0;
+  info.memoryTypeBits = 0;
   info.pool = VK_NULL_HANDLE;
-  // info.pUserData = nullptr;
-  // info.priority = 0;
+  info.pUserData = nullptr;
+  info.priority = 0;
 
   return info;
 }
 
 VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(const VkClearValue& clear,
   bool doClear) const {
-  VkRenderingAttachmentInfo attachmentInfo {};
+  VkRenderingAttachmentInfo attachmentInfo;
   attachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-  // colorAttachment.pNext = nullptr;
+  attachmentInfo.pNext = nullptr;
 
   attachmentInfo.imageView = view;
   attachmentInfo.imageLayout = _layout;
@@ -384,8 +456,6 @@ VkRenderingAttachmentInfo Image::getRenderingAttachmentInfo(const VkClearValue& 
   attachmentInfo.loadOp = doClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
   attachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
   if(doClear) { attachmentInfo.clearValue = clear; }
-
-  // delete clear;
 
   return attachmentInfo;
 }
@@ -402,7 +472,7 @@ RenderingInfoData Image::getRenderingInfo(const Image& color, const Image& depth
   data.info.flags = 0;
   data.info.renderArea.extent = color._extent;
   data.info.renderArea.offset = {0, 0};
-  data.info.layerCount = 1;
+  data.info.layerCount = color._layerCount;
   data.info.viewMask = 0;
   data.info.colorAttachmentCount = (uint32_t) data.colorAttachments.size();
   data.info.pColorAttachments = data.colorAttachments.data();
@@ -413,53 +483,53 @@ RenderingInfoData Image::getRenderingInfo(const Image& color, const Image& depth
 }
 
 VkImageSubresourceRange Image::getSubresourceRange() const {
-  VkImageSubresourceRange range {};
+  VkImageSubresourceRange range;
   range.aspectMask = _aspect;
-  // range.baseMipLevel = 0;
+  range.baseMipLevel = 0;
   range.levelCount = 1;
-  // range.baseArrayLayer = 0;
-  range.layerCount = 1;
+  range.baseArrayLayer = 0;
+  range.layerCount = _layerCount;
 
   return range;
 }
 
 VkImageSubresourceLayers Image::getSubresourceLayers() const {
-  VkImageSubresourceLayers layers {};
+  VkImageSubresourceLayers layers;
   layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  // layers.mipLevel = 0;
-  // layers.baseArrayLayer = 0;
-  layers.layerCount = 1;
+  layers.mipLevel = 0;
+  layers.baseArrayLayer = 0;
+  layers.layerCount = _layerCount;
 
   return layers;
 }
 
 void Image::blitTo(std::shared_ptr<CommandBuffer> commandBuffer,
   std::shared_ptr<Image> image) const {
-  VkImageBlit2 blitRegion {};
+  VkImageBlit2 blitRegion;
   blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
-  // blitRegion.pNext = nullptr;
+  blitRegion.pNext = nullptr;
 
   blitRegion.srcSubresource = getSubresourceLayers();
 
-  // blitRegion.srcOffsets[0].x = 0;
-  // blitRegion.srcOffsets[0].y = 0;
-  // blitRegion.srcOffsets[0].z = 0;
+  blitRegion.srcOffsets[0].x = 0;
+  blitRegion.srcOffsets[0].y = 0;
+  blitRegion.srcOffsets[0].z = 0;
   blitRegion.srcOffsets[1].x = _extent.width;
   blitRegion.srcOffsets[1].y = _extent.height;
   blitRegion.srcOffsets[1].z = 1;
 
   blitRegion.dstSubresource = image->getSubresourceLayers();
 
-  // blitRegion.dstOffsets[0].x = 0;
-  // blitRegion.dstOffsets[0].y = 0;
-  // blitRegion.dstOffsets[0].z = 0;
+  blitRegion.dstOffsets[0].x = 0;
+  blitRegion.dstOffsets[0].y = 0;
+  blitRegion.dstOffsets[0].z = 0;
   blitRegion.dstOffsets[1].x = image->_extent.width;
   blitRegion.dstOffsets[1].y = image->_extent.height;
   blitRegion.dstOffsets[1].z = 1;
 
-  VkBlitImageInfo2 blitInfo {};
+  VkBlitImageInfo2 blitInfo;
   blitInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
-  // blitInfo.pNext = nullptr;
+  blitInfo.pNext = nullptr;
   blitInfo.srcImage = handle;
   blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
   blitInfo.dstImage = image->handle;
@@ -473,11 +543,11 @@ void Image::blitTo(std::shared_ptr<CommandBuffer> commandBuffer,
 
 void Image::copyTo(std::shared_ptr<CommandBuffer> commandBuffer,
   std::shared_ptr<Image> image) const {
-  VkImageCopy region {};
+  VkImageCopy region;
   region.srcSubresource = getSubresourceLayers();
-  // region.srcOffset = 0;
+  region.srcOffset = {0, 0, 0};
   region.dstSubresource = image->getSubresourceLayers();
-  // region.dstOffset = 0;
+  region.dstOffset = {0, 0, 0};
   region.extent = {_extent.width, _extent.height, 1};
 
   vkCmdCopyImage(commandBuffer->handle, handle, _layout, image->handle, image->_layout, 1, &region);
@@ -485,15 +555,15 @@ void Image::copyTo(std::shared_ptr<CommandBuffer> commandBuffer,
 
 void Image::copyToBuffer(std::shared_ptr<CommandBuffer> commandBuffer,
   std::shared_ptr<Buffer> buffer) const {
-  VkBufferImageCopy region {};
-  // region.bufferOffset;
-  // region.bufferRowLength;
-  // region.bufferImageHeight;
+  VkBufferImageCopy region;
+  region.bufferOffset = 0;
+  region.bufferRowLength = 0;
+  region.bufferImageHeight = 0;
   region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   region.imageSubresource.mipLevel = 0;
-  // region.imageSubresource.baseArrayLayer;
-  region.imageSubresource.layerCount = 1;
-  // region.imageOffset;
+  region.imageSubresource.baseArrayLayer = 0;
+  region.imageSubresource.layerCount = _layerCount;
+  region.imageOffset = {0, 0, 0};
   region.imageExtent = {_extent.width, _extent.height, 1};
 
   vkCmdCopyImageToBuffer(commandBuffer->handle, handle, _layout, buffer->handle, 1, &region);

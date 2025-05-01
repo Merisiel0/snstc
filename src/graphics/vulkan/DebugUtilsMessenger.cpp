@@ -49,10 +49,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 }
 
 VkDebugUtilsMessengerCreateInfoEXT DebugUtilsMessenger::getCreateInfo() {
-  VkDebugUtilsMessengerCreateInfoEXT info {};
+  VkDebugUtilsMessengerCreateInfoEXT info;
   info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-  //info.pNext = nullptr;
-  //info.flags = 0;
+  info.pNext = nullptr;
+  info.flags = 0;
   info.messageSeverity =
     /*VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |*/
     /*VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |*/
@@ -61,7 +61,7 @@ VkDebugUtilsMessengerCreateInfoEXT DebugUtilsMessenger::getCreateInfo() {
                      VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                      VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   info.pfnUserCallback = debugCallback;
-  //info.pUserData = nullptr;
+  info.pUserData = nullptr;
 
   return info;
 }

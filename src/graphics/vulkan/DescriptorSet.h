@@ -17,9 +17,9 @@ private:
     const DescriptorSetLayout& layout) const;
   WriteDescriptorSetData getWriteInfo(uint32_t binding, const Image& image,
     const Sampler& sampler) const;
-  WriteDescriptorSetData getWriteInfo(uint32_t binding, Buffer* buffer) const;
+  WriteDescriptorSetData getWriteInfo(uint32_t binding, const Buffer& buffer) const;
   VkDescriptorImageInfo getImageInfo(const Image& image, const Sampler& sampler) const;
-  VkDescriptorBufferInfo getBufferInfo(Buffer* buffer) const;
+  VkDescriptorBufferInfo getBufferInfo(const Buffer& buffer) const;
 
 public:
   VkDescriptorSet handle;
@@ -28,5 +28,5 @@ public:
     const DescriptorSetLayout& layout);
 
   void write(uint32_t binding, const Image& image, const Sampler& sampler);
-  void write(uint32_t binding, Buffer* buffer);
+  void write(uint32_t binding, const Buffer& buffer);
 };
