@@ -23,16 +23,16 @@ private:
   VkPipelineViewportStateCreateInfo getViewportState() const;
   VkPipelineRasterizationStateCreateInfo getRasterizationState(VkPolygonMode polygonMode) const;
   VkPipelineMultisampleStateCreateInfo getMultisampleState() const;
-  VkPipelineDepthStencilStateCreateInfo getDepthStencilState() const;
+  VkPipelineDepthStencilStateCreateInfo getDepthStencilState(bool depthWrite) const;
   PipelineColorBlendStateCreateInfoData getColorBlendState() const;
   PipelineDynamicStateCreateInfoData getDynamicState() const;
 
   GraphicsPipelineCreateInfoData getCreateInfo(
     std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-    VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const;
+    VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode, bool depthWrite) const;
 
 public:
   GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology,
     VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-    std::vector<VkDescriptorSetLayout>& setLayouts);
+    std::vector<VkDescriptorSetLayout>& setLayouts, bool depthWrite = true);
 };

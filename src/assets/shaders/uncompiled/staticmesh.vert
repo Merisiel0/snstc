@@ -1,7 +1,7 @@
 #version 450
 #extension GL_EXT_buffer_reference : require
 
-layout(location = 0) out vec3 texCoords;
+layout(location = 0) out vec2 outUV;
 
 // global descriptor set
 layout(std140, set = 0, binding = 0) uniform GlobalBuffer {
@@ -27,16 +27,9 @@ layout( push_constant ) uniform PushConstants {
 } pushConstants;
 
 // main shader
-void main()
-{
+void main()  {	
   Vertex v = pushConstants.vertBuf.vertices[gl_VertexIndex];
 
-  mat4 view = global.view;
-  view[3][0] = 0.0;
-  view[3][1] = 0.0;
-  view[3][2] = 0.0;
-
-  texCoords = v.position;
-  vec4 pos = global.projection * view  * pushConstants.model * vec4(v.position, 1.0);
-  gl_Position = vec4(pos.xy, 0.9999999 * pos.w, pos.w);
-} 
+	outUV = vec2(v.u, v.v);
+  gl_Position = global.projection * global.view  * pushConstants.model * vec4(v.position, 1.0);
+}

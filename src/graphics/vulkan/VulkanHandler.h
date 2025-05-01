@@ -35,7 +35,7 @@ enum GraphicsPipelineId {
 
   // UNLIT_POINT_TRIANGLE_LIST,
   // UNLIT_LINE_TRIANGLE_LIST,
-  // UNLIT_FILL_TRIANGLE_LIST,
+  UNLIT_FILL_TRIANGLE_LIST,
 
   // UNLIT_POINT_TRIANGLE_STRIP,
   // UNLIT_LINE_TRIANGLE_STRIP,
@@ -108,9 +108,9 @@ private:
   std::shared_ptr<Sampler> _defaultSampler;
 
   std::shared_ptr<DescriptorPool> _descriptorPool;
-  std::shared_ptr<DescriptorSetLayout> _sceneDescSetLayout;
+  std::shared_ptr<DescriptorSetLayout> _globalDescSetLayout;
   std::shared_ptr<DescriptorSetLayout> _skyboxDescSetLayout;
-  std::shared_ptr<DescriptorSetLayout> _objDescSetLayout;
+  std::shared_ptr<DescriptorSetLayout> _materialDescSetLayout;
 
   void beginDrawing(World& world);
   void endDrawing();

@@ -21,13 +21,13 @@ Frame::Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
   for(const auto& setLayout : descriptorSetLayouts) {
     switch(setLayout->type) {
       case DESCRIPTOR_SET_LAYOUT_SCENE:
-        sceneDescSet.reset(new DescriptorSet(device, pool, *setLayout));
+        globalDescSet.reset(new DescriptorSet(device, pool, *setLayout));
         break;
       case DESCRIPTOR_SET_LAYOUT_SKYBOX:
         skyboxDescSet.reset(new DescriptorSet(device, pool, *setLayout));
         break;
       case DESCRIPTOR_SET_LAYOUT_OBJECT:
-        objectDescSet.reset(new DescriptorSet(device, pool, *setLayout));
+        materialDescSet.reset(new DescriptorSet(device, pool, *setLayout));
         break;
     }
   }

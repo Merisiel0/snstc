@@ -248,7 +248,7 @@ void InputHandler::processInputs() {
       if(keyboardStates[SDL_SCANCODE_W]) { movement.z += 1; }
 
       movement *= playerController->movementSpeed * Time::deltaTime;
-      playerController->gameObject->getComponent<Transform>()->translate(movement);
+      playerController->gameObject->getComponent<Transform>()->translate(movement, SELF);
 
       vec3 rotation {};
       if(keyboardStates[SDL_SCANCODE_LEFT]) { rotation.y += 1; }
@@ -257,7 +257,7 @@ void InputHandler::processInputs() {
       if(keyboardStates[SDL_SCANCODE_UP]) { rotation.x += 1; }
 
       rotation *= playerController->rotationSpeed * Time::deltaTime;
-      playerController->gameObject->getComponent<Transform>()->rotate(rotation);
+      playerController->gameObject->getComponent<Transform>()->rotate(rotation, WORLD);
     }
 
     // if (playerController->gamepad) {

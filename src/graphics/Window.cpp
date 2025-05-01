@@ -10,7 +10,6 @@ Window::Window(std::string title, std::shared_ptr<Instance> instance) {
   SDL_DisplayID* displays = SDL_GetDisplays(nullptr);
   const SDL_DisplayMode* dm = SDL_GetCurrentDisplayMode(displays[0]);
   extent = {dm->w, dm->h};
-  //extent = { dm->w * .8f, dm->h * .8f };
 
   handle =
     SDL_CreateWindow(title.c_str(), extent.x, extent.y, SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);

@@ -108,13 +108,13 @@ VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getMultisampleState() con
   return state;
 }
 
-VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState() const {
+VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState(bool depthWrite) const {
   VkPipelineDepthStencilStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   state.pNext = nullptr;
   state.flags = 0;
   state.depthTestEnable = VK_TRUE;
-  state.depthWriteEnable = VK_TRUE;
+  state.depthWriteEnable = (VkBool32)depthWrite;
   state.depthCompareOp = VK_COMPARE_OP_LESS;
   state.depthBoundsTestEnable = VK_FALSE;
   state.stencilTestEnable = VK_FALSE;
@@ -176,7 +176,7 @@ PipelineDynamicStateCreateInfoData GraphicsPipeline::getDynamicState() const {
 
 GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-  VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode) const {
+  VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode, bool depthWrite) const {
   GraphicsPipelineCreateInfoData data;
 
   // get necessary informations
@@ -187,7 +187,7 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   data.viewport = getViewportState();
   data.rasterization = getRasterizationState(polygonMode);
   data.multisample = getMultisampleState();
-  data.depthStencil = getDepthStencilState();
+  data.depthStencil = getDepthStencilState(depthWrite);
   data.colorBlend = getColorBlendState();
   data.dynamicState = getDynamicState();
 
@@ -220,12 +220,12 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
 GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device,
   VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
   std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-  std::vector<VkDescriptorSetLayout>& setLayouts) :
+  std::vector<VkDescriptorSetLayout>& setLayouts, bool depthWrite) :
     IPipeline(device, {getPushConstantRange()}, setLayouts) {
   _type = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
   GraphicsPipelineCreateInfoData data =
-    getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode);
+    getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode, depthWrite);
   VK_CHECK(
     vkCreateGraphicsPipelines(device->handle, VK_NULL_HANDLE, 1, &data.info, nullptr, &handle));
 }

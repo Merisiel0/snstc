@@ -194,49 +194,49 @@ GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primit
       obj.addComponent<MeshRenderer>(mesh, material);
       break;
 
-    case CUBE:
-      mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
-      MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
+    // case CUBE:
+    //   mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
+    //   MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
       
-      mr.setMaxInstanceCount(6);
+    //   mr.setMaxInstanceCount(6);
 
-      // top plane
-      InstanceProperties props;
-      mat4& mat = props.transform;
-      mat = glm::identity<mat4>();
-      mat = glm::translate(mat, vec3 {0, 0.5f, 0});
-      mr.addInstance(props);
+    //   // top plane
+    //   InstanceProperties props;
+    //   mat4& mat = props.transform;
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::translate(mat, vec3 {0, 0.5f, 0});
+    //   mr.addInstance(props);
 
-      // bottom plane
-      mat = glm::identity<mat4>();
-      mat = glm::rotate(mat, radians(180.f), vec3{1,0,0});
-      mat = glm::translate(mat, {0, 0.5f, 0});
-      mr.addInstance(props);
+    //   // bottom plane
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::rotate(mat, radians(180.f), vec3{1,0,0});
+    //   mat = glm::translate(mat, {0, 0.5f, 0});
+    //   mr.addInstance(props);
 
-      // right plane
-      mat = glm::identity<mat4>();
-      mat = glm::rotate(mat, radians(90.f), vec3{0,0,1});
-      mat = glm::translate(mat, {0, 0.5f, 0});
-      mr.addInstance(props);
+    //   // right plane
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::rotate(mat, radians(90.f), vec3{0,0,1});
+    //   mat = glm::translate(mat, {0, 0.5f, 0});
+    //   mr.addInstance(props);
 
-      // left plane
-      mat = glm::identity<mat4>();
-      mat = glm::rotate(mat, radians(-90.f), vec3{0,0,1});
-      mat = glm::translate(mat, {0, 0.5f, 0});
-      mr.addInstance(props);
+    //   // left plane
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::rotate(mat, radians(-90.f), vec3{0,0,1});
+    //   mat = glm::translate(mat, {0, 0.5f, 0});
+    //   mr.addInstance(props);
 
-      // front plane
-      mat = glm::identity<mat4>();
-      mat = glm::rotate(mat, radians(90.f), vec3{1,0,0});
-      mat = glm::translate(mat, {0, 0.5f, 0});
-      mr.addInstance(props);
+    //   // front plane
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::rotate(mat, radians(90.f), vec3{1,0,0});
+    //   mat = glm::translate(mat, {0, 0.5f, 0});
+    //   mr.addInstance(props);
 
-      // back plane
-      mat = glm::identity<mat4>();
-      mat = glm::rotate(mat, radians(-90.f), vec3{1,0,0});
-      mat = glm::translate(mat, {0, 0.5f, 0});
-      mr.addInstance(props);
-      break;
+    //   // back plane
+    //   mat = glm::identity<mat4>();
+    //   mat = glm::rotate(mat, radians(-90.f), vec3{1,0,0});
+    //   mat = glm::translate(mat, {0, 0.5f, 0});
+    //   mr.addInstance(props);
+    //   break;
   }
 
   return obj;

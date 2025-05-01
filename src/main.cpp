@@ -36,15 +36,16 @@ int main() {
     std::cerr << "Failed to initialize Vulkan." << std::endl << e.what();
   }
 
+  // --- Game Initialization ---
   World world = World();
   world.addTag("world");
 
-  // --- Game Initialization ---
   GameObject cameraObj = GameObject(world);
   cameraObj.addTag("camera");
   cameraObj.getComponent<Transform>()->position = {0, 0, 5};
   Camera& cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
+  cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   GameObject skyboxObj = GameObject(world);
   skyboxObj.addComponent<Skybox>(
@@ -54,7 +55,9 @@ int main() {
       ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/bottom.jpg",
       ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/front.jpg",
       ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/back.jpg"});
-  skyboxObj.addComponent<PlayerController>(3.0f, radians(40.f));
+
+  GameObject planeObj = GameObject::createPrimitive(world, PLANE);
+  planeObj.getComponent<Transform>()->rotate({radians(45.f),0,0}, WORLD);
 
   // GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
   // cubeObj.addTag("cube");
@@ -66,7 +69,6 @@ int main() {
   // lightObj.addComponent<PlayerController>(3.0f, radians(40.f));
 
   // --- Game Loop ---
-  int frames = 0;
   while(!quit) {
     ResourceManager::cleanupResources();
     EventHandler::processEvents();
@@ -75,11 +77,6 @@ int main() {
     Time::update();
 
     vulkanHandler->render(world);
-
-    frames++;
-    if(frames == 1) {
-      //quit = true;
-    }
   }
 
   // --- Game Cleanup ---

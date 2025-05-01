@@ -19,25 +19,24 @@ mat4 Transform::getScaleMatrix(Space space) const {
   return glm::scale(mat4(1.0f), getScale(space));
 }
 
-mat4 Transform::getModelMatrix() const {
+mat4 Transform::getModelMatrix(Space space) const {
   vec3 pos = position;
   quat rot = rotation;
   vec3 scl = scale;
-
-  ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
-  while(data->parent && data->parent->hasComponent<Transform>()) {
-    Transform* parentTransform = data->parent->getComponent<Transform>();
-    pos += parentTransform->position;
-    rot = parentTransform->rotation * rot;
-    scl *= parentTransform->scale;
-
-    data = data->parent->getComponent<ECS::ObjectData>();
-  }
 
   mat4 mat = mat4(1.0f);
   mat = glm::translate(mat, pos);
   mat = glm::rotate(mat, angle(rot), axis(rot));
   mat = glm::scale(mat, scl);
+
+  if(space == WORLD) {
+    ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
+    if(data->parent){
+      Transform* parentTransform = data->parent->getComponent<Transform>();
+      mat4 parentMat = parentTransform->getModelMatrix(WORLD);
+      return parentMat * mat;
+    }
+  }
 
   return mat;
 }
@@ -66,9 +65,7 @@ vec3 Transform::getScale(Space space) const {
   if(space == SELF) { return scale; }
 
   ECS::ObjectData* data = gameObject->getComponent<ECS::ObjectData>();
-  if(data->parent) {
-    return scale * data->parent->getComponent<Transform>()->getScale(WORLD);
-  }
+  if(data->parent) { return scale * data->parent->getComponent<Transform>()->getScale(WORLD); }
   return scale;
 }
 
@@ -107,14 +104,14 @@ void Transform::rotate(vec3 angles, Space space) {
 void Transform::rotate(float x, float y, float z, Space space) { this->rotate({x, y, z}, space); }
 
 vec3 Transform::right() const {
-  mat4 mat = getModelMatrix();
+  mat4 mat = getModelMatrix(WORLD);
   return {mat[0].x, mat[0].y, mat[0].z};
 }
 
 vec3 Transform::left() const { return right() * -1.0f; }
 
 vec3 Transform::up() const {
-  mat4 mat = getModelMatrix();
+  mat4 mat = getModelMatrix(WORLD);
   return {mat[1].x, mat[1].y, mat[1].z};
 }
 
@@ -123,6 +120,6 @@ vec3 Transform::down() const { return up() * -1.0f; }
 vec3 Transform::forward() const { return backward() * -1.0f; }
 
 vec3 Transform::backward() const {
-  mat4 mat = getModelMatrix();
+  mat4 mat = getModelMatrix(WORLD);
   return {mat[2].x, mat[2].y, mat[2].z};
 }
