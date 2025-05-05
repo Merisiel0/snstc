@@ -14,7 +14,7 @@ std::string ResourceManager::getCompletePath(std::string partialPath) {
   return assetsPath + partialPath;
 }
 
-void ResourceManager::cleanupResources() {
+void ResourceManager::cleanupExpired() {
   std::unordered_map<std::string, std::weak_ptr<Image>>::iterator it0;
   for(it0 = _images.begin(); it0 != _images.end(); it0++) {
     if((*it0).second.expired()) { _images.erase(it0); }

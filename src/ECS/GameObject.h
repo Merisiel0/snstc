@@ -61,8 +61,8 @@ public:
   /// Thist operator is deleted.
   GameObject& operator=(const GameObject&) = delete;
 
-  GameObject(GameObject&&) noexcept = default;
-  GameObject& operator=(GameObject&&) noexcept = default;
+  GameObject(GameObject&&) = default;
+  GameObject& operator=(GameObject&&) = default;
 
   /// @brief Gets a component on this GameObject.
   /// @tparam Type type of the component to get.

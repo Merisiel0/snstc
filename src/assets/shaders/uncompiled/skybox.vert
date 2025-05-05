@@ -38,5 +38,5 @@ void main()
 
   texCoords = v.position;
   vec4 pos = global.projection * view  * pushConstants.model * vec4(v.position, 1.0);
-  gl_Position = vec4(pos.xy, 0.9999999 * pos.w, pos.w);
+  gl_Position = vec4(pos.xy, 0.99999 * pos.w, pos.w);
 } 

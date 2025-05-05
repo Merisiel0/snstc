@@ -8,9 +8,9 @@
 #include "Fence.h"
 #include "Queue.h"
 #include "Semaphore.h"
+#include "DescriptorManager.h"
 
-Frame::Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
-  std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts) {
+Frame::Frame(std::shared_ptr<Device> device) {
   commandPool = std::make_shared<CommandPool>(device, device->graphicsQueue->familyIndex);
   commandBuffer = std::make_shared<CommandBuffer>(device, *commandPool);
 
@@ -18,19 +18,8 @@ Frame::Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
   renderSemaphore = std::make_shared<Semaphore>(device);
   renderFence = std::make_shared<Fence>(device, true);
 
-  for(const auto& setLayout : descriptorSetLayouts) {
-    switch(setLayout->type) {
-      case DESCRIPTOR_SET_LAYOUT_SCENE:
-        globalDescSet.reset(new DescriptorSet(device, pool, *setLayout));
-        break;
-      case DESCRIPTOR_SET_LAYOUT_SKYBOX:
-        skyboxDescSet.reset(new DescriptorSet(device, pool, *setLayout));
-        break;
-      case DESCRIPTOR_SET_LAYOUT_OBJECT:
-        materialDescSet.reset(new DescriptorSet(device, pool, *setLayout));
-        break;
-    }
-  }
+  globalDescSet = DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_GLOBAL);
+  skyboxDescSet = DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_SKYBOX);
 }
 
 Frame::~Frame() {}

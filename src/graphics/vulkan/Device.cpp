@@ -69,6 +69,7 @@ Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice,
   features.pNext = &vk12Features;
   features.features.logicOp = VK_TRUE;
   features.features.fillModeNonSolid = VK_TRUE;
+  features.features.wideLines = VK_TRUE;
 
   VkDeviceCreateInfo createInfo = getCreateInfo(features, queueCreateInfos, extensions);
   VK_CHECK(vkCreateDevice(physicalDevice->handle, &createInfo, nullptr, &handle));

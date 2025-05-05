@@ -4,6 +4,7 @@
 #include "Buffer.h"
 #include "CommandBuffer.h"
 #include "DebugUtilsMessenger.h"
+#include "DescriptorManager.h"
 #include "DescriptorPool.h"
 #include "DescriptorSet.h"
 #include "DescriptorSetLayout.h"
@@ -42,7 +43,7 @@ void VulkanHandler::beginDrawing(World& world) {
   // begin recording command buffer
   currentFrame->commandBuffer->begin();
 
-  // clear image with color - todo: insert skybox here
+  // clear image with color
   _drawImage->transitionLayout(currentFrame->commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
   _drawImage->clear(currentFrame->commandBuffer, {1, 1, 1, 1});
 
@@ -107,8 +108,7 @@ void VulkanHandler::endDrawing() {
 
   // submit command buffer to queue and execute it
   currentFrame->commandBuffer->submitToQueue(*_device->graphicsQueue, *currentFrame->renderFence,
-    currentFrame->swapchainSemaphore,
-    currentFrame->renderSemaphore); // currentFrame->swapchainSemaphore
+    currentFrame->swapchainSemaphore, currentFrame->renderSemaphore);
 
   // present image to screen
   _device->graphicsQueue->present(*_swapchain, swapchainImageIndex, *currentFrame->renderSemaphore);
@@ -164,78 +164,9 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   // init classes
   Buffer::init(_device, _allocator, _immediateSubmit);
   Image::init(_device, _allocator, _immediateSubmit);
+  DescriptorManager::init(_device);
 
-  // descriptor pool
-  std::vector<VkDescriptorPoolSize> poolSizes;
-  VkDescriptorPoolSize poolSize {};
-  poolSize.descriptorCount =
-    Swapchain::FRAME_OVERLAP * 2; // times 2 for cam buffer and light buffer
-  poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-  poolSizes.push_back(poolSize);
-
-  poolSize.descriptorCount = Swapchain::FRAME_OVERLAP * MapIndex::MAP_COUNT;
-  poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  poolSizes.push_back(poolSize);
-
-  _descriptorPool = std::make_shared<DescriptorPool>(_device, poolSizes);
-
-  // descriptor set layouts
-  std::vector<VkDescriptorSetLayoutBinding> bindings;
-
-  // camera descriptor set layout
-  VkDescriptorSetLayoutBinding binding;
-  binding.binding = 0; // camera buffer
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  binding.descriptorCount = 1;
-  binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  binding.pImmutableSamplers = nullptr;
-  bindings.push_back(binding);
-
-  binding.binding = 1; // lights buffer
-  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-  bindings.push_back(binding);
-
-  _globalDescSetLayout =
-    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_SCENE);
-
-  // skybox descriptor set layout
-  bindings.clear();
-
-  binding.binding = 0; // cubemap
-  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  bindings.push_back(binding);
-
-  _skyboxDescSetLayout =
-    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_SKYBOX);
-
-  // object descriptor set layout
-  bindings.clear();
-
-  binding.binding = 0; // albedo texture
-  bindings.push_back(binding);
-
-  binding.binding = 1; // normal texture
-  bindings.push_back(binding);
-
-  binding.binding = 2; // rougness texture
-  bindings.push_back(binding);
-
-  binding.binding = 3; // metalness texture
-  bindings.push_back(binding);
-
-  binding.binding = 4; // height texture
-  bindings.push_back(binding);
-
-  binding.binding = 5; // ambiant occlusion texture
-  bindings.push_back(binding);
-
-  _materialDescSetLayout =
-    std::make_shared<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_OBJECT);
-
-  _swapchain = std::make_shared<Swapchain>(*_window, _device, *_descriptorPool,
-    std::vector<std::shared_ptr<DescriptorSetLayout>> {_globalDescSetLayout, _skyboxDescSetLayout,
-      _materialDescSetLayout});
+  _swapchain = std::make_shared<Swapchain>(*_window, _device);
 
   _drawImage = std::make_shared<Image>(*_swapchain, COLOR,
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
@@ -249,9 +180,6 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 
   _defaultSampler = std::make_shared<Sampler>(_device);
 
-  // create pipelines
-  _graphicsPipelines.resize(GRAPHICS_PIPELINE_ID_COUNT);
-
   // skybox pipeline
   Shader* skyboxVert =
     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/skybox_vert.spv",
@@ -263,11 +191,17 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   std::vector<VkPipelineShaderStageCreateInfo> shaderInfos = {skyboxVert->getStageCreateInfo(),
     skyboxFrag->getStageCreateInfo()};
 
-  std::vector<VkDescriptorSetLayout> setLayouts = {_globalDescSetLayout->handle,
-    _skyboxDescSetLayout->handle};
+  std::vector<VkDescriptorSetLayout> setLayouts = {
+    DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_GLOBAL).getHandle(),
+    DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_SKYBOX).getHandle()};
 
-  _graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX] = std::make_shared<GraphicsPipeline>(_device,
-    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, shaderInfos, setLayouts, false);
+  GraphicsPipelineId pipelineId = createPipelineId(UNIQUE_GRAPHICS_PIPELINE_SKYBOX);
+
+  std::pair<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> mapPair = std::make_pair(
+    pipelineId, std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                  VK_POLYGON_MODE_FILL, shaderInfos, setLayouts, false));
+
+  _graphicsPipelines.insert(mapPair);
 
   delete skyboxVert;
   delete skyboxFrag;
@@ -281,13 +215,29 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
     new Shader(_device, ResourceManager::assetsPath + "/src/assets/shaders/unlit_frag.spv",
       VK_SHADER_STAGE_FRAGMENT_BIT);
 
-  // unlit fill triangle list pipeline
+  // unlit static meshes pipelines
   shaderInfos = {staticmeshVert->getStageCreateInfo(), unlitFrag->getStageCreateInfo()};
 
-  setLayouts = {_globalDescSetLayout->handle, _materialDescSetLayout->handle};
+  setLayouts.pop_back();
+  setLayouts.push_back(DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_MATERIAL).getHandle());
 
-  _graphicsPipelines[UNLIT_FILL_TRIANGLE_LIST] = std::make_shared<GraphicsPipeline>(_device,
-    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, shaderInfos, setLayouts);
+  pipelineId = createPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+    MESH_LAYOUT_STATIC, LIGHTING_TYPE_UNLIT);
+
+  mapPair = std::make_pair(pipelineId,
+    std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+      VK_POLYGON_MODE_FILL, shaderInfos, setLayouts));
+
+  _graphicsPipelines.insert(mapPair);
+
+  pipelineId = createPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+    MESH_LAYOUT_STATIC, LIGHTING_TYPE_UNLIT);
+
+  mapPair = std::make_pair(pipelineId,
+    std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+      VK_POLYGON_MODE_LINE, shaderInfos, setLayouts));
+
+  _graphicsPipelines.insert(mapPair);
 
   // cleanup shaders
   delete staticmeshVert;
@@ -297,9 +247,7 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
 VulkanHandler::~VulkanHandler() {
   _device->waitIdle();
 
-  for(int i = 0; i < GRAPHICS_PIPELINE_ID_COUNT; i++) {
-    _graphicsPipelines[i].reset();
-  }
+  _graphicsPipelines.clear();
 
   _defaultSampler.reset();
 
@@ -307,10 +255,7 @@ VulkanHandler::~VulkanHandler() {
   _drawImage.reset();
   _swapchain.reset();
 
-  _globalDescSetLayout.reset();
-  _skyboxDescSetLayout.reset();
-  _materialDescSetLayout.reset();
-  _descriptorPool.reset();
+  DescriptorManager::cleanup();
 
   _immediateSubmit.reset();
 
@@ -338,12 +283,12 @@ void VulkanHandler::render(World& world) {
 
     // find and bind pipeline to use
     std::shared_ptr<GraphicsPipeline> currentPipeline =
-      _graphicsPipelines[UNLIT_FILL_TRIANGLE_LIST];
+      _graphicsPipelines.at(rd.getGraphicsPipelineId());
     currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write and bind descriptor sets
-    currentFrame->materialDescSet->write(0, rd.material->getMap(ALBEDO), *_defaultSampler);
-    currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->materialDescSet, 1,
+    rd.material->updateDescriptorSet(_swapchain->getFrameIndex(), *_defaultSampler);
+    currentFrame->commandBuffer->bindDescriptorSet(*rd.material->getDescriptorSet(_swapchain->getFrameIndex()), 1,
       *currentPipeline);
 
     // push vertices and model matrix inside pushconstants
@@ -366,20 +311,22 @@ void VulkanHandler::render(World& world) {
   Skybox* skybox = world.getComponentInChildren<Skybox>();
   if(skybox) {
     // bind pipeline
-    currentFrame->commandBuffer->bindPipeline(*_graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]);
+    std::shared_ptr<GraphicsPipeline> currentPipeline =
+      _graphicsPipelines.at(createPipelineId(UNIQUE_GRAPHICS_PIPELINE_NONE));
+    currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write and bind descriptor sets
     Transform* skyboxTransform = skybox->gameObject->getComponent<Transform>();
     currentFrame->skyboxDescSet->write(0, *skybox->getCubeMap(), *_defaultSampler);
     currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->skyboxDescSet, 1,
-      *_graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]);
+      *currentPipeline);
 
     // push constants
     PushConstants constants;
     constants.model = skyboxTransform->getRotationMatrix(WORLD);
     constants.vertexBuffer = skybox->getMesh()->vertices->address;
-    currentFrame->commandBuffer->pushConstants(constants,
-      _graphicsPipelines[GRAPHICS_PIPELINE_SKYBOX]->layout(), VK_SHADER_STAGE_VERTEX_BIT);
+    currentFrame->commandBuffer->pushConstants(constants, currentPipeline->layout(),
+      VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
     currentFrame->commandBuffer->setCullMode(VK_CULL_MODE_NONE);

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../../utils/Utils.h"
+#include "DataStructures.h"
 #include "SDL3/SDL_vulkan.h"
 #include "vk_mem_alloc.h"
 #include "vulkan/vulkan.h"
-#include "DataStructures.h"
 
 #include <iostream>
 #include <memory>
@@ -93,3 +93,114 @@ static void fetchExtensionFunctionPointers(VkInstance instance) {
     VK_CHECK(VK_ERROR_EXTENSION_NOT_PRESENT);
   }
 }
+
+enum WindowScreenMode { WINDOWED = 0, FULLSCREEN = SDL_WINDOW_FULLSCREEN };
+
+using GraphicsPipelineId = uint16_t;
+
+enum MeshLayout : uint16_t {
+  MESH_LAYOUT_STATIC = 0,
+  MESH_LAYOUT_STATIC_INSTANCE = 1,
+  MESH_LAYOUT_PARTICLE = 2
+};
+
+enum LightingType {
+  LIGHTING_TYPE_UNLIT = 0,
+  LIGHTING_TYPE_PHONG = 1,
+  LIGHTING_TYPE_BLINN_PHONG = 2,
+  LIGHTING_TYPE_COOK_TORRANCE = 3
+};
+
+enum UniqueGraphicsPipeline : uint16_t {
+  UNIQUE_GRAPHICS_PIPELINE_NONE = 0,
+  UNIQUE_GRAPHICS_PIPELINE_SKYBOX = 1
+};
+
+/// @brief Converts a mesh's parameters into a graphics pipeline id.
+///
+/// [ 9 | 8 7 | 6 5 | 4 3 | 2 1 0 ]
+/// @param topology a primitive topology to encode in bits 0-2
+/// @param polygonMode a polygon mode to encode in bits 3-4.
+/// @param layout a mesh layout to encode in bits 5-6.
+/// @param lighting a lighting type to encode in bits 7-8.
+/// @param unique a unique graphics pipeline to encode in bit 9.
+/// @return a graphics pipeline id.
+inline GraphicsPipelineId createPipelineId(VkPrimitiveTopology topology, VkPolygonMode polygonMode,
+  MeshLayout layout, LightingType lighting,
+  UniqueGraphicsPipeline unique = UNIQUE_GRAPHICS_PIPELINE_NONE) {
+  if(unique != UNIQUE_GRAPHICS_PIPELINE_NONE) {
+    return (((GraphicsPipelineId) topology) & 0b1) << 9;
+  }
+
+  GraphicsPipelineId id = 0;
+  id |= ((GraphicsPipelineId) topology) & 0b111;
+  id |= (((GraphicsPipelineId) polygonMode) & 0b11) << 3;
+  id |= (((GraphicsPipelineId) layout) & 0b11) << 5;
+  id |= (((GraphicsPipelineId) lighting) & 0b11) << 7;
+
+  return id;
+}
+
+/// @brief Gets a unique graphics pipeline id.
+/// @param unique a unique graphics pipeline.
+/// @return a graphics pipeline id.
+inline GraphicsPipelineId createPipelineId(UniqueGraphicsPipeline unique) {
+  return createPipelineId((VkPrimitiveTopology) 0, (VkPolygonMode) 0, (MeshLayout) 0,
+    (LightingType) 0, UNIQUE_GRAPHICS_PIPELINE_SKYBOX);
+}
+
+// /// @brief List containing all implemented graphics pipelines.
+// enum GraphicsPipelineId {
+//   /// @brief Reserved for skyboxes.
+//   GRAPHICS_PIPELINE_SKYBOX,
+
+//   // UNLIT_POINT_LIST,
+//   // UNLIT_LINE_LIST,
+//   // UNLIT_LINE_STRIP,
+
+//   // UNLIT_POINT_TRIANGLE_LIST,
+//   UNLIT_LINE_TRIANGLE_LIST,
+//   UNLIT_FILL_TRIANGLE_LIST,
+
+//   // UNLIT_POINT_TRIANGLE_STRIP,
+//   // UNLIT_LINE_TRIANGLE_STRIP,
+//   // UNLIT_FILL_TRIANGLE_STRIP,
+
+//   // UNLIT_POINT_TRIANGLE_FAN,
+//   // UNLIT_LINE_TRIANGLE_FAN,
+//   // UNLIT_FILL_TRIANGLE_FAN,
+
+//   // UNLIT_INSTANCE_POINT_LIST,
+//   // UNLIT_INSTANCE_LINE_LIST,
+//   // UNLIT_INSTANCE_LINE_STRIP,
+
+//   // UNLIT_INSTANCE_POINT_TRIANGLE_LIST,
+//   // UNLIT_INSTANCE_LINE_TRIANGLE_LIST,
+//   // UNLIT_INSTANCE_FILL_TRIANGLE_LIST,
+
+//   // UNLIT_INSTANCE_POINT_TRIANGLE_STRIP,
+//   // UNLIT_INSTANCE_LINE_TRIANGLE_STRIP,
+//   // UNLIT_INSTANCE_FILL_TRIANGLE_STRIP,
+
+//   // UNLIT_INSTANCE_POINT_TRIANGLE_FAN,
+//   // UNLIT_INSTANCE_LINE_TRIANGLE_FAN,
+//   // UNLIT_INSTANCE_FILL_TRIANGLE_FAN,
+
+//   // UNLIT_PARTICLE_POINT_LIST,
+//   // UNLIT_PARTICLE_LINE_LIST,
+//   // UNLIT_PARTICLE_LINE_STRIP,
+
+//   // UNLIT_PARTICLE_POINT_TRIANGLE_LIST,
+//   // UNLIT_PARTICLE_LINE_TRIANGLE_LIST,
+//   // UNLIT_PARTICLE_FILL_TRIANGLE_LIST,
+
+//   // UNLIT_PARTICLE_POINT_TRIANGLE_STRIP,
+//   // UNLIT_PARTICLE_LINE_TRIANGLE_STRIP,
+//   // UNLIT_PARTICLE_FILL_TRIANGLE_STRIP,
+
+//   // UNLIT_PARTICLE_POINT_TRIANGLE_FAN,
+//   // UNLIT_PARTICLE_LINE_TRIANGLE_FAN,
+//   // UNLIT_PARTICLE_FILL_TRIANGLE_FAN,
+
+//   GRAPHICS_PIPELINE_ID_COUNT
+// };

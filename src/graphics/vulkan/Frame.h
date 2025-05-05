@@ -21,11 +21,9 @@ public:
   std::shared_ptr<Semaphore> renderSemaphore;
   std::shared_ptr<Fence> renderFence;
 
-  std::shared_ptr<DescriptorSet> globalDescSet;
-  std::shared_ptr<DescriptorSet> skyboxDescSet;
-  std::shared_ptr<DescriptorSet> materialDescSet;
+  std::shared_ptr<DescriptorSet> globalDescSet; // TODO: move to World class
+  std::shared_ptr<DescriptorSet> skyboxDescSet; // TODO: move to Skybox component (also remove material from skybox, make it only an image)
 
-  Frame(std::shared_ptr<Device> device, const DescriptorPool& pool,
-    std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts);
+  Frame(std::shared_ptr<Device> device);
   ~Frame();
 };

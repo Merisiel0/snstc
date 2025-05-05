@@ -14,13 +14,33 @@ VkDescriptorSetLayoutCreateInfo DescriptorSetLayout::getCreateInfo(
   return info;
 }
 
+VkDescriptorSetLayout DescriptorSetLayout::getHandle() const { return _handle; }
+
+DescriptorSetLayoutType DescriptorSetLayout::getType() const { return _type; }
+
+std::vector<VkDescriptorPoolSize> DescriptorSetLayout::getPoolSizes() const { return _poolSizes; }
+
 DescriptorSetLayout::DescriptorSetLayout(std::shared_ptr<Device> device,
   std::vector<VkDescriptorSetLayoutBinding>& bindings, DescriptorSetLayoutType type) :
-    _device {device}, type {type} {
+    _device {device}, _type {type} {
+  for(const auto& binding : bindings) {
+    const auto it = std::find_if(_poolSizes.begin(), _poolSizes.end(),
+      [binding](VkDescriptorPoolSize size) { return size.type = binding.descriptorType; });
+
+    if(it != _poolSizes.end()) {
+      it->descriptorCount += binding.descriptorCount;
+    } else {
+      VkDescriptorPoolSize size;
+      size.type = binding.descriptorType;
+      size.descriptorCount = binding.descriptorCount;
+      _poolSizes.push_back(size);
+    }
+  }
+
   VkDescriptorSetLayoutCreateInfo createInfo = getCreateInfo(bindings);
-  VK_CHECK(vkCreateDescriptorSetLayout(device->handle, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateDescriptorSetLayout(device->handle, &createInfo, nullptr, &_handle));
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-  vkDestroyDescriptorSetLayout(_device->handle, handle, nullptr);
+  vkDestroyDescriptorSetLayout(_device->handle, _handle, nullptr);
 }

@@ -9,7 +9,6 @@
 #include "resources/ResourceManager.h"
 #include "utils/Utils.h"
 
-std::shared_ptr<VulkanHandler> vulkanHandler;
 bool quit = false;
 
 static void quitFunctor(SDL_QuitEvent e) { quit = true; }
@@ -30,8 +29,9 @@ int main() {
   EventHandler::quit += quitFunctor;
   EventHandler::keyDown += quitFunctor;
 
+  VulkanHandler* vulkanHandler = nullptr;
   try {
-    vulkanHandler = std::make_shared<VulkanHandler>("SphereNSTC", 0, "SphereNSTC Engine", 0);
+    vulkanHandler = new VulkanHandler("SphereNSTC", 0, "SphereNSTC Engine", 0);
   } catch(std::runtime_error e) {
     std::cerr << "Failed to initialize Vulkan." << std::endl << e.what();
   }
@@ -56,8 +56,18 @@ int main() {
       ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/front.jpg",
       ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/back.jpg"});
 
-  GameObject planeObj = GameObject::createPrimitive(world, PLANE);
-  planeObj.getComponent<Transform>()->rotate({radians(45.f),0,0}, WORLD);
+  GameObject planeObj = GameObject::createPrimitive(world, PLANE,
+    ResourceManager::loadMaterial(
+      ResourceManager::assetsPath + "/src/assets/materials/checkered_wood_4k"));
+  planeObj.getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+
+  GameObject planeObj2 = GameObject::createPrimitive(world, PLANE,
+    ResourceManager::loadMaterial(
+      {0,1,0}));
+  planeObj2.getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+  planeObj2.getComponent<Transform>()->translate({2, 0, 0}, WORLD);
+  planeObj2.getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);
+  planeObj2.getComponent<MeshRenderer>()->lineWidth = 5;
 
   // GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
   // cubeObj.addTag("cube");
@@ -70,7 +80,7 @@ int main() {
 
   // --- Game Loop ---
   while(!quit) {
-    ResourceManager::cleanupResources();
+    ResourceManager::cleanupExpired();
     EventHandler::processEvents();
     InputHandler::processInputs();
 
@@ -82,6 +92,8 @@ int main() {
   // --- Game Cleanup ---
   vulkanHandler->waitForEndOfWork();
   SDL_Quit();
+
+  world.~World();
 
   return 0;
 }

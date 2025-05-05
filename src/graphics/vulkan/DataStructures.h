@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VulkanUtils.h"
+#include "vulkan/vulkan.h"
 
 /// @brief Container for `VkPipelineColorBlendStateCreateInfo` and all its necessary data.
 struct PipelineColorBlendStateCreateInfoData {
@@ -57,4 +57,9 @@ struct WriteDescriptorSetData {
   VkBufferView texelBufferView;
 
   VkWriteDescriptorSet info;
+};
+
+struct DescriptorSetAllocateInfoData {
+  std::vector<VkDescriptorSetLayout> setLayouts;
+  VkDescriptorSetAllocateInfo info;
 };

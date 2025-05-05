@@ -35,9 +35,9 @@ public:
   uint32_t frameNumber;
   std::array<std::shared_ptr<Frame>, FRAME_OVERLAP> frames;
   std::shared_ptr<Frame> getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
+  int getFrameIndex() const { return frameNumber % FRAME_OVERLAP; }
 
-  Swapchain(const Window& window, std::shared_ptr<Device> device,
-    const DescriptorPool& descriptorPool, std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts);
+  Swapchain(const Window& window, std::shared_ptr<Device> device);
 
   ~Swapchain();
 

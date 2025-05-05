@@ -3,6 +3,8 @@
 
 #include "VulkanUtils.h"
 
+#include <memory>
+#include <unordered_map>
 #include <vector>
 
 class Instance;
@@ -21,64 +23,6 @@ class DescriptorSet;
 class Sampler;
 
 class World;
-
-enum WindowScreenMode { WINDOWED = 0, FULLSCREEN = SDL_WINDOW_FULLSCREEN };
-
-/// @brief List containing all implemented graphics pipelines.
-enum GraphicsPipelineId {
-  /// @brief Reserved for skyboxes.
-  GRAPHICS_PIPELINE_SKYBOX,
-
-  // UNLIT_POINT_LIST,
-  // UNLIT_LINE_LIST,
-  // UNLIT_LINE_STRIP,
-
-  // UNLIT_POINT_TRIANGLE_LIST,
-  // UNLIT_LINE_TRIANGLE_LIST,
-  UNLIT_FILL_TRIANGLE_LIST,
-
-  // UNLIT_POINT_TRIANGLE_STRIP,
-  // UNLIT_LINE_TRIANGLE_STRIP,
-  // UNLIT_FILL_TRIANGLE_STRIP,
-
-  // UNLIT_POINT_TRIANGLE_FAN,
-  // UNLIT_LINE_TRIANGLE_FAN,
-  // UNLIT_FILL_TRIANGLE_FAN,
-
-  // UNLIT_INSTANCE_POINT_LIST,
-  // UNLIT_INSTANCE_LINE_LIST,
-  // UNLIT_INSTANCE_LINE_STRIP,
-
-  // UNLIT_INSTANCE_POINT_TRIANGLE_LIST,
-  // UNLIT_INSTANCE_LINE_TRIANGLE_LIST,
-  // UNLIT_INSTANCE_FILL_TRIANGLE_LIST,
-
-  // UNLIT_INSTANCE_POINT_TRIANGLE_STRIP,
-  // UNLIT_INSTANCE_LINE_TRIANGLE_STRIP,
-  // UNLIT_INSTANCE_FILL_TRIANGLE_STRIP,
-
-  // UNLIT_INSTANCE_POINT_TRIANGLE_FAN,
-  // UNLIT_INSTANCE_LINE_TRIANGLE_FAN,
-  // UNLIT_INSTANCE_FILL_TRIANGLE_FAN,
-
-  // UNLIT_PARTICLE_POINT_LIST,
-  // UNLIT_PARTICLE_LINE_LIST,
-  // UNLIT_PARTICLE_LINE_STRIP,
-
-  // UNLIT_PARTICLE_POINT_TRIANGLE_LIST,
-  // UNLIT_PARTICLE_LINE_TRIANGLE_LIST,
-  // UNLIT_PARTICLE_FILL_TRIANGLE_LIST,
-
-  // UNLIT_PARTICLE_POINT_TRIANGLE_STRIP,
-  // UNLIT_PARTICLE_LINE_TRIANGLE_STRIP,
-  // UNLIT_PARTICLE_FILL_TRIANGLE_STRIP,
-
-  // UNLIT_PARTICLE_POINT_TRIANGLE_FAN,
-  // UNLIT_PARTICLE_LINE_TRIANGLE_FAN,
-  // UNLIT_PARTICLE_FILL_TRIANGLE_FAN,
-
-  GRAPHICS_PIPELINE_ID_COUNT
-};
 
 // Opens a window and renders worlds on it.
 class VulkanHandler {
@@ -103,14 +47,9 @@ private:
   std::shared_ptr<Image> _drawImage;
   std::shared_ptr<Image> _depthImage;
 
-  std::vector<std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
+  std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
 
   std::shared_ptr<Sampler> _defaultSampler;
-
-  std::shared_ptr<DescriptorPool> _descriptorPool;
-  std::shared_ptr<DescriptorSetLayout> _globalDescSetLayout;
-  std::shared_ptr<DescriptorSetLayout> _skyboxDescSetLayout;
-  std::shared_ptr<DescriptorSetLayout> _materialDescSetLayout;
 
   void beginDrawing(World& world);
   void endDrawing();

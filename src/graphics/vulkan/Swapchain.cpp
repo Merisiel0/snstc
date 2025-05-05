@@ -33,13 +33,11 @@ VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t
   return info;
 }
 
-Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device,
-  const DescriptorPool& descriptorPool,
-  std::vector<std::shared_ptr<DescriptorSetLayout>> descriptorSetLayouts) {
+Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
   _device = device;
 
   for(int i = 0; i < FRAME_OVERLAP; i++) {
-    frames[i] = std::make_shared<Frame>(device, descriptorPool, descriptorSetLayouts);
+    frames[i] = std::make_shared<Frame>(device);
   }
 
   extent.width = window.extent.x;

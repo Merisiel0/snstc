@@ -14,35 +14,39 @@ struct InstanceProperties {
 };
 
 struct MeshRenderer : public ECS::BaseComponent {
+private:
+  GraphicsPipelineId _pipelineId;
+  VkPolygonMode _polygonMode;
+  VkPrimitiveTopology _topology;
+  LightingType _lightingType;
+
+  void updatePipelineId();
+
+public:
   std::shared_ptr<Mesh> mesh;
   std::shared_ptr<Material> material;
   VkCullModeFlags cullMode;
-  VkPolygonMode polygonMode;
   float lineWidth = 1.0f;
 
-  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) :
-      mesh {mesh},
-      material {material},
-      cullMode {VK_CULL_MODE_BACK_BIT},
-      polygonMode {VK_POLYGON_MODE_FILL} {};
-
   MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-    VkCullModeFlags cullMode) :
-      mesh {mesh}, material {material}, cullMode {cullMode}, polygonMode {VK_POLYGON_MODE_FILL} {};
+    VkPrimitiveTopology topology, VkCullModeFlags cullMode, VkPolygonMode polygonMode,
+    LightingType lightingType);
 
-  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-    VkPolygonMode polygonMode) :
-      mesh {mesh},
-      material {material},
-      cullMode {VK_CULL_MODE_BACK_BIT},
-      polygonMode {polygonMode} {};
-
-  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-    VkCullModeFlags cullMode, VkPolygonMode polygonMode) :
-      mesh {mesh}, material {material}, cullMode {cullMode}, polygonMode {polygonMode} {};
+  MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
 
   MeshRenderer(MeshRenderer&&) noexcept = default;
   MeshRenderer& operator=(MeshRenderer&&) noexcept = default;
 
   ~MeshRenderer();
+
+  GraphicsPipelineId getGraphicsPipelineId() const;
+
+  VkPolygonMode getPolygonMode() const;
+  void setPolygonMode(VkPolygonMode mode);
+
+  VkPrimitiveTopology getPrimitiveTopology() const;
+  void setPrimitiveTopology(VkPrimitiveTopology topology);
+
+  LightingType getLightingType() const;
+  void setLightingType(LightingType type);
 };

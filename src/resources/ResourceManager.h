@@ -29,7 +29,10 @@ public:
   static std::string getCompletePath(std::string partialPath);
 
   /// @brief Cleans up pointers to expired resources.
-  static void cleanupResources();
+  static void cleanupExpired();
+
+  /// @brief Cleans up every allocated resource.
+  static void cleanup();
 
   /// @brief Loads an image from the provided path.
   /// @param path path to the image.

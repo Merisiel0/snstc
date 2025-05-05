@@ -1,7 +1,9 @@
 #include "Material.h"
 
 #include "ResourceManager.h"
+#include "graphics/vulkan/DescriptorManager.h"
 #include "graphics/vulkan/Image.h"
+#include "graphics/vulkan/Swapchain.h"
 
 #include <filesystem>
 #include <string>
@@ -28,23 +30,43 @@ Material::Material(std::string path) {
       completePath.append(supportedImageExtensions[j]);
       if(std::filesystem::exists(completePath)) {
         _maps[i] = ResourceManager::loadImage(completePath.c_str());
-        if(i == 0) { plainColor = false; }
       }
     }
   }
 
-  if(!hasAMap()){
-    std::cerr << "PBR Material initialized without any maps. This shouldn't happen and is probably a path issue.";
+  if(!hasAMap()) {
+    std::cerr
+      << "PBR Material initialized without any maps. This shouldn't happen and is probably a path issue.";
+  }
+
+  for(int i = 0; i < Swapchain::FRAME_OVERLAP; i++){
+    _descriptorSets.push_back(DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_MATERIAL));
   }
 }
 
-Material::Material(Color color){
-  _maps[ALBEDO] = ResourceManager::loadImage(1, 1, color);
+Material::Material(Color color) {
+  _maps[MAP_INDEX_ALBEDO] = ResourceManager::loadImage(1, 1, color);
+  
+  for(int i = 0; i < Swapchain::FRAME_OVERLAP; i++){
+    _descriptorSets.push_back(DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_MATERIAL));
+  }
 }
 
 bool Material::hasAMap() {
-  for(int i = 0; i < MapIndex::MAP_COUNT; i++) {
+  for(int i = 0; i < MapIndex::MAP_INDEX_COUNT; i++) {
     if(hasMap((MapIndex) i)) { return true; }
   }
   return false;
 }
+
+Image& Material::getMap(MapIndex i) { return *_maps[i]; }
+
+void Material::updateDescriptorSet(int frameIndex, const Sampler& sampler) {
+  for(int i = 0; i < MAP_INDEX_COUNT; i++) {
+    if(_maps[i]) {
+      _descriptorSets.at(frameIndex)->write(i, getMap((MapIndex) i), sampler);
+    }
+  }
+}
+
+std::shared_ptr<DescriptorSet> Material::getDescriptorSet(int frameIndex) const { return _descriptorSets.at(frameIndex); }

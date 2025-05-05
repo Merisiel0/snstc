@@ -68,7 +68,8 @@ void CommandBuffer::bindPipeline(const GraphicsPipeline& pipeline) const {
 
 void CommandBuffer::bindDescriptorSet(const DescriptorSet& set, uint32_t setNb,
   const IPipeline& pipeline) const {
-  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &set.handle, 0,
+  VkDescriptorSet setHandle = set.getHandle();
+  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &setHandle, 0,
     nullptr);
 }
 
@@ -126,7 +127,7 @@ void CommandBuffer::submitToQueue(const Queue& queue, const Fence& fence,
   data.info.pWaitSemaphoreInfos = data.waitSemaphoreInfos.data();
   data.info.signalSemaphoreInfoCount = (uint32_t) data.signalSemaphoreInfos.size();
   data.info.pSignalSemaphoreInfos = data.signalSemaphoreInfos.data();
-  data.info.commandBufferInfoCount = (uint32_t)data.commandBufferSubmitInfos.size();
+  data.info.commandBufferInfoCount = (uint32_t) data.commandBufferSubmitInfos.size();
   data.info.pCommandBufferInfos = data.commandBufferSubmitInfos.data();
 
   VK_CHECK(vkQueueSubmit2(queue.handle, 1, &data.info, fence.handle));
