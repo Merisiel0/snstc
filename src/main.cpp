@@ -29,9 +29,8 @@ int main() {
   EventHandler::quit += quitFunctor;
   EventHandler::keyDown += quitFunctor;
 
-  VulkanHandler* vulkanHandler = nullptr;
   try {
-    vulkanHandler = new VulkanHandler("SphereNSTC", 0, "SphereNSTC Engine", 0);
+    VulkanHandler::init("SphereNSTC", 0, "SphereNSTC Engine", 0);
   } catch(std::runtime_error e) {
     std::cerr << "Failed to initialize Vulkan." << std::endl << e.what();
   }
@@ -86,11 +85,11 @@ int main() {
 
     Time::update();
 
-    vulkanHandler->render(world);
+    VulkanHandler::render(world);
   }
 
   // --- Game Cleanup ---
-  vulkanHandler->waitForEndOfWork();
+  VulkanHandler::waitForEndOfWork();
   SDL_Quit();
 
   world.~World();

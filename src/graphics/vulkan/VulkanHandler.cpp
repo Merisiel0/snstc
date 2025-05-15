@@ -31,6 +31,24 @@
 #include <optional>
 #include <vector>
 
+std::shared_ptr<Instance> VulkanHandler::_instance;
+
+#ifdef VKDEBUG
+std::shared_ptr<DebugUtilsMessenger> VulkanHandler::_debugMessenger;
+#endif // VKDEBUG
+
+std::shared_ptr<PhysicalDevice> VulkanHandler::_physicalDevice;
+std::shared_ptr<Device> VulkanHandler::_device;
+std::shared_ptr<Allocator> VulkanHandler::_allocator;
+std::shared_ptr<ImmediateSubmit> VulkanHandler::_immediateSubmit;
+std::shared_ptr<Window> VulkanHandler::_window;
+std::shared_ptr<Swapchain> VulkanHandler::_swapchain;
+std::shared_ptr<Image> VulkanHandler::_drawImage;
+std::shared_ptr<Image> VulkanHandler::_depthImage;
+std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>>
+  VulkanHandler::_graphicsPipelines;
+std::shared_ptr<Sampler> VulkanHandler::_defaultSampler;
+
 void VulkanHandler::beginDrawing(World& world) {
   std::shared_ptr<Frame> currentFrame = _swapchain->getCurrentFrame();
 
@@ -117,7 +135,7 @@ void VulkanHandler::endDrawing() {
   _swapchain->frameNumber++;
 }
 
-VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion,
+void VulkanHandler::init(const char* applicationName, int applicationVersion,
   const char* engineName, int engineVersion) {
   // instance
   std::vector<const char*> instanceLayers {
@@ -244,7 +262,7 @@ VulkanHandler::VulkanHandler(const char* applicationName, int applicationVersion
   delete unlitFrag;
 }
 
-VulkanHandler::~VulkanHandler() {
+void VulkanHandler::cleanup() {
   _device->waitIdle();
 
   _graphicsPipelines.clear();
@@ -270,6 +288,12 @@ VulkanHandler::~VulkanHandler() {
   _instance.reset();
 }
 
+void VulkanHandler::loadPipeline(GraphicsPipelineId id) {
+  
+}
+
+void VulkanHandler::releasePipeline(GraphicsPipelineId id) {}
+
 void VulkanHandler::render(World& world) {
   // begin
   beginDrawing(world);
@@ -288,8 +312,8 @@ void VulkanHandler::render(World& world) {
 
     // write and bind descriptor sets
     rd.material->updateDescriptorSet(_swapchain->getFrameIndex(), *_defaultSampler);
-    currentFrame->commandBuffer->bindDescriptorSet(*rd.material->getDescriptorSet(_swapchain->getFrameIndex()), 1,
-      *currentPipeline);
+    currentFrame->commandBuffer->bindDescriptorSet(
+      *rd.material->getDescriptorSet(_swapchain->getFrameIndex()), 1, *currentPipeline);
 
     // push vertices and model matrix inside pushconstants
     PushConstants constants {};
@@ -339,4 +363,4 @@ void VulkanHandler::render(World& world) {
   endDrawing();
 }
 
-void VulkanHandler::waitForEndOfWork() const { _device->waitIdle(); }
+void VulkanHandler::waitForEndOfWork() { _device->waitIdle(); }

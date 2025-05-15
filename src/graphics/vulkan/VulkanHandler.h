@@ -27,38 +27,41 @@ class World;
 // Opens a window and renders worlds on it.
 class VulkanHandler {
 private:
-  std::shared_ptr<Instance> _instance;
+  static std::shared_ptr<Instance> _instance;
 
 #ifdef VKDEBUG
-  std::shared_ptr<DebugUtilsMessenger> _debugMessenger;
+  static std::shared_ptr<DebugUtilsMessenger> _debugMessenger;
 #endif // VKDEBUG
 
-  std::shared_ptr<PhysicalDevice> _physicalDevice;
-  std::shared_ptr<Device> _device;
-  std::shared_ptr<Allocator> _allocator;
+  static std::shared_ptr<PhysicalDevice> _physicalDevice;
+  static std::shared_ptr<Device> _device;
+  static std::shared_ptr<Allocator> _allocator;
 
-  std::shared_ptr<ImmediateSubmit> _immediateSubmit;
+  static std::shared_ptr<ImmediateSubmit> _immediateSubmit;
 
 public:
-  std::shared_ptr<Window> _window;
+  static std::shared_ptr<Window> _window;
 
 private:
-  std::shared_ptr<Swapchain> _swapchain;
-  std::shared_ptr<Image> _drawImage;
-  std::shared_ptr<Image> _depthImage;
+  static std::shared_ptr<Swapchain> _swapchain;
+  static std::shared_ptr<Image> _drawImage;
+  static std::shared_ptr<Image> _depthImage;
 
-  std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
+  static std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
 
-  std::shared_ptr<Sampler> _defaultSampler;
+  static std::shared_ptr<Sampler> _defaultSampler;
 
-  void beginDrawing(World& world);
-  void endDrawing();
+  static void beginDrawing(World& world);
+  static void endDrawing();
 
 public:
-  VulkanHandler(const char* applicationName, int applicationVersion, const char* engineName,
+  static void init(const char* applicationName, int applicationVersion, const char* engineName,
     int engineVersion);
-  ~VulkanHandler();
+  static void cleanup();
 
-  void render(World& world);
-  void waitForEndOfWork() const;
+  static void loadPipeline(GraphicsPipelineId id);
+  static void releasePipeline(GraphicsPipelineId id);
+
+  static void render(World& world);
+  static void waitForEndOfWork();
 };

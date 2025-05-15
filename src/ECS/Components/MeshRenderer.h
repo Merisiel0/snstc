@@ -3,15 +3,12 @@
 #include "BaseComponent.h"
 #include "graphics/vulkan/VulkanUtils.h"
 #include "resources/Mesh.h"
+#include "graphics/vulkan/GraphicsPipelineId.h"
 
 class Material;
 class CommandBuffer;
 class Buffer;
 struct PushConstants;
-
-struct InstanceProperties {
-  mat4 transform;
-};
 
 struct MeshRenderer : public ECS::BaseComponent {
 private:
