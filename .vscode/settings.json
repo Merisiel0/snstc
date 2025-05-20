@@ -69,5 +69,13 @@
       "variant": "cpp",
       "filesystem": "cpp",
       "*.inc": "cpp"
-    }
+    },
+    "[cpp]": {
+      "editor.detectIndentation": false,
+      "editor.tabSize": 2
+    },
+    "[c]": {
+      "editor.tabSize": 2,
+      "editor.detectIndentation": false
+    },
 }

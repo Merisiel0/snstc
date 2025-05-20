@@ -13,6 +13,7 @@
 #include "Fence.h"
 #include "Frame.h"
 #include "GraphicsPipeline.h"
+#include "GraphicsPipelineId.h"
 #include "Image.h"
 #include "ImmediateSubmit.h"
 #include "Instance.h"
@@ -29,6 +30,7 @@
 
 #include <array>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 std::shared_ptr<Instance> VulkanHandler::_instance;
@@ -97,7 +99,7 @@ void VulkanHandler::beginDrawing(World& world) {
   currentFrame->globalDescSet->write(0, *world.camBuffer);
   currentFrame->globalDescSet->write(1, *world.lightsBuffer);
   currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->globalDescSet, 0,
-    *_graphicsPipelines[0]);
+    *_graphicsPipelines.begin()->second);
 }
 
 void VulkanHandler::endDrawing() {
@@ -213,7 +215,7 @@ void VulkanHandler::init(const char* applicationName, int applicationVersion,
     DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_GLOBAL).getHandle(),
     DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_SKYBOX).getHandle()};
 
-  GraphicsPipelineId pipelineId = createPipelineId(UNIQUE_GRAPHICS_PIPELINE_SKYBOX);
+  GraphicsPipelineId pipelineId = GraphicsPipelineId(UNIQUE_GRAPHICS_PIPELINE_SKYBOX);
 
   std::pair<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> mapPair = std::make_pair(
     pipelineId, std::make_shared<GraphicsPipeline>(_device, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -239,7 +241,7 @@ void VulkanHandler::init(const char* applicationName, int applicationVersion,
   setLayouts.pop_back();
   setLayouts.push_back(DescriptorManager::getLayout(DESCRIPTOR_SET_LAYOUT_MATERIAL).getHandle());
 
-  pipelineId = createPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
+  pipelineId = GraphicsPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL,
     MESH_LAYOUT_STATIC, LIGHTING_TYPE_UNLIT);
 
   mapPair = std::make_pair(pipelineId,
@@ -248,7 +250,7 @@ void VulkanHandler::init(const char* applicationName, int applicationVersion,
 
   _graphicsPipelines.insert(mapPair);
 
-  pipelineId = createPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
+  pipelineId = GraphicsPipelineId(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE,
     MESH_LAYOUT_STATIC, LIGHTING_TYPE_UNLIT);
 
   mapPair = std::make_pair(pipelineId,
@@ -288,9 +290,7 @@ void VulkanHandler::cleanup() {
   _instance.reset();
 }
 
-void VulkanHandler::loadPipeline(GraphicsPipelineId id) {
-  
-}
+void VulkanHandler::loadPipeline(GraphicsPipelineId id) {}
 
 void VulkanHandler::releasePipeline(GraphicsPipelineId id) {}
 
@@ -323,10 +323,8 @@ void VulkanHandler::render(World& world) {
       VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
-    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
-    currentFrame->commandBuffer->setCullMode(rd.cullMode);
 
-    // draw
+    // write and bind descriptor sets
     currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
     currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), 1);
   }
@@ -335,8 +333,8 @@ void VulkanHandler::render(World& world) {
   Skybox* skybox = world.getComponentInChildren<Skybox>();
   if(skybox) {
     // bind pipeline
-    std::shared_ptr<GraphicsPipeline> currentPipeline =
-      _graphicsPipelines.at(createPipelineId(UNIQUE_GRAPHICS_PIPELINE_NONE));
+    GraphicsPipelineId skyboxPipelineId = GraphicsPipelineId(UNIQUE_GRAPHICS_PIPELINE_SKYBOX);
+    std::shared_ptr<GraphicsPipeline> currentPipeline = _graphicsPipelines.at(skyboxPipelineId);
     currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write and bind descriptor sets

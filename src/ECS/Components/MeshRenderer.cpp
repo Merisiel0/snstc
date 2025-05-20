@@ -3,12 +3,9 @@
 #include "ECS/Components/Transform.h"
 #include "ECS/GameObject.h"
 #include "graphics/vulkan/Buffer.h"
-#include "graphics/vulkan/GraphicsPipeline.h"
+#include "graphics/vulkan/GraphicsPipelineId.h"
+#include "graphics/vulkan/VulkanHandler.h"
 #include "resources/Material.h"
-
-void MeshRenderer::updatePipelineId() {
-  _pipelineId = createPipelineId(_topology, _polygonMode, MESH_LAYOUT_STATIC, _lightingType);
-}
 
 MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
   VkPrimitiveTopology topology, VkCullModeFlags cullMode, VkPolygonMode polygonMode,
@@ -18,8 +15,9 @@ MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material>
     _topology {topology},
     cullMode {cullMode},
     _polygonMode {polygonMode},
-    _lightingType {lightingType} {
-  updatePipelineId();
+    _lightingType {lightingType},
+    _pipelineId {GraphicsPipelineId(topology, polygonMode, MESH_LAYOUT_STATIC, lightingType)} {
+  VulkanHandler::loadPipeline(_pipelineId);
 }
 
 MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) :
@@ -34,19 +32,22 @@ VkPolygonMode MeshRenderer::getPolygonMode() const { return _polygonMode; }
 
 void MeshRenderer::setPolygonMode(VkPolygonMode mode) {
   _polygonMode = mode;
-  updatePipelineId();
+  _pipelineId.setPolygonMode(mode);
+  VulkanHandler::loadPipeline(_pipelineId);
 }
 
 VkPrimitiveTopology MeshRenderer::getPrimitiveTopology() const { return _topology; }
 
 void MeshRenderer::setPrimitiveTopology(VkPrimitiveTopology topology) {
   _topology = topology;
-  updatePipelineId();
+  _pipelineId.setPrimitiveTopology(topology);
+  VulkanHandler::loadPipeline(_pipelineId);
 }
 
 LightingType MeshRenderer::getLightingType() const { return _lightingType; }
 
 void MeshRenderer::setLightingType(LightingType type) {
   _lightingType = type;
-  updatePipelineId();
+  _pipelineId.setLightingType(type);
+  VulkanHandler::loadPipeline(_pipelineId);
 }

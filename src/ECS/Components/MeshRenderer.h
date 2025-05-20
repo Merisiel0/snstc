@@ -17,8 +17,6 @@ private:
   VkPrimitiveTopology _topology;
   LightingType _lightingType;
 
-  void updatePipelineId();
-
 public:
   std::shared_ptr<Mesh> mesh;
   std::shared_ptr<Material> material;

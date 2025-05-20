@@ -104,7 +104,10 @@ std::shared_ptr<Material> ResourceManager::loadMaterial(std::string path) {
     }
   }
 
-  if(!std::filesystem::exists(path)) { return nullptr; }
+  if(!std::filesystem::exists(path)) { 
+    std::clog << "Material not found at path." << std::endl;
+    return nullptr;
+  }
 
   std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material(path));
   _materials.insert({path, mat});

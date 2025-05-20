@@ -21,6 +21,7 @@ class DescriptorPool;
 class DescriptorSetLayout;
 class DescriptorSet;
 class Sampler;
+class GraphicsPipelineId;
 
 class World;
 
