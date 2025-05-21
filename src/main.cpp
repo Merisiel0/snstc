@@ -62,7 +62,7 @@ int main() {
 
   GameObject planeObj2 = GameObject::createPrimitive(world, PLANE,
     ResourceManager::loadMaterial(
-      {0,1,0}));
+      Color{0,1,0,1}));
   planeObj2.getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
   planeObj2.getComponent<Transform>()->translate({2, 0, 0}, WORLD);
   planeObj2.getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);

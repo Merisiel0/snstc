@@ -323,6 +323,8 @@ void VulkanHandler::render(World& world) {
       VK_SHADER_STAGE_VERTEX_BIT);
 
     // set dynamic states
+    currentFrame->commandBuffer->setLineWidth(rd.lineWidth);
+    currentFrame->commandBuffer->setCullMode(rd.cullMode);
 
     // write and bind descriptor sets
     currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
