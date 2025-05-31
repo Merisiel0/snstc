@@ -80,16 +80,16 @@ void VulkanHandler::beginDrawing(World& world) {
 
   // set constant dynamic states
   VkViewport viewport {};
-  viewport.x = (float) _window->position.x;
-  viewport.y = (float) _window->position.y;
+  viewport.x = 0.0f;
+  viewport.y = 0.0f;
   viewport.width = (float) _window->extent.x;
   viewport.height = (float) _window->extent.y;
   viewport.minDepth = 0.0f;
   viewport.maxDepth = 1.0f;
 
   VkRect2D scissor {};
-  scissor.offset.x = _window->position.x >= 0 ? (int32_t) _window->position.x : 0;
-  scissor.offset.y = _window->position.y >= 0 ? (int32_t) _window->position.y : 0;
+  scissor.offset.x = 0;
+  scissor.offset.y = 0;
   scissor.extent.width = _window->extent.x;
   scissor.extent.height = _window->extent.y;
 
@@ -331,13 +331,6 @@ void VulkanHandler::render(World& world) {
     // write and bind descriptor sets
     currentFrame->commandBuffer->bindIndexBuffer(rd.mesh->indices);
     currentFrame->commandBuffer->drawIndexed(rd.mesh->indices->count(), 1);
-
-    // print rd informations
-    std::cout << "Lighting type: " << rd.getLightingType() << std::endl;
-    std::cout << "Polygon mode: " << rd.getPolygonMode() << std::endl;
-    std::cout << "Primitive topology: " << rd.getPrimitiveTopology() << std::endl;
-    std::cout << "Cull mode: " << rd.cullMode << std::endl;
-    std::cout << "Line width: " << rd.lineWidth << std::endl;
   }
 
   // draw skybox
