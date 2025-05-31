@@ -16,22 +16,26 @@ void GameObject::setWorldCamera(Camera& cam) {
 
 GameObject::GameObject(entt::registry& registry) { _registry = &registry; }
 
-GameObject::GameObject(World& world) {
-  _registry = &world._registry;
+GameObject::GameObject(World* world) {
+  _registry = &world->_registry;
   _id = _registry->create();
 
   ObjectData& data = addComponent<ObjectData>();
-  data.world = &world;
+  data.world = world;
 
   addComponent<Transform>();
 
-  world.addChild(*this);
+  world->addChild(*this);
 }
 
 GameObject::~GameObject() {
   if(_id == entt::null) return;
 
   const ObjectData& data = _registry->get<ObjectData>(_id);
+
+  if(data.tags.size() > 0){
+    std::cout << "Destroyed " << data.tags[0] << std::endl;
+  }
 
   // recursively destroy all children
   GameObject* currentChild = data.first;
@@ -181,9 +185,9 @@ GameObject* GameObject::getChild(uint32_t index) const {
   return data.next;
 }
 
-GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primitive,
+GameObject* GameObject::createPrimitive(World* world, GameObjectPrimitives primitive,
   std::shared_ptr<Material> material) {
-  GameObject obj = GameObject(world);
+  GameObject* obj = new GameObject(world);
 
   if(!material) { material = ResourceManager::loadMaterial(Color{0, 1, 0, 1}); }
 
@@ -191,7 +195,7 @@ GameObject GameObject::createPrimitive(World& world, GameObjectPrimitives primit
   switch(primitive) {
     case PLANE:
       mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
-      obj.addComponent<MeshRenderer>(mesh, material);
+      obj->addComponent<MeshRenderer>(mesh, material);
       break;
 
     // case CUBE:

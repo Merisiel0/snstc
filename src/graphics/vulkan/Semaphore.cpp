@@ -1,6 +1,7 @@
 #include "Semaphore.h"
 
 #include "Device.h"
+#include "VulkanHandler.h"
 
 VkSemaphoreCreateInfo Semaphore::getCreateInfo() const {
   VkSemaphoreCreateInfo info;
@@ -11,14 +12,12 @@ VkSemaphoreCreateInfo Semaphore::getCreateInfo() const {
   return info;
 }
 
-Semaphore::Semaphore(std::shared_ptr<Device> device) {
-  _device = device;
-
+Semaphore::Semaphore() {
   VkSemaphoreCreateInfo createInfo = getCreateInfo();
-  VK_CHECK(vkCreateSemaphore(device->handle, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateSemaphore(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &handle));
 }
 
-Semaphore::~Semaphore() { vkDestroySemaphore(_device->handle, handle, nullptr); }
+Semaphore::~Semaphore() { vkDestroySemaphore(VulkanHandler::getDevice()->handle, handle, nullptr); }
 
 VkSemaphoreSubmitInfo Semaphore::getSubmitInfo(VkPipelineStageFlags2 stageMask) const {
   VkSemaphoreSubmitInfo info;

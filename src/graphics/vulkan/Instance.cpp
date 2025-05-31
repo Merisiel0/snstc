@@ -20,6 +20,7 @@ VkInstanceCreateInfo Instance::getCreateInfo(VkApplicationInfo* appInfo,
   std::vector<const char*>& requiredLayers, std::vector<const char*>& requiredExtensions) const {
   VkInstanceCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  info.pNext = nullptr;
   info.flags = 0;
   info.pApplicationInfo = appInfo;
   info.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());

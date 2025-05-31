@@ -1,8 +1,9 @@
 #include "CommandPool.h"
 
 #include "Device.h"
+#include "VulkanHandler.h"
 
-VkCommandPoolCreateInfo CommandPool::getCreateInfo(VkDevice device, uint32_t queueFamily) const {
+VkCommandPoolCreateInfo CommandPool::getCreateInfo(uint32_t queueFamily) const {
   VkCommandPoolCreateInfo info;
   info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   info.pNext = nullptr;
@@ -12,11 +13,11 @@ VkCommandPoolCreateInfo CommandPool::getCreateInfo(VkDevice device, uint32_t que
   return info;
 }
 
-CommandPool::CommandPool(std::shared_ptr<Device> device, uint32_t queueFamilyIndex) {
-  _device = device;
-
-  VkCommandPoolCreateInfo createInfo = getCreateInfo(device->handle, queueFamilyIndex);
-  VK_CHECK(vkCreateCommandPool(device->handle, &createInfo, nullptr, &handle));
+CommandPool::CommandPool(uint32_t queueFamilyIndex) {
+  VkCommandPoolCreateInfo createInfo = getCreateInfo(queueFamilyIndex);
+  VK_CHECK(vkCreateCommandPool(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &handle));
 }
 
-CommandPool::~CommandPool() { vkDestroyCommandPool(_device->handle, handle, nullptr); }
+CommandPool::~CommandPool() {
+  vkDestroyCommandPool(VulkanHandler::getDevice()->handle, handle, nullptr);
+}

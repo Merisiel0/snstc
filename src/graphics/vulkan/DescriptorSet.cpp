@@ -6,6 +6,7 @@
 #include "Device.h"
 #include "Image.h"
 #include "Sampler.h"
+#include "VulkanHandler.h"
 
 DescriptorSetAllocateInfoData DescriptorSet::getSetAllocateInfo(const DescriptorPool& pool,
   const DescriptorSetLayout& layout) const {
@@ -81,9 +82,8 @@ VkDescriptorBufferInfo DescriptorSet::getBufferInfo(const Buffer& buffer) const 
 
 VkDescriptorSet DescriptorSet::getHandle() const { return _handle; }
 
-DescriptorSet::DescriptorSet(std::shared_ptr<Device> device, std::shared_ptr<DescriptorPool> pool,
+DescriptorSet::DescriptorSet(std::shared_ptr<DescriptorPool> pool,
   const DescriptorSetLayout& layout) {
-  _device = device;
   _pool = pool;
   _layout = &layout;
 
@@ -91,7 +91,7 @@ DescriptorSet::DescriptorSet(std::shared_ptr<Device> device, std::shared_ptr<Des
 
   DescriptorSetAllocateInfoData allocateInfo = getSetAllocateInfo(*pool, layout);
   VkDescriptorSet descriptorSet {};
-  VK_CHECK(vkAllocateDescriptorSets(_device->handle, &allocateInfo.info, &_handle));
+  VK_CHECK(vkAllocateDescriptorSets(VulkanHandler::getDevice()->handle, &allocateInfo.info, &_handle));
 }
 
 DescriptorSet::~DescriptorSet(){
@@ -100,10 +100,10 @@ DescriptorSet::~DescriptorSet(){
 
 void DescriptorSet::write(uint32_t binding, const Image& image, const Sampler& sampler) {
   WriteDescriptorSetData writeData = getWriteInfo(binding, image, sampler);
-  vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
+  vkUpdateDescriptorSets(VulkanHandler::getDevice()->handle, 1, &writeData.info, 0, nullptr);
 }
 
 void DescriptorSet::write(uint32_t binding, const Buffer& buffer) {
   WriteDescriptorSetData writeData = getWriteInfo(binding, buffer);
-  vkUpdateDescriptorSets(_device->handle, 1, &writeData.info, 0, nullptr);
+  vkUpdateDescriptorSets(VulkanHandler::getDevice()->handle, 1, &writeData.info, 0, nullptr);
 }

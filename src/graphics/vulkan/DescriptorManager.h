@@ -24,8 +24,6 @@ enum DescriptorSetLayoutType : uint8_t {
 /// @brief Manager class to allocate and free descriptor pools, layouts and sets.
 class DescriptorManager {
 private:
-  static std::shared_ptr<Device> _device;
-
   /// @brief Contains a list of pools for each layout type.
   static std::array<std::vector<std::shared_ptr<DescriptorPool>>, DESCRIPTOR_SET_LAYOUT_TYPE_COUNT>
     _pools;
@@ -41,7 +39,7 @@ private:
 public:
   /// @brief Initializes initial descriptor pools and available layouts and allocates unique descriptor sets.
   /// @param device a device.
-  static void init(std::shared_ptr<Device> device);
+  static void init();
 
   /// @brief Frees all expired descriptor sets.
   static void cleanupExpired();

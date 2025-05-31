@@ -1,6 +1,7 @@
 #include "Window.h"
 
 #include "stb_image.h"
+#include <filesystem>
 #include "vulkan/Instance.h"
 
 Window::Window(std::string title, std::shared_ptr<Instance> instance) {
@@ -44,7 +45,8 @@ void Window::setIcon(std::string path) {
 
   SDL_DestroySurface(_iconSurface);
 
-  _iconSurface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA8888, data, 0);
+  _iconSurface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA8888, data, width*4);
+  SDL_CHECK(_iconSurface);
 
   SDL_SetWindowIcon(handle, _iconSurface);
 

@@ -6,7 +6,6 @@ class Device;
 
 class Shader {
 private:
-  std::shared_ptr<Device> _device;
   VkShaderStageFlagBits _stage;
 
   VkShaderModuleCreateInfo getCreateInfo(std::vector<uint32_t>& data) const;
@@ -14,8 +13,14 @@ private:
 public:
   VkShaderModule handle;
 
-  Shader(std::shared_ptr<Device> device, std::string path, VkShaderStageFlagBits stage);
+  Shader(std::string path, VkShaderStageFlagBits stage);
   ~Shader();
+
+  Shader(const Shader& other) = delete;
+  Shader& operator=(const Shader& other) = delete;
+
+  Shader(Shader&& other);
+  Shader& operator=(Shader&& other);
 
   VkPipelineShaderStageCreateInfo getStageCreateInfo() const;
 };

@@ -1,1 +1,0 @@
-valgrind --log-file=./valgrind/logoutput.txt --suppressions=./valgrind/suppressions.supp --num-callers=50 --leak-check=full --gen-suppressions=all --track-origins=yes ./build/Sphere

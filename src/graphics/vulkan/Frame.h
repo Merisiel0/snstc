@@ -24,6 +24,6 @@ public:
   std::shared_ptr<DescriptorSet> globalDescSet; // TODO: move to World class
   std::shared_ptr<DescriptorSet> skyboxDescSet; // TODO: move to Skybox component (also remove material from skybox, make it only an image)
 
-  Frame(std::shared_ptr<Device> device);
+  Frame();
   ~Frame();
 };

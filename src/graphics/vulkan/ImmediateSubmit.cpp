@@ -7,9 +7,9 @@
 #include "Queue.h"
 
 ImmediateSubmit::ImmediateSubmit(std::shared_ptr<Device> device) {
-  _commandPool = std::make_shared<CommandPool>(device, device->graphicsQueue->familyIndex);
-  _commandBuffer = std::make_shared<CommandBuffer>(device, *_commandPool);
-  _fence = std::make_shared<Fence>(device);
+  _commandPool = std::make_shared<CommandPool>(device->graphicsQueue->familyIndex);
+  _commandBuffer = std::make_shared<CommandBuffer>(*_commandPool);
+  _fence = std::make_shared<Fence>();
   _queue = device->graphicsQueue;
 }
 

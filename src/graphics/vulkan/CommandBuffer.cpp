@@ -9,6 +9,7 @@
 #include "Image.h"
 #include "Queue.h"
 #include "Semaphore.h"
+#include "VulkanHandler.h"
 
 VkCommandBufferAllocateInfo CommandBuffer::getAllocateInfo(VkCommandPool commandPool) const {
   VkCommandBufferAllocateInfo info;
@@ -41,9 +42,9 @@ VkCommandBufferSubmitInfo CommandBuffer::getSubmitInfo() const {
   return info;
 }
 
-CommandBuffer::CommandBuffer(std::shared_ptr<Device> device, const CommandPool& commandPool) {
+CommandBuffer::CommandBuffer(const CommandPool& commandPool) {
   VkCommandBufferAllocateInfo allocationInfo = getAllocateInfo(commandPool.handle);
-  VK_CHECK(vkAllocateCommandBuffers(device->handle, &allocationInfo, &handle));
+  VK_CHECK(vkAllocateCommandBuffers(VulkanHandler::getDevice()->handle, &allocationInfo, &handle));
 }
 
 void CommandBuffer::reset() const { VK_CHECK(vkResetCommandBuffer(handle, 0)); }

@@ -24,6 +24,20 @@ MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material>
     MeshRenderer(mesh, material, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_CULL_MODE_BACK_BIT,
       VK_POLYGON_MODE_FILL, LIGHTING_TYPE_UNLIT) {}
 
+MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, VkCullModeFlags cullMode,
+  CustomGraphicsPipeline id, VkPrimitiveTopology topology, VkPolygonMode polygonMode,
+  std::vector<VkPushConstantRange> pushConstantRanges, std::vector<Shader> shaders,
+  std::vector<DescriptorSetLayoutType> setLayouts) :
+    mesh {mesh},
+    material {nullptr},
+    _topology {topology},
+    cullMode {cullMode},
+    _polygonMode {polygonMode},
+    _lightingType {LIGHTING_TYPE_UNDEFINED},
+    _pipelineId {GraphicsPipelineId(topology, polygonMode, MESH_LAYOUT_STATIC, id)} {
+  VulkanHandler::loadPipeline(_pipelineId, shaders, pushConstantRanges, setLayouts);
+}
+
 MeshRenderer::~MeshRenderer() {}
 
 GraphicsPipelineId MeshRenderer::getGraphicsPipelineId() const { return _pipelineId; }

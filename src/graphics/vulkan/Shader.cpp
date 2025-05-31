@@ -1,6 +1,7 @@
 #include "Shader.h"
 
 #include "Device.h"
+#include "VulkanHandler.h"
 
 VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t>& data) const {
   VkShaderModuleCreateInfo info;
@@ -13,17 +14,30 @@ VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t>& data) cons
   return info;
 }
 
-Shader::Shader(std::shared_ptr<Device> device, std::string path, VkShaderStageFlagBits stage) {
-  _device = device;
+Shader::Shader(std::string path, VkShaderStageFlagBits stage) {
   _stage = stage;
 
   std::vector<uint32_t> data = readFileBytes(path.c_str());
 
   VkShaderModuleCreateInfo moduleCreateInfo = getCreateInfo(data);
-  VK_CHECK(vkCreateShaderModule(device->handle, &moduleCreateInfo, nullptr, &handle));
+  VK_CHECK(
+    vkCreateShaderModule(VulkanHandler::getDevice()->handle, &moduleCreateInfo, nullptr, &handle));
 }
 
-Shader::~Shader() { vkDestroyShaderModule(_device->handle, handle, nullptr); }
+Shader::~Shader() { vkDestroyShaderModule(VulkanHandler::getDevice()->handle, handle, nullptr); }
+
+Shader::Shader(Shader&& other) : _stage {other._stage}, handle {other.handle} {
+  other.handle = VK_NULL_HANDLE;
+}
+
+Shader& Shader::operator=(Shader&& other) {
+  _stage = other._stage;
+  handle = other.handle;
+
+  other.handle = VK_NULL_HANDLE;
+
+  return *this;
+}
 
 VkPipelineShaderStageCreateInfo Shader::getStageCreateInfo() const {
   VkPipelineShaderStageCreateInfo info;

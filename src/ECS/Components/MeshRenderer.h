@@ -1,14 +1,17 @@
 #pragma once
 
 #include "BaseComponent.h"
+#include "graphics/vulkan/GraphicsPipelineId.h"
 #include "graphics/vulkan/VulkanUtils.h"
 #include "resources/Mesh.h"
-#include "graphics/vulkan/GraphicsPipelineId.h"
 
 class Material;
 class CommandBuffer;
 class Buffer;
 struct PushConstants;
+class Shader;
+class DescriptorSetLayout;
+enum DescriptorSetLayoutType : uint8_t;
 
 struct MeshRenderer : public ECS::BaseComponent {
 private:
@@ -28,6 +31,11 @@ public:
     LightingType lightingType);
 
   MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+
+  MeshRenderer(std::shared_ptr<Mesh> mesh, VkCullModeFlags cullMode, CustomGraphicsPipeline id,
+    VkPrimitiveTopology topology, VkPolygonMode polygonMode,
+    std::vector<VkPushConstantRange> pushConstantRanges, std::vector<Shader> shaders,
+    std::vector<DescriptorSetLayoutType> setLayouts);
 
   MeshRenderer(MeshRenderer&&) noexcept = default;
   MeshRenderer& operator=(MeshRenderer&&) noexcept = default;

@@ -27,6 +27,10 @@ World::World() : GameObject(_registry) {
 World::~World() {
   const ObjectData& data = _registry.get<ObjectData>(_id);
 
+  if(data.tags.size() > 0){
+    std::cout << "Destroyed " << data.tags[0] << std::endl;
+  }
+
   // recursively destroy all children
   GameObject* currentChild = data.first;
   GameObject* nextChild {nullptr};

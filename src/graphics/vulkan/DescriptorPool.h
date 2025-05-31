@@ -2,13 +2,10 @@
 
 #include "VulkanUtils.h"
 
-class Device;
 class DescriptorSetLayout;
 
 class DescriptorPool {
 private:
-  std::shared_ptr<Device> _device;
-
   VkDescriptorPool _handle;
   std::vector<VkDescriptorPoolSize> _totalSizes;
   std::vector<VkDescriptorPoolSize> _usedSizes;
@@ -40,7 +37,7 @@ public:
   /// @param sizes sizes to remove.
   void removeSizes(std::vector<VkDescriptorPoolSize> sizes);
 
-  DescriptorPool(std::shared_ptr<Device> device, const std::vector<VkDescriptorPoolSize>& poolSizes);
+  DescriptorPool(const std::vector<VkDescriptorPoolSize>& poolSizes);
   ~DescriptorPool();
 
   DescriptorPool(const DescriptorPool&) = delete;

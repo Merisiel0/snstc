@@ -68,7 +68,8 @@
       "typeinfo": "cpp",
       "variant": "cpp",
       "filesystem": "cpp",
-      "*.inc": "cpp"
+      "*.inc": "cpp",
+      "bitset": "cpp"
     },
     "[cpp]": {
       "editor.detectIndentation": false,

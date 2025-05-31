@@ -15,7 +15,7 @@ enum ImageType { COLOR, DEPTH };
 
 class Image {
 private:
-static const std::string SWAPCHAIN_IMAGE_TAG;
+  static const std::string SWAPCHAIN_IMAGE_TAG;
 
   static inline std::weak_ptr<Device> _device;
   static inline std::weak_ptr<Allocator> _allocator;
@@ -31,7 +31,7 @@ static const std::string SWAPCHAIN_IMAGE_TAG;
   VkImageUsageFlags _usage;
   uint _layerCount;
 
-  VkImageCreateInfo getCreateInfo(VkImageCreateFlagBits flags = (VkImageCreateFlagBits)0) const;
+  VkImageCreateInfo getCreateInfo(VkImageCreateFlagBits flags = (VkImageCreateFlagBits) 0) const;
   VkImageViewCreateInfo getViewCreateInfo() const;
   VmaAllocationCreateInfo getAllocationInfo() const;
   VkRenderingAttachmentInfo getRenderingAttachmentInfo(const VkClearValue& clear = VkClearValue {},

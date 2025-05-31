@@ -9,16 +9,12 @@
 
 class Window;
 class Instance;
-class PhysicalDevice;
-class Device;
 class CommandBuffer;
 class DescriptorPool;
 class DescriptorSetLayout;
 
 class Swapchain {
 private:
-  std::shared_ptr<Device> _device;
-
   std::vector<std::shared_ptr<Image>> _images;
 
   VkSurfaceFormatKHR _surfaceFormat;
@@ -37,7 +33,7 @@ public:
   std::shared_ptr<Frame> getCurrentFrame() const { return frames[frameNumber % FRAME_OVERLAP]; }
   int getFrameIndex() const { return frameNumber % FRAME_OVERLAP; }
 
-  Swapchain(const Window& window, std::shared_ptr<Device> device);
+  Swapchain(const Window& window);
 
   ~Swapchain();
 

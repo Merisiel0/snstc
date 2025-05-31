@@ -2,14 +2,10 @@
 
 #include "VulkanUtils.h"
 
-class Device;
-
 enum DescriptorSetLayoutType : uint8_t;
 
 class DescriptorSetLayout {
 private:
-  std::shared_ptr<Device> _device;
-
   VkDescriptorSetLayout _handle;
 
   DescriptorSetLayoutType _type;
@@ -24,7 +20,7 @@ public:
   DescriptorSetLayoutType getType() const;
   std::vector<VkDescriptorPoolSize> getPoolSizes() const;
 
-  DescriptorSetLayout(std::shared_ptr<Device> device,
-    std::vector<VkDescriptorSetLayoutBinding>& bindings, DescriptorSetLayoutType type);
+  DescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& bindings,
+    DescriptorSetLayoutType type);
   ~DescriptorSetLayout();
 };

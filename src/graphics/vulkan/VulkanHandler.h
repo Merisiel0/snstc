@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "Shader.h"
 #include "VulkanUtils.h"
 
 #include <memory>
@@ -22,6 +23,7 @@ class DescriptorSetLayout;
 class DescriptorSet;
 class Sampler;
 class GraphicsPipelineId;
+enum DescriptorSetLayoutType : uint8_t;
 
 class World;
 
@@ -48,7 +50,8 @@ private:
   static std::shared_ptr<Image> _drawImage;
   static std::shared_ptr<Image> _depthImage;
 
-  static std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>> _graphicsPipelines;
+  static std::unordered_map<GraphicsPipelineId, std::shared_ptr<GraphicsPipeline>>
+    _graphicsPipelines;
 
   static std::shared_ptr<Sampler> _defaultSampler;
 
@@ -60,7 +63,16 @@ public:
     int engineVersion);
   static void cleanup();
 
-  static void loadPipeline(GraphicsPipelineId id);
+  static std::shared_ptr<Device> getDevice();
+
+  static VkPushConstantRange getDefaultPushConstantRange();
+
+  static void loadPipeline(const GraphicsPipelineId& id);
+
+  static void loadPipeline(const GraphicsPipelineId& id, const std::vector<Shader>& shaders,
+    const std::vector<VkPushConstantRange>& pushConstantRanges,
+    const std::vector<DescriptorSetLayoutType>& setLayoutTypes);
+
   static void releasePipeline(GraphicsPipelineId id);
 
   static void render(World& world);

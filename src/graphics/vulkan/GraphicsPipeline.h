@@ -13,8 +13,6 @@ struct PushConstants {
 
 class GraphicsPipeline : public IPipeline {
 private:
-  VkPushConstantRange getPushConstantRange() const;
-
   VkPipelineRenderingCreateInfo getRenderingCreateInfo() const;
   VkPipelineVertexInputStateCreateInfo getVertexInputState() const;
   VkPipelineInputAssemblyStateCreateInfo getInputAssemblyState(
@@ -32,7 +30,8 @@ private:
     VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode, bool depthWrite) const;
 
 public:
-  GraphicsPipeline(std::shared_ptr<Device>, VkPrimitiveTopology primitiveTopology,
+  GraphicsPipeline(std::shared_ptr<Device> device, VkPrimitiveTopology primitiveTopology,
     VkPolygonMode polygonMode, std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
+    std::vector<VkPushConstantRange> pushConstantRanges,
     std::vector<VkDescriptorSetLayout>& setLayouts, bool depthWrite = true);
 };

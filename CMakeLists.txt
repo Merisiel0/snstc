@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project(Sphere)
 
 set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
+set(CMAKE_MESSAGE_LOG_LEVEL NOTICE)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -22,8 +24,6 @@ target_link_libraries(Sphere PRIVATE Vulkan::Vulkan)
 
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 target_link_libraries(Sphere PRIVATE Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
-
-target_include_directories(Sphere PRIVATE ${CMAKE_SOURCE_DIR}/build/vcpkg_installed/installed/x64-linux/include)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-D_DEBUG)

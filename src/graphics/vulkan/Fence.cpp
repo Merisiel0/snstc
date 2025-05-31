@@ -1,6 +1,7 @@
 #include "Fence.h"
 
 #include "Device.h"
+#include "VulkanHandler.h"
 
 VkFenceCreateInfo Fence::getCreateInfo(bool signaled) const {
   VkFenceCreateInfo info;
@@ -11,15 +12,13 @@ VkFenceCreateInfo Fence::getCreateInfo(bool signaled) const {
   return info;
 }
 
-Fence::Fence(std::shared_ptr<Device> device, bool signaled) {
-  _device = device;
-
+Fence::Fence(bool signaled) {
   VkFenceCreateInfo createInfo = getCreateInfo(signaled);
-  VK_CHECK(vkCreateFence(device->handle, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateFence(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &handle));
 }
 
-Fence::~Fence() { vkDestroyFence(_device->handle, handle, nullptr); }
+Fence::~Fence() { vkDestroyFence(VulkanHandler::getDevice()->handle, handle, nullptr); }
 
-void Fence::reset() { VK_CHECK(vkResetFences(_device->handle, 1, &handle)); }
+void Fence::reset() { VK_CHECK(vkResetFences(VulkanHandler::getDevice()->handle, 1, &handle)); }
 
-void Fence::wait() { VK_CHECK(vkWaitForFences(_device->handle, 1, &handle, true, 9999999999)); }
+void Fence::wait() { VK_CHECK(vkWaitForFences(VulkanHandler::getDevice()->handle, 1, &handle, true, 9999999999)); }

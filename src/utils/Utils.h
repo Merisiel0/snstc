@@ -27,10 +27,10 @@ struct Vertex {
   float v;
 };
 
-static inline std::string readFileText(const char* path) {
+static inline std::string readFileText(std::string path) {
   std::ifstream file(path, std::ios::ate | std::ios::in);
 
-  if(!file.is_open()) { throw std::runtime_error("Failed to read file text."); }
+  if(!file.is_open()) { throw std::runtime_error("Failed to read file text at:" + path); }
 
   size_t fileSize = (size_t) file.tellg();
   std::string text;
@@ -42,10 +42,10 @@ static inline std::string readFileText(const char* path) {
   return text;
 }
 
-static inline std::vector<uint32_t> readFileBytes(const char* path) {
+static inline std::vector<uint32_t> readFileBytes(std::string path) {
   std::ifstream file(path, std::ios::ate | std::ios::in | std::ios::binary);
 
-  if(!file.is_open()) { throw std::runtime_error("Failed to read file bytes."); }
+  if(!file.is_open()) { throw std::runtime_error("Failed to read file bytes at:" + path); }
 
   size_t fileSize = (size_t) file.tellg();
   std::vector<uint32_t> fileBytes(fileSize / sizeof(uint32_t));

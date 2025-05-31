@@ -2,7 +2,6 @@
 
 #include "VulkanUtils.h"
 
-class Device;
 class CommandPool;
 class Queue;
 class Semaphore;
@@ -24,7 +23,7 @@ public:
   VkCommandBuffer handle;
 
   CommandBuffer() : handle {VK_NULL_HANDLE} {}
-  CommandBuffer(std::shared_ptr<Device>, const CommandPool& commandPool);
+  CommandBuffer(const CommandPool& commandPool);
   ~CommandBuffer() {};
 
   void reset() const;

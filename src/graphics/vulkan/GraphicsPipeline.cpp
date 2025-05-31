@@ -3,14 +3,14 @@
 #include "Device.h"
 #include "Image.h"
 
-VkPushConstantRange GraphicsPipeline::getPushConstantRange() const {
-  VkPushConstantRange range {};
-  range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  range.offset = 0;
-  range.size = sizeof(PushConstants);
+// VkPushConstantRange GraphicsPipeline::getPushConstantRange() const {
+//   VkPushConstantRange range {};
+//   range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+//   range.offset = 0;
+//   range.size = sizeof(PushConstants);
 
-  return range;
-}
+//   return range;
+// }
 
 VkPipelineRenderingCreateInfo GraphicsPipeline::getRenderingCreateInfo() const {
   VkPipelineRenderingCreateInfo info {};
@@ -108,13 +108,14 @@ VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getMultisampleState() con
   return state;
 }
 
-VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState(bool depthWrite) const {
+VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState(
+  bool depthWrite) const {
   VkPipelineDepthStencilStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   state.pNext = nullptr;
   state.flags = 0;
   state.depthTestEnable = VK_TRUE;
-  state.depthWriteEnable = (VkBool32)depthWrite;
+  state.depthWriteEnable = (VkBool32) depthWrite;
   state.depthCompareOp = VK_COMPARE_OP_LESS;
   state.depthBoundsTestEnable = VK_FALSE;
   state.stencilTestEnable = VK_FALSE;
@@ -220,8 +221,9 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
 GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device,
   VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
   std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
+  std::vector<VkPushConstantRange> pushConstantRanges,
   std::vector<VkDescriptorSetLayout>& setLayouts, bool depthWrite) :
-    IPipeline(device, {getPushConstantRange()}, setLayouts) {
+    IPipeline(device, pushConstantRanges, setLayouts) {
   _type = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
   GraphicsPipelineCreateInfoData data =

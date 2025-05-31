@@ -101,19 +101,21 @@ enum MeshLayout : uint16_t {
   MESH_LAYOUT_STATIC_INSTANCE = 1,
   MESH_LAYOUT_PARTICLE = 2,
   MESH_LAYOUT_COUNT = 3,
+  MESH_LAYOUT_UNDEFINED = 0xFFFF
 };
 
-enum LightingType {
+enum LightingType : uint16_t {
   LIGHTING_TYPE_UNLIT = 0,
   LIGHTING_TYPE_PHONG = 1,
   LIGHTING_TYPE_BLINN_PHONG = 2,
   LIGHTING_TYPE_COOK_TORRANCE = 3,
   LIGHTING_TYPE_COUNT = 4,
+  LIGHTING_TYPE_UNDEFINED = 0xFFFF
 };
 
 enum UniqueGraphicsPipeline : uint16_t {
-  UNIQUE_GRAPHICS_PIPELINE_NONE = 0,
   UNIQUE_GRAPHICS_PIPELINE_SKYBOX = 1,
+  UNIQUE_GRAPHICS_PIPELINE_UNDEFINED = 0xFFFF
 };
 
 // /// @brief List containing all implemented graphics pipelines.

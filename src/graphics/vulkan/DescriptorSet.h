@@ -11,7 +11,6 @@ class Buffer;
 
 class DescriptorSet {
 private:
-  std::shared_ptr<Device> _device;
   std::shared_ptr<DescriptorPool> _pool;
   const DescriptorSetLayout* _layout;
 
@@ -28,7 +27,7 @@ private:
 public:
   VkDescriptorSet getHandle() const;
 
-  DescriptorSet(std::shared_ptr<Device> device, std::shared_ptr<DescriptorPool> pool,
+  DescriptorSet(std::shared_ptr<DescriptorPool> pool,
     const DescriptorSetLayout& layout);
   ~DescriptorSet();
 

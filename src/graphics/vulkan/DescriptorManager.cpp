@@ -5,16 +5,13 @@
 #include "Swapchain.h"
 #include "resources/Material.h"
 
-std::shared_ptr<Device> DescriptorManager::_device;
 std::array<std::vector<std::shared_ptr<DescriptorPool>>, DESCRIPTOR_SET_LAYOUT_TYPE_COUNT> DescriptorManager::_pools;
 std::array<std::unique_ptr<DescriptorSetLayout>, DESCRIPTOR_SET_LAYOUT_TYPE_COUNT>
   DescriptorManager::_layouts;
 std::array<std::vector<std::weak_ptr<DescriptorSet>>, DESCRIPTOR_SET_LAYOUT_TYPE_COUNT>
   DescriptorManager::_sets;
 
-void DescriptorManager::init(std::shared_ptr<Device> device) {
-  _device = device;
-
+void DescriptorManager::init() {
   // global layout
   std::vector<VkDescriptorSetLayoutBinding> bindings;
 
@@ -31,7 +28,7 @@ void DescriptorManager::init(std::shared_ptr<Device> device) {
   bindings.push_back(binding);
 
   _layouts[DESCRIPTOR_SET_LAYOUT_GLOBAL] =
-    std::make_unique<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_GLOBAL);
+    std::make_unique<DescriptorSetLayout>(bindings, DESCRIPTOR_SET_LAYOUT_GLOBAL);
 
   // skybox layout
   bindings.clear();
@@ -42,7 +39,7 @@ void DescriptorManager::init(std::shared_ptr<Device> device) {
   bindings.push_back(binding);
 
   _layouts[DESCRIPTOR_SET_LAYOUT_SKYBOX] =
-    std::make_unique<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_SKYBOX);
+    std::make_unique<DescriptorSetLayout>(bindings, DESCRIPTOR_SET_LAYOUT_SKYBOX);
 
   // material layout
   bindings.clear();
@@ -66,17 +63,17 @@ void DescriptorManager::init(std::shared_ptr<Device> device) {
   bindings.push_back(binding);
 
   _layouts[DESCRIPTOR_SET_LAYOUT_MATERIAL] =
-    std::make_unique<DescriptorSetLayout>(_device, bindings, DESCRIPTOR_SET_LAYOUT_MATERIAL);
+    std::make_unique<DescriptorSetLayout>(bindings, DESCRIPTOR_SET_LAYOUT_MATERIAL);
 
   // allocate pools
   std::vector<VkDescriptorPoolSize> poolSizes = _layouts[DESCRIPTOR_SET_LAYOUT_GLOBAL]->getPoolSizes();
-  _pools[DESCRIPTOR_SET_LAYOUT_GLOBAL].push_back(std::make_shared<DescriptorPool>(_device, poolSizes));
+  _pools[DESCRIPTOR_SET_LAYOUT_GLOBAL].push_back(std::make_shared<DescriptorPool>(poolSizes));
 
   poolSizes = _layouts[DESCRIPTOR_SET_LAYOUT_SKYBOX]->getPoolSizes();
-  _pools[DESCRIPTOR_SET_LAYOUT_SKYBOX].push_back(std::make_shared<DescriptorPool>(_device, poolSizes));
+  _pools[DESCRIPTOR_SET_LAYOUT_SKYBOX].push_back(std::make_shared<DescriptorPool>(poolSizes));
 
   poolSizes = _layouts[DESCRIPTOR_SET_LAYOUT_MATERIAL]->getPoolSizes();
-  _pools[DESCRIPTOR_SET_LAYOUT_MATERIAL].push_back(std::make_shared<DescriptorPool>(_device, poolSizes));
+  _pools[DESCRIPTOR_SET_LAYOUT_MATERIAL].push_back(std::make_shared<DescriptorPool>(poolSizes));
 }
 
 void DescriptorManager::cleanupExpired() {
@@ -136,12 +133,12 @@ std::shared_ptr<DescriptorSet> DescriptorManager::allocateSet(DescriptorSetLayou
       size.descriptorCount *= 2;
     }
 
-    _pools[type].push_back(std::make_shared<DescriptorPool>(_device, sizes));
+    _pools[type].push_back(std::make_shared<DescriptorPool>(sizes));
     poolIndex = _pools[type].size() - 1;
   }
 
   std::shared_ptr<DescriptorSet> set =
-    std::make_shared<DescriptorSet>(_device, _pools[type].at(poolIndex), *_layouts[type]);
+    std::make_shared<DescriptorSet>(_pools[type].at(poolIndex), *_layouts[type]);
   _sets[type].push_back(set);
 
   return set;

@@ -48,7 +48,7 @@ private:
   void setWorldCamera(Camera& cam);
 
 public:
-  GameObject(World& world);
+  GameObject(World* world);
   ~GameObject();
 
   /// @brief GameObjects should be unique, copying them is not allowed.
@@ -232,7 +232,7 @@ public:
 
   /// @brief Creates a GameObject primitive.
   /// @return a GameObject.
-  static GameObject createPrimitive(World& world, GameObjectPrimitives primitive,
+  static GameObject* createPrimitive(World* world, GameObjectPrimitives primitive,
     std::shared_ptr<Material> material = nullptr);
 
   // static GameObject find();

@@ -22,7 +22,7 @@ int main() {
   SDL_SetMainReady();
   SDL_CHECK(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD));
 
-  ResourceManager::assetsPath = "../..";
+  ResourceManager::assetsPath = "../../src/assets";
   Time::init();
   InputHandler::init();
 
@@ -36,37 +36,37 @@ int main() {
   }
 
   // --- Game Initialization ---
-  World world = World();
-  world.addTag("world");
+  World* world = new World();
+  world->addTag("world");
 
-  GameObject cameraObj = GameObject(world);
-  cameraObj.addTag("camera");
-  cameraObj.getComponent<Transform>()->position = {0, 0, 5};
-  Camera& cam = cameraObj.addComponent<Camera>(PERSPECTIVE);
+  GameObject* cameraObj = new GameObject(world);
+  cameraObj->addTag("camera");
+  cameraObj->getComponent<Transform>()->position = {0, 0, 5};
+  Camera& cam = cameraObj->addComponent<Camera>(PERSPECTIVE);
   cam.updateProjectionPerspective(70, 16.0f / 9.0f, 0.5f, 1000);
-  cameraObj.addComponent<PlayerController>(3.0f, radians(40.f));
+  cameraObj->addComponent<PlayerController>(3.0f, radians(40.f));
 
-  GameObject skyboxObj = GameObject(world);
-  skyboxObj.addComponent<Skybox>(
-    std::vector<std::string> {ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/right.jpg",
-      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/left.jpg",
-      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/top.jpg",
-      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/bottom.jpg",
-      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/front.jpg",
-      ResourceManager::assetsPath + "/src/assets/skyboxes/glsky/back.jpg"});
+  GameObject* skyboxObj = new GameObject(world);
+  skyboxObj->addComponent<Skybox>(
+    std::vector<std::string> {ResourceManager::assetsPath + "/skyboxes/glsky/right.jpg",
+      ResourceManager::assetsPath + "/skyboxes/glsky/left.jpg",
+      ResourceManager::assetsPath + "/skyboxes/glsky/top.jpg",
+      ResourceManager::assetsPath + "/skyboxes/glsky/bottom.jpg",
+      ResourceManager::assetsPath + "/skyboxes/glsky/front.jpg",
+      ResourceManager::assetsPath + "/skyboxes/glsky/back.jpg"});
 
-  GameObject planeObj = GameObject::createPrimitive(world, PLANE,
+  GameObject* planeObj = GameObject::createPrimitive(world, PLANE,
     ResourceManager::loadMaterial(
-      ResourceManager::assetsPath + "/src/assets/materials/checkered_wood_4k"));
-  planeObj.getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+      ResourceManager::assetsPath + "/materials/checkered_wood_4k"));
+  planeObj->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
 
-  GameObject planeObj2 = GameObject::createPrimitive(world, PLANE,
-    ResourceManager::loadMaterial(
-      Color{0,1,0,1}));
-  planeObj2.getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
-  planeObj2.getComponent<Transform>()->translate({2, 0, 0}, WORLD);
-  planeObj2.getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);
-  planeObj2.getComponent<MeshRenderer>()->lineWidth = 5;
+  // GameObject* planeObj2 = GameObject::createPrimitive(world, PLANE,
+  //   ResourceManager::loadMaterial(
+  //     Color{0,1,0,1}));
+  // planeObj2->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+  // planeObj2->getComponent<Transform>()->translate({2, 0, 0}, WORLD);
+  // planeObj2->getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);
+  // planeObj2->getComponent<MeshRenderer>()->lineWidth = 5;
 
   // GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
   // cubeObj.addTag("cube");
@@ -85,14 +85,14 @@ int main() {
 
     Time::update();
 
-    VulkanHandler::render(world);
+    VulkanHandler::render(*world);
   }
 
   // --- Game Cleanup ---
   VulkanHandler::waitForEndOfWork();
+  delete world;
+  VulkanHandler::cleanup();
   SDL_Quit();
-
-  world.~World();
 
   return 0;
 }

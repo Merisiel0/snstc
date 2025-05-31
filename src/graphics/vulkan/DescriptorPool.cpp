@@ -2,6 +2,7 @@
 
 #include "DescriptorSetLayout.h"
 #include "Device.h"
+#include "VulkanHandler.h"
 
 VkDescriptorPoolCreateInfo DescriptorPool::getCreateInfo() const {
   VkDescriptorPoolCreateInfo info;
@@ -60,10 +61,7 @@ void DescriptorPool::removeSizes(std::vector<VkDescriptorPoolSize> sizes) {
   }
 }
 
-DescriptorPool::DescriptorPool(std::shared_ptr<Device> device,
-  const std::vector<VkDescriptorPoolSize>& poolSizes) {
-  _device = device;
-
+DescriptorPool::DescriptorPool(const std::vector<VkDescriptorPoolSize>& poolSizes) {
   _totalSizes = std::move(poolSizes);
 
   _usedSizes = _totalSizes;
@@ -72,17 +70,19 @@ DescriptorPool::DescriptorPool(std::shared_ptr<Device> device,
   }
 
   VkDescriptorPoolCreateInfo createInfo = getCreateInfo();
-  VK_CHECK(vkCreateDescriptorPool(_device->handle, &createInfo, nullptr, &_handle));
+  VK_CHECK(
+    vkCreateDescriptorPool(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &_handle));
 }
 
 DescriptorPool::DescriptorPool(DescriptorPool&& other) :
-    _device {other._device},
-    _handle {other._handle},
-    _totalSizes {other._totalSizes},
-    _usedSizes {other._usedSizes} {
+    _handle {other._handle}, _totalSizes {other._totalSizes}, _usedSizes {other._usedSizes} {
   other._handle = VK_NULL_HANDLE;
 }
 
-DescriptorPool::~DescriptorPool() { vkDestroyDescriptorPool(_device->handle, _handle, nullptr); }
+DescriptorPool::~DescriptorPool() {
+  vkDestroyDescriptorPool(VulkanHandler::getDevice()->handle, _handle, nullptr);
+}
 
-void DescriptorPool::reset() const { vkResetDescriptorPool(_device->handle, _handle, 0); }
+void DescriptorPool::reset() const {
+  vkResetDescriptorPool(VulkanHandler::getDevice()->handle, _handle, 0);
+}

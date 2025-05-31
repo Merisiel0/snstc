@@ -7,6 +7,7 @@
 #include "PhysicalDevice.h"
 #include "Semaphore.h"
 #include "graphics/Window.h"
+#include "VulkanHandler.h"
 
 VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t imageCount,
   VkSurfaceCapabilitiesKHR capabilities, VkPresentModeKHR presentMode) const {
@@ -33,11 +34,9 @@ VkSwapchainCreateInfoKHR Swapchain::getCreateInfo(VkSurfaceKHR surface, uint32_t
   return info;
 }
 
-Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
-  _device = device;
-
+Swapchain::Swapchain(const Window& window) {
   for(int i = 0; i < FRAME_OVERLAP; i++) {
-    frames[i] = std::make_shared<Frame>(device);
+    frames[i] = std::make_shared<Frame>();
   }
 
   extent.width = window.extent.x;
@@ -45,10 +44,10 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
 
   // find surface format
   uint32_t surfaceFormatCount;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device->physicalDevice()->handle, window.surface,
+  vkGetPhysicalDeviceSurfaceFormatsKHR(VulkanHandler::getDevice()->physicalDevice()->handle, window.surface,
     &surfaceFormatCount, nullptr);
   std::vector<VkSurfaceFormatKHR> availableSurfaceFormats(surfaceFormatCount);
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device->physicalDevice()->handle, window.surface,
+  vkGetPhysicalDeviceSurfaceFormatsKHR(VulkanHandler::getDevice()->physicalDevice()->handle, window.surface,
     &surfaceFormatCount, availableSurfaceFormats.data());
 
   const std::vector<VkFormat> preferredFormats = {VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UINT,
@@ -74,10 +73,10 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
 
   // find present mode
   uint32_t presentModeCount = 0;
-  VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(device->physicalDevice()->handle,
+  VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(VulkanHandler::getDevice()->physicalDevice()->handle,
     window.surface, &presentModeCount, nullptr));
   std::vector<VkPresentModeKHR> availablePresentModes(presentModeCount);
-  VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(device->physicalDevice()->handle,
+  VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(VulkanHandler::getDevice()->physicalDevice()->handle,
     window.surface, &presentModeCount, availablePresentModes.data()));
 
   const std::vector<VkPresentModeKHR> preferredPresentModes = {VK_PRESENT_MODE_MAILBOX_KHR,
@@ -97,7 +96,7 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
   }
 
   VkSurfaceCapabilitiesKHR capabilities {};
-  VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->physicalDevice()->handle,
+  VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VulkanHandler::getDevice()->physicalDevice()->handle,
     window.surface, &capabilities));
 
   uint32_t imageCount = capabilities.minImageCount + 1;
@@ -107,13 +106,13 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
 
   VkSwapchainCreateInfoKHR createInfo =
     getCreateInfo(window.surface, imageCount, capabilities, presentMode);
-  VK_CHECK(vkCreateSwapchainKHR(device->handle, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateSwapchainKHR(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &handle));
 
   // get swapchain images
   uint32_t _imageCount = 0;
-  VK_CHECK(vkGetSwapchainImagesKHR(device->handle, handle, &_imageCount, nullptr));
+  VK_CHECK(vkGetSwapchainImagesKHR(VulkanHandler::getDevice()->handle, handle, &_imageCount, nullptr));
   std::vector<VkImage> vkImages(_imageCount);
-  VK_CHECK(vkGetSwapchainImagesKHR(device->handle, handle, &_imageCount, vkImages.data()));
+  VK_CHECK(vkGetSwapchainImagesKHR(VulkanHandler::getDevice()->handle, handle, &_imageCount, vkImages.data()));
 
   _images.resize(_imageCount);
   // get swapchain image views
@@ -136,7 +135,7 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
     createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount = 1;
 
-    VK_CHECK(vkCreateImageView(device->handle, &createInfo, nullptr, &imageViews[i]));
+    VK_CHECK(vkCreateImageView(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &imageViews[i]));
 
     _images[i] = std::make_shared<Image>(vkImages[i], imageViews[i], extent);
   }
@@ -144,17 +143,17 @@ Swapchain::Swapchain(const Window& window, std::shared_ptr<Device> device) {
 
 Swapchain::~Swapchain() {
   for(size_t i = 0; i < _images.size(); i++) {
-    vkDestroyImageView(_device->handle, _images[i]->view, nullptr);
+    vkDestroyImageView(VulkanHandler::getDevice()->handle, _images[i]->view, nullptr);
   }
 
-  vkDestroySwapchainKHR(_device->handle, handle, nullptr);
+  vkDestroySwapchainKHR(VulkanHandler::getDevice()->handle, handle, nullptr);
 }
 
 uint32_t Swapchain::acquireNextImage() const {
   uint32_t swapchainImageIndex;
   VkSemaphore s = getCurrentFrame()->swapchainSemaphore->handle;
   VK_CHECK(
-    vkAcquireNextImageKHR(_device->handle, handle, 9999999999, s, nullptr, &swapchainImageIndex));
+    vkAcquireNextImageKHR(VulkanHandler::getDevice()->handle, handle, 9999999999, s, nullptr, &swapchainImageIndex));
   return swapchainImageIndex;
 }
 
