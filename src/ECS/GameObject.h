@@ -181,6 +181,10 @@ public:
   /// @param tag a tag to add.
   void addTag(std::string tag) const;
 
+  /// @brief Gets the tags of this object.
+  /// @return the tags on this object.
+  std::vector<std::string> getTags() const;
+
   /// @brief Removes a tag from this GameObject, if it exists.
   /// @param tag a tag to remove.
   void removeTag(std::string tag) const;
@@ -233,7 +237,7 @@ public:
   /// @brief Creates a GameObject primitive.
   /// @return a GameObject.
   static GameObject* createPrimitive(World* world, GameObjectPrimitives primitive,
-    std::shared_ptr<Material> material = nullptr);
+    std::shared_ptr<Material> material);
 
   // static GameObject find();
   // static GameObject findWithTag();

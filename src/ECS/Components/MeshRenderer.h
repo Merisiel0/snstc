@@ -34,7 +34,7 @@ public:
 
   MeshRenderer(std::shared_ptr<Mesh> mesh, VkCullModeFlags cullMode, CustomGraphicsPipeline id,
     VkPrimitiveTopology topology, VkPolygonMode polygonMode,
-    std::vector<VkPushConstantRange> pushConstantRanges, std::vector<Shader> shaders,
+    std::vector<VkPushConstantRange> pushConstantRanges, const std::vector<Shader>& shaders,
     std::vector<DescriptorSetLayoutType> setLayouts);
 
   MeshRenderer(MeshRenderer&&) noexcept = default;

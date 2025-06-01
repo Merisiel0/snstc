@@ -2,6 +2,7 @@
 #include "ECS/ECS.h"
 #include "SDL3/SDL_main.h"
 #include "events/EventHandler.h"
+#include "graphics/vulkan/DescriptorManager.h"
 #include "graphics/vulkan/VulkanHandler.h"
 #include "inputs/InputHandler.h"
 #include "resources/Material.h"
@@ -16,6 +17,13 @@ static void quitFunctor(SDL_QuitEvent e) { quit = true; }
 static void quitFunctor(SDL_KeyboardEvent e) {
   if(e.key == SDLK_ESCAPE) { quit = true; }
 }
+
+struct ColdConstants {
+  vec3 resolution;
+  float time;
+};
+
+enum CustomGraphicsPipeline : uint16_t { CUSTOM_PIPELINE_COLD = 0 };
 
 int main() {
   //--- Engine Initialization ---
@@ -56,26 +64,41 @@ int main() {
       ResourceManager::assetsPath + "/skyboxes/glsky/back.jpg"});
 
   GameObject* planeObj = GameObject::createPrimitive(world, PLANE,
-    ResourceManager::loadMaterial(
-      ResourceManager::assetsPath + "/materials/checkered_wood_4k"));
+    ResourceManager::loadMaterial(ResourceManager::assetsPath + "/materials/checkered_wood_4k"));
+  planeObj->addTag("checkered plane");
   planeObj->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
 
-  // GameObject* planeObj2 = GameObject::createPrimitive(world, PLANE,
-  //   ResourceManager::loadMaterial(
-  //     Color{0,1,0,1}));
-  // planeObj2->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
-  // planeObj2->getComponent<Transform>()->translate({2, 0, 0}, WORLD);
-  // planeObj2->getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);
-  // planeObj2->getComponent<MeshRenderer>()->lineWidth = 5;
+  GameObject* planeObj2 =
+    GameObject::createPrimitive(world, PLANE, ResourceManager::loadMaterial(Color {0, 1, 0, 1}));
+  planeObj2->addTag("green lines plane");
+  planeObj2->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+  planeObj2->getComponent<Transform>()->translate({2, 0, 0}, WORLD);
+  planeObj2->getComponent<MeshRenderer>()->setPolygonMode(VK_POLYGON_MODE_LINE);
+  planeObj2->getComponent<MeshRenderer>()->lineWidth = 5;
 
-  // GameObject cubeObj = GameObject::createPrimitive(world, CUBE);
-  // cubeObj.addTag("cube");
+  // plane with custom pipeline
+  GameObject* planeObj3 = new GameObject(world);
+  planeObj3->addTag("custom shader plane");
+  planeObj3->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
+  planeObj3->getComponent<Transform>()->translate({-2, 0, 0}, WORLD);
 
-  // GameObject lightObj = GameObject(world);
-  // lightObj.addComponent<MeshRenderer>(ResourceManager::generateIcoSphere(1), ResourceManager::loadMaterial(Color{0, 0, 1, 1}));
-  // lightObj.addComponent<AmbiantLight>(Color {1, 1, 1, 0.2f});
-  // lightObj.addComponent<Light>(Color {1, 1, 1, 3});
-  // lightObj.addComponent<PlayerController>(3.0f, radians(40.f));
+  std::vector<VkPushConstantRange> ranges(1);
+  ranges[0] = VulkanHandler::getDefaultPushConstantRange();
+  // ranges[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  // ranges[1].offset = ranges[0].size;
+  // ranges[1].size = sizeof(ColdConstants);
+
+  std::vector<Shader> shaders;
+  shaders.emplace_back(ResourceManager::assetsPath + "/shaders/vert0000.spv",
+    VK_SHADER_STAGE_VERTEX_BIT);
+  shaders.emplace_back(ResourceManager::assetsPath + "/shaders/cold.spv",
+    VK_SHADER_STAGE_FRAGMENT_BIT);
+
+  std::vector<DescriptorSetLayoutType> setLayouts = {DESCRIPTOR_SET_LAYOUT_GLOBAL};
+
+  planeObj3->addComponent<MeshRenderer>(ResourceManager::generatePlane({1, 1}, {2, 2}),
+    VK_CULL_MODE_BACK_BIT, CUSTOM_PIPELINE_COLD, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    VK_POLYGON_MODE_FILL, ranges, shaders, setLayouts);
 
   // --- Game Loop ---
   while(!quit) {

@@ -100,8 +100,8 @@ void VulkanHandler::beginDrawing(World& world) {
   if(_graphicsPipelines.size() > 0) {
     currentFrame->globalDescSet->write(0, *world.camBuffer);
     currentFrame->globalDescSet->write(1, *world.lightsBuffer);
-    currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->globalDescSet, 0,
-      *_graphicsPipelines.begin()->second);
+    // currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->globalDescSet, 0,
+    //   *_graphicsPipelines.begin()->second);
   }
 }
 
@@ -306,6 +306,7 @@ void VulkanHandler::render(World& world) {
   auto renderers = world.getComponentsInChildren<MeshRenderer>();
   for(const auto& renderer : renderers) {
     MeshRenderer& rd = renderer.get();
+    std::cout << rd.gameObject->getTags()[0] << std::endl;
 
     // find and bind pipeline to use
     std::shared_ptr<GraphicsPipeline> currentPipeline =
@@ -313,9 +314,14 @@ void VulkanHandler::render(World& world) {
     currentFrame->commandBuffer->bindPipeline(*currentPipeline);
 
     // write and bind descriptor sets
-    rd.material->updateDescriptorSet(_swapchain->getFrameIndex(), *_defaultSampler);
-    currentFrame->commandBuffer->bindDescriptorSet(
-      *rd.material->getDescriptorSet(_swapchain->getFrameIndex()), 1, *currentPipeline);
+    currentFrame->commandBuffer->bindDescriptorSet(*currentFrame->globalDescSet, 0,
+      *currentPipeline);
+
+    if(rd.material) {
+      rd.material->updateDescriptorSet(_swapchain->getFrameIndex(), *_defaultSampler);
+      currentFrame->commandBuffer->bindDescriptorSet(
+        *rd.material->getDescriptorSet(_swapchain->getFrameIndex()), 1, *currentPipeline);
+    }
 
     // push vertices and model matrix inside pushconstants
     PushConstants constants {};

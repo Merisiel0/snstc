@@ -10,6 +10,9 @@ glslc $SCRIPT_DIR/uncompiled/unlit.frag --target-env=vulkan1.3 -o $SCRIPT_DIR/fr
 # mesh layouts
 glslc $SCRIPT_DIR/uncompiled/staticmesh.vert --target-env=vulkan1.3 -o $SCRIPT_DIR/vert0000.spv
 
+# custom pipelines
+glslc $SCRIPT_DIR/uncompiled/cold.frag --target-env=vulkan1.3 -o $SCRIPT_DIR/cold.spv
+
 # glslc $SCRIPT_DIR/uncompiled/PBR_material.vert --target-env=vulkan1.3 -o $SCRIPT_DIR/PBR_material_vert.spv
 # glslc $SCRIPT_DIR/uncompiled/PBR_material.frag --target-env=vulkan1.3 -o $SCRIPT_DIR/PBR_material_frag.spv
 # glslc $SCRIPT_DIR/uncompiled/color_material.vert --target-env=vulkan1.3 -o $SCRIPT_DIR/color_material_vert.spv

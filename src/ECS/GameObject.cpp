@@ -70,6 +70,10 @@ void GameObject::addTag(std::string tag) const {
   _registry->get<ObjectData>(_id).tags.push_back(tag);
 }
 
+std::vector<std::string> GameObject::getTags() const {
+  return _registry->get<ObjectData>(_id).tags;
+}
+
 void GameObject::removeTag(std::string tag) const {
   if(!hasTag(tag)) return;
 
@@ -188,8 +192,6 @@ GameObject* GameObject::getChild(uint32_t index) const {
 GameObject* GameObject::createPrimitive(World* world, GameObjectPrimitives primitive,
   std::shared_ptr<Material> material) {
   GameObject* obj = new GameObject(world);
-
-  if(!material) { material = ResourceManager::loadMaterial(Color{0, 1, 0, 1}); }
 
   std::shared_ptr<Mesh> mesh;
   switch(primitive) {
