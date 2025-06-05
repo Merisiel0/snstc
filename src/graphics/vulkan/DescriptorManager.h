@@ -37,11 +37,15 @@ private:
     _sets;
 
 public:
-  /// @brief Initializes initial descriptor pools and available layouts and allocates unique descriptor sets.
+  /// @brief Initializes initial descriptor pools and available layouts.
   /// @param device a device.
   static void init();
 
   /// @brief Frees all expired descriptor sets.
+  ///
+  /// This method is called internally when descriptor sets are destroyed.
+  ///
+  /// Calling it again is useless.
   static void cleanupExpired();
 
   /// @brief Frees all descriptor sets, layouts and pools.

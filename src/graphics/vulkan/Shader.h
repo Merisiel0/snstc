@@ -7,6 +7,7 @@ class Device;
 class Shader {
 private:
   VkShaderStageFlagBits _stage;
+  std::string _path;
 
   VkShaderModuleCreateInfo getCreateInfo(std::vector<uint32_t>& data) const;
 
@@ -21,6 +22,8 @@ public:
 
   Shader(Shader&& other);
   Shader& operator=(Shader&& other);
+
+  std::string getPath() const;
 
   VkPipelineShaderStageCreateInfo getStageCreateInfo() const;
 };

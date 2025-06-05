@@ -111,7 +111,7 @@ std::shared_ptr<DescriptorSet> DescriptorManager::allocateSet(DescriptorSetLayou
     const auto freeSizes = _pools[type][i]->getFreeSizes();
     const auto neededSizes = _layouts[type]->getPoolSizes();
     for(const auto& freeSize : freeSizes) {
-      for(const auto neededSize : neededSizes) {
+      for(const auto& neededSize : neededSizes) {
         if(freeSize.type == neededSize.type &&
            freeSize.descriptorCount >= neededSize.descriptorCount) {
           validSizes++;

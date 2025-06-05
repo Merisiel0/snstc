@@ -2,15 +2,41 @@
 
 #include "Device.h"
 #include "Image.h"
+#include "PipelineLayout.h"
+#include "Shader.h"
+#include "VulkanHandler.h"
 
-// VkPushConstantRange GraphicsPipeline::getPushConstantRange() const {
-//   VkPushConstantRange range {};
-//   range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-//   range.offset = 0;
-//   range.size = sizeof(PushConstants);
+GraphicsPipelineSettings::GraphicsPipelineSettings(std::shared_ptr<PipelineLayout> layout,
+  const std::vector<Shader>& shaders,
+  VkPrimitiveTopology primitiveTopology,
+  VkPolygonMode polygonMode,
+  bool depthWrite) {
+  _layout = layout;
+  for(const auto& shader : shaders) {
+    _shaderPaths.push_back(shader.getPath());
+  }
+  _primitiveTopology = primitiveTopology;
+  _polygonMode = polygonMode;
+  _depthWrite = depthWrite;
+}
 
-//   return range;
-// }
+bool GraphicsPipelineSettings::operator==(const GraphicsPipelineSettings& other) const {
+  bool shadersMatch = _shaderPaths.size() == other._shaderPaths.size();
+
+  if(!shadersMatch) return false;
+
+  int matchingPaths = 0;
+  for(const auto& path : _shaderPaths) {
+    for(const auto& otherPath : other._shaderPaths) {
+      if(path == otherPath) matchingPaths++;
+    }
+  }
+
+  if(matchingPaths != _shaderPaths.size()) return false;
+
+  return _primitiveTopology == other._primitiveTopology && _polygonMode == other._polygonMode &&
+         _depthWrite == other._depthWrite && _layout->matchSettings(other._layout->getSettings());
+}
 
 VkPipelineRenderingCreateInfo GraphicsPipeline::getRenderingCreateInfo() const {
   VkPipelineRenderingCreateInfo info {};
@@ -175,9 +201,11 @@ PipelineDynamicStateCreateInfoData GraphicsPipeline::getDynamicState() const {
   return data;
 }
 
-GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
-  std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-  VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode, bool depthWrite) const {
+GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(const PipelineLayout& layout,
+  const std::vector<Shader>& shaders,
+  VkPrimitiveTopology primitiveTopology,
+  VkPolygonMode polygonMode,
+  bool depthWrite) const {
   GraphicsPipelineCreateInfoData data;
 
   // get necessary informations
@@ -197,8 +225,12 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   data.info.pNext = &data.rendering;
   data.info.flags = 0;
 
-  data.info.stageCount = (uint32_t) shaderStageCreateInfos.size();
-  data.info.pStages = shaderStageCreateInfos.data();
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStages {};
+  for(const auto& shader : shaders) {
+    shaderStages.push_back(shader.getStageCreateInfo());
+  }
+  data.info.stageCount = (uint32_t) shaderStages.size();
+  data.info.pStages = shaderStages.data();
 
   data.info.pVertexInputState = &data.vertexInput;
   data.info.pInputAssemblyState = &data.inputAssembly;
@@ -209,7 +241,8 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   data.info.pDepthStencilState = &data.depthStencil;
   data.info.pColorBlendState = &data.colorBlend.info;
   data.info.pDynamicState = &data.dynamicState.info;
-  data.info.layout = _layout;
+  data.info.layout = layout.getHandle();
+  ;
   data.info.renderPass = VK_NULL_HANDLE;
   data.info.subpass = 0;
   data.info.basePipelineHandle = VK_NULL_HANDLE;
@@ -218,16 +251,26 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(
   return data;
 }
 
-GraphicsPipeline::GraphicsPipeline(std::shared_ptr<Device> device,
-  VkPrimitiveTopology primitiveTopology, VkPolygonMode polygonMode,
-  std::vector<VkPipelineShaderStageCreateInfo>& shaderStageCreateInfos,
-  std::vector<VkPushConstantRange> pushConstantRanges,
-  std::vector<VkDescriptorSetLayout>& setLayouts, bool depthWrite) :
-    IPipeline(device, pushConstantRanges, setLayouts) {
-  _type = VK_PIPELINE_BIND_POINT_GRAPHICS;
+VkPipeline GraphicsPipeline::getHandle() const { return _handle; }
+
+GraphicsPipeline::GraphicsPipeline(std::shared_ptr<PipelineLayout> layout,
+  const std::vector<Shader>& shaders,
+  VkPrimitiveTopology primitiveTopology,
+  VkPolygonMode polygonMode,
+  bool depthWrite) {
+  _settings = GraphicsPipelineSettings(layout, shaders, primitiveTopology, polygonMode, depthWrite);
 
   GraphicsPipelineCreateInfoData data =
-    getCreateInfo(shaderStageCreateInfos, primitiveTopology, polygonMode, depthWrite);
-  VK_CHECK(
-    vkCreateGraphicsPipelines(device->handle, VK_NULL_HANDLE, 1, &data.info, nullptr, &handle));
+    getCreateInfo(*layout, shaders, primitiveTopology, polygonMode, depthWrite);
+
+  VK_CHECK(vkCreateGraphicsPipelines(VulkanHandler::getDevice()->handle, VK_NULL_HANDLE, 1,
+    &data.info, nullptr, &_handle));
+}
+
+GraphicsPipeline::~GraphicsPipeline() {
+  vkDestroyPipeline(VulkanHandler::getDevice()->handle, _handle, nullptr);
+}
+
+bool GraphicsPipeline::matchSettings(const GraphicsPipelineSettings& settings) const {
+  return _settings == settings;
 }

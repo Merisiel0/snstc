@@ -19,7 +19,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: 'false'
 AlwaysBreakTemplateDeclarations: 'Yes'
 BinPackArguments: 'true'
-BinPackParameters: 'true'
+BinPackParameters: 'false'
 BreakAfterJavaFieldAnnotations: 'true'
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom

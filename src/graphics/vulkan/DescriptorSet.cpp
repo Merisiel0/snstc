@@ -7,6 +7,7 @@
 #include "Image.h"
 #include "Sampler.h"
 #include "VulkanHandler.h"
+#include "DescriptorManager.h"
 
 DescriptorSetAllocateInfoData DescriptorSet::getSetAllocateInfo(const DescriptorPool& pool,
   const DescriptorSetLayout& layout) const {
@@ -96,6 +97,7 @@ DescriptorSet::DescriptorSet(std::shared_ptr<DescriptorPool> pool,
 
 DescriptorSet::~DescriptorSet(){
   _pool->removeSizes(_layout->getPoolSizes());
+  DescriptorManager::cleanupExpired();
 }
 
 void DescriptorSet::write(uint32_t binding, const Image& image, const Sampler& sampler) {

@@ -118,58 +118,10 @@ enum UniqueGraphicsPipeline : uint16_t {
   UNIQUE_GRAPHICS_PIPELINE_UNDEFINED = 0xFFFF
 };
 
-// /// @brief List containing all implemented graphics pipelines.
-// enum GraphicsPipelineId {
-//   /// @brief Reserved for skyboxes.
-//   GRAPHICS_PIPELINE_SKYBOX,
+inline bool operator==(const VkPushConstantRange& a, const VkPushConstantRange& b) {
+  return a.stageFlags == b.stageFlags && a.size == b.size && a.offset == b.offset;
+}
 
-//   // UNLIT_POINT_LIST,
-//   // UNLIT_LINE_LIST,
-//   // UNLIT_LINE_STRIP,
-
-//   // UNLIT_POINT_TRIANGLE_LIST,
-//   UNLIT_LINE_TRIANGLE_LIST,
-//   UNLIT_FILL_TRIANGLE_LIST,
-
-//   // UNLIT_POINT_TRIANGLE_STRIP,
-//   // UNLIT_LINE_TRIANGLE_STRIP,
-//   // UNLIT_FILL_TRIANGLE_STRIP,
-
-//   // UNLIT_POINT_TRIANGLE_FAN,
-//   // UNLIT_LINE_TRIANGLE_FAN,
-//   // UNLIT_FILL_TRIANGLE_FAN,
-
-//   // UNLIT_INSTANCE_POINT_LIST,
-//   // UNLIT_INSTANCE_LINE_LIST,
-//   // UNLIT_INSTANCE_LINE_STRIP,
-
-//   // UNLIT_INSTANCE_POINT_TRIANGLE_LIST,
-//   // UNLIT_INSTANCE_LINE_TRIANGLE_LIST,
-//   // UNLIT_INSTANCE_FILL_TRIANGLE_LIST,
-
-//   // UNLIT_INSTANCE_POINT_TRIANGLE_STRIP,
-//   // UNLIT_INSTANCE_LINE_TRIANGLE_STRIP,
-//   // UNLIT_INSTANCE_FILL_TRIANGLE_STRIP,
-
-//   // UNLIT_INSTANCE_POINT_TRIANGLE_FAN,
-//   // UNLIT_INSTANCE_LINE_TRIANGLE_FAN,
-//   // UNLIT_INSTANCE_FILL_TRIANGLE_FAN,
-
-//   // UNLIT_PARTICLE_POINT_LIST,
-//   // UNLIT_PARTICLE_LINE_LIST,
-//   // UNLIT_PARTICLE_LINE_STRIP,
-
-//   // UNLIT_PARTICLE_POINT_TRIANGLE_LIST,
-//   // UNLIT_PARTICLE_LINE_TRIANGLE_LIST,
-//   // UNLIT_PARTICLE_FILL_TRIANGLE_LIST,
-
-//   // UNLIT_PARTICLE_POINT_TRIANGLE_STRIP,
-//   // UNLIT_PARTICLE_LINE_TRIANGLE_STRIP,
-//   // UNLIT_PARTICLE_FILL_TRIANGLE_STRIP,
-
-//   // UNLIT_PARTICLE_POINT_TRIANGLE_FAN,
-//   // UNLIT_PARTICLE_LINE_TRIANGLE_FAN,
-//   // UNLIT_PARTICLE_FILL_TRIANGLE_FAN,
-
-//   GRAPHICS_PIPELINE_ID_COUNT
-// };
+inline bool operator!=(const VkPushConstantRange& a, const VkPushConstantRange& b) {
+  return !(a == b);
+}

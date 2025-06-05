@@ -16,6 +16,7 @@ VkShaderModuleCreateInfo Shader::getCreateInfo(std::vector<uint32_t>& data) cons
 
 Shader::Shader(std::string path, VkShaderStageFlagBits stage) {
   _stage = stage;
+  _path = path;
 
   std::vector<uint32_t> data = readFileBytes(path.c_str());
 
@@ -38,6 +39,8 @@ Shader& Shader::operator=(Shader&& other) {
 
   return *this;
 }
+
+std::string Shader::getPath() const { return _path; }
 
 VkPipelineShaderStageCreateInfo Shader::getStageCreateInfo() const {
   VkPipelineShaderStageCreateInfo info;

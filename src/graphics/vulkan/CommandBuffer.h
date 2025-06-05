@@ -11,7 +11,7 @@ class GraphicsPipeline;
 class DescriptorSet;
 class Buffer;
 struct PushConstants;
-class IPipeline;
+class PipelineLayout;
 
 class CommandBuffer {
 private:
@@ -34,17 +34,22 @@ public:
   void end() const;
 
   void bindPipeline(const GraphicsPipeline& pipeline) const;
-  void bindDescriptorSet(const DescriptorSet& set, uint32_t setNb, const IPipeline& pipeline) const;
+  void bindDescriptorSet(const DescriptorSet& set,
+    uint32_t setNb,
+    VkPipelineBindPoint bindPoint,
+    std::shared_ptr<PipelineLayout> layout) const;
   void setViewport(VkViewport* viewport) const;
   void setScissor(VkRect2D* scissor) const;
   void setLineWidth(float lineWidth) const;
   void setCullMode(VkCullModeFlags cullMode) const;
-  void pushConstants(PushConstants constants, VkPipelineLayout layout,
-    VkShaderStageFlags stage) const;
+  void pushConstants(
+    PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const;
   void bindIndexBuffer(Buffer* buffer) const;
   void drawIndexed(uint32_t indexCount, uint32_t instanceCount) const;
   void drawVertices(uint32_t vertexCount) const;
 
-  void submitToQueue(const Queue& queue, const Fence& fence, std::shared_ptr<Semaphore> wait,
+  void submitToQueue(const Queue& queue,
+    const Fence& fence,
+    std::shared_ptr<Semaphore> wait,
     std::shared_ptr<Semaphore> signal) const;
 };

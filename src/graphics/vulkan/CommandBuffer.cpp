@@ -7,6 +7,7 @@
 #include "Fence.h"
 #include "GraphicsPipeline.h"
 #include "Image.h"
+#include "PipelineLayout.h"
 #include "Queue.h"
 #include "Semaphore.h"
 #include "VulkanHandler.h"
@@ -64,14 +65,15 @@ void CommandBuffer::endRendering() const { vkCmdEndRendering(handle); }
 void CommandBuffer::end() const { VK_CHECK(vkEndCommandBuffer(handle)); }
 
 void CommandBuffer::bindPipeline(const GraphicsPipeline& pipeline) const {
-  vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+  vkCmdBindPipeline(handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getHandle());
 }
 
-void CommandBuffer::bindDescriptorSet(const DescriptorSet& set, uint32_t setNb,
-  const IPipeline& pipeline) const {
+void CommandBuffer::bindDescriptorSet(const DescriptorSet& set,
+  uint32_t setNb,
+  VkPipelineBindPoint bindPoint,
+  std::shared_ptr<PipelineLayout> layout) const {
   VkDescriptorSet setHandle = set.getHandle();
-  vkCmdBindDescriptorSets(handle, pipeline.type(), pipeline.layout(), setNb, 1, &setHandle, 0,
-    nullptr);
+  vkCmdBindDescriptorSets(handle, bindPoint, layout->getHandle(), setNb, 1, &setHandle, 0, nullptr);
 }
 
 void CommandBuffer::setViewport(VkViewport* viewport) const {
@@ -88,8 +90,8 @@ void CommandBuffer::setCullMode(VkCullModeFlags cullMode) const {
   vkCmdSetCullMode(handle, cullMode);
 }
 
-void CommandBuffer::pushConstants(PushConstants constants, VkPipelineLayout layout,
-  VkShaderStageFlags stage) const {
+void CommandBuffer::pushConstants(
+  PushConstants constants, VkPipelineLayout layout, VkShaderStageFlags stage) const {
   vkCmdPushConstants(handle, layout, stage, 0, sizeof(PushConstants), &constants);
 }
 
@@ -105,8 +107,10 @@ void CommandBuffer::drawVertices(uint32_t vertexCount) const {
   vkCmdDraw(handle, vertexCount, 1, 0, 0);
 }
 
-void CommandBuffer::submitToQueue(const Queue& queue, const Fence& fence,
-  std::shared_ptr<Semaphore> wait, std::shared_ptr<Semaphore> signal) const {
+void CommandBuffer::submitToQueue(const Queue& queue,
+  const Fence& fence,
+  std::shared_ptr<Semaphore> wait,
+  std::shared_ptr<Semaphore> signal) const {
   SubmitInfo2Data data;
 
   if(wait) {
