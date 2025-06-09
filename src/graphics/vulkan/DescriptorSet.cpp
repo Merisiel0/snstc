@@ -65,7 +65,7 @@ WriteDescriptorSetData DescriptorSet::getWriteInfo(uint32_t binding, const Buffe
 VkDescriptorImageInfo DescriptorSet::getImageInfo(const Image& image,
   const Sampler& sampler) const {
   VkDescriptorImageInfo info;
-  info.sampler = sampler.handle;
+  info.sampler = sampler.getHandle();
   info.imageView = image.view;
   info.imageLayout = image.layout();
 

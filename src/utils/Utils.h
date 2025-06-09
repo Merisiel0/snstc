@@ -57,6 +57,11 @@ static inline std::vector<uint32_t> readFileBytes(std::string path) {
   return fileBytes;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const glm::vec4& v) {
+  os << "(" << v.x << "," << v.y << "," << v.z << v.w << ")";
+  return os;
+}
+
 inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
   os << "(" << v.x << "," << v.y << "," << v.z << ")";
   return os;

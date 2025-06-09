@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Resource.h"
 #include "utils/Utils.h"
 
 #include <memory>
@@ -21,34 +22,27 @@ enum TextureType {
   TEXTURE_TYPE_COUNT = 6
 };
 
-class Material {
+class Material : public Resource<Material> {
 private:
   std::vector<std::shared_ptr<Image>> _textures {TEXTURE_TYPE_COUNT, nullptr};
   std::vector<std::shared_ptr<DescriptorSet>> _descriptorSets;
 
-  Material(std::string path = "");
-  Material(Color color);
-
-  friend class ResourceManager;
+  Material();
 
 public:
-  /// @brief Checks if this material has a specific map.
-  /// @param i a map index to check.
-  /// @return true if this material has map of index i, false otherwise
-  bool hasMap(TextureType i) { return (bool) _textures[i]; }
+  /// @brief Loads a material from a given path.
+  /// @param path a path to a material asset.
+  /// @return a shared pointer to the material.
+  static std::shared_ptr<Material> load(std::string path);
 
-  /// @brief Checks if this material has at least one map.
-  /// @return true if this material has at least one map, false otherwise.
-  bool hasAMap();
+  /// @brief Loads a material from a given color.
+  /// @param color a color.
+  /// @return a shared pointer to the material.
+  static std::shared_ptr<Material> load(Color color);
 
-  /// @brief Gets one of the maps of this material.
-  /// @param i a map index to return.
-  /// @return the map at map index i if it exists, nullptr otherwise.
-  Image& getMap(TextureType i);
-
-  /// @brief Updates this material's descriptor set.
-  /// @param sampler a sampler.
-  void updateDescriptorSet(int frameIndex, const Sampler& sampler);
+  /// @brief Checks if this material has at least one texture.
+  /// @return true if this material has at least one texture, false otherwise.
+  bool hasTextures();
 
   /// @brief Gets this material's descriptor set.
   /// @return a descriptor set.

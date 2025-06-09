@@ -64,6 +64,7 @@ public:
   static void cleanup();
 
   static std::shared_ptr<Device> getDevice();
+  static const Sampler& getSampler();
 
   static VkPushConstantRange getDefaultPushConstantRange();
 

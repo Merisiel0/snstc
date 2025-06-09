@@ -140,8 +140,8 @@ void VulkanHandler::endDrawing() {
   _swapchain->frameNumber++;
 }
 
-void VulkanHandler::init(const char* applicationName, int applicationVersion,
-  const char* engineName, int engineVersion) {
+void VulkanHandler::init(
+  const char* applicationName, int applicationVersion, const char* engineName, int engineVersion) {
   // instance
   std::vector<const char*> instanceLayers {
 #ifdef VKDEBUG
@@ -232,6 +232,8 @@ void VulkanHandler::cleanup() {
 
 std::shared_ptr<Device> VulkanHandler::getDevice() { return _device; }
 
+const Sampler& VulkanHandler::getSampler() { return *_defaultSampler; }
+
 VkPushConstantRange VulkanHandler::getDefaultPushConstantRange() {
   VkPushConstantRange range;
   range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -272,7 +274,8 @@ void VulkanHandler::loadPipeline(const GraphicsPipelineId& id) {
   _graphicsPipelines.insert(mapPair);
 }
 
-void VulkanHandler::loadPipeline(const GraphicsPipelineId& id, const std::vector<Shader>& shaders,
+void VulkanHandler::loadPipeline(const GraphicsPipelineId& id,
+  const std::vector<Shader>& shaders,
   const std::vector<VkPushConstantRange>& pushConstantRanges,
   const std::vector<DescriptorSetLayoutType>& setLayoutTypes) {
   if(_graphicsPipelines.find(id) != _graphicsPipelines.end()) return;

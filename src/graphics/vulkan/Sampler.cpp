@@ -26,11 +26,13 @@ VkSamplerCreateInfo Sampler::getCreateInfo() const {
   return info;
 }
 
+const VkSampler& Sampler::getHandle() const { return _handle; }
+
 Sampler::Sampler(std::shared_ptr<Device> device) {
   _device = device;
 
   VkSamplerCreateInfo createInfo = getCreateInfo();
-  VK_CHECK(vkCreateSampler(device->handle, &createInfo, nullptr, &handle));
+  VK_CHECK(vkCreateSampler(device->handle, &createInfo, nullptr, &_handle));
 }
 
-Sampler::~Sampler() { vkDestroySampler(_device->handle, handle, nullptr); }
+Sampler::~Sampler() { vkDestroySampler(_device->handle, _handle, nullptr); }
