@@ -11,19 +11,19 @@ class ResourceManager;
 class DescriptorSet;
 class Sampler;
 
-enum MapIndex {
-  MAP_INDEX_ALBEDO = 0,
-  MAP_INDEX_NORMAL = 1,
-  MAP_INDEX_ROUGHNESS = 2,
-  MAP_INDEX_METALNESS = 3,
-  MAP_INDEX_HEIGHT = 4,
-  MAP_INDEX_AMBIENT_OCCLUSION = 5,
-  MAP_INDEX_COUNT = 6
+enum TextureType {
+  TEXTURE_ALBEDO = 0,
+  TEXTURE_NORMAL = 1,
+  TEXTURE_ROUGHNESS = 2,
+  TEXTURE_METALNESS = 3,
+  TEXTURE_HEIGHT = 4,
+  TEXTURE_AMBIENT_OCCLUSION = 5,
+  TEXTURE_TYPE_COUNT = 6
 };
 
 class Material {
 private:
-  std::vector<std::shared_ptr<Image>> _maps {MAP_INDEX_COUNT, nullptr};
+  std::vector<std::shared_ptr<Image>> _textures {TEXTURE_TYPE_COUNT, nullptr};
   std::vector<std::shared_ptr<DescriptorSet>> _descriptorSets;
 
   Material(std::string path = "");
@@ -35,7 +35,7 @@ public:
   /// @brief Checks if this material has a specific map.
   /// @param i a map index to check.
   /// @return true if this material has map of index i, false otherwise
-  bool hasMap(MapIndex i) { return (bool) _maps[i]; }
+  bool hasMap(TextureType i) { return (bool) _textures[i]; }
 
   /// @brief Checks if this material has at least one map.
   /// @return true if this material has at least one map, false otherwise.
@@ -44,7 +44,7 @@ public:
   /// @brief Gets one of the maps of this material.
   /// @param i a map index to return.
   /// @return the map at map index i if it exists, nullptr otherwise.
-  Image& getMap(MapIndex i);
+  Image& getMap(TextureType i);
 
   /// @brief Updates this material's descriptor set.
   /// @param sampler a sampler.

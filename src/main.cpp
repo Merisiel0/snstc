@@ -7,7 +7,7 @@
 #include "inputs/InputHandler.h"
 #include "resources/Material.h"
 #include "resources/Mesh.h"
-#include "resources/ResourceManager.h"
+#include "resources/Resource.h"
 #include "utils/Utils.h"
 
 bool quit = false;
@@ -30,7 +30,7 @@ int main() {
   SDL_SetMainReady();
   SDL_CHECK(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD));
 
-  ResourceManager::assetsPath = "../../src/assets";
+  assetsPath = "../../src/assets";
   Time::init();
   InputHandler::init();
 
@@ -56,15 +56,15 @@ int main() {
 
   GameObject* skyboxObj = new GameObject(world);
   skyboxObj->addComponent<Skybox>(
-    std::vector<std::string> {ResourceManager::assetsPath + "/skyboxes/glsky/right.jpg",
-      ResourceManager::assetsPath + "/skyboxes/glsky/left.jpg",
-      ResourceManager::assetsPath + "/skyboxes/glsky/top.jpg",
-      ResourceManager::assetsPath + "/skyboxes/glsky/bottom.jpg",
-      ResourceManager::assetsPath + "/skyboxes/glsky/front.jpg",
-      ResourceManager::assetsPath + "/skyboxes/glsky/back.jpg"});
+    std::vector<std::string> {assetsPath + "/skyboxes/glsky/right.jpg",
+      assetsPath + "/skyboxes/glsky/left.jpg",
+      assetsPath + "/skyboxes/glsky/top.jpg",
+      assetsPath + "/skyboxes/glsky/bottom.jpg",
+      assetsPath + "/skyboxes/glsky/front.jpg",
+      assetsPath + "/skyboxes/glsky/back.jpg"});
 
   GameObject* planeObj = GameObject::createPrimitive(world, PLANE,
-    ResourceManager::loadMaterial(ResourceManager::assetsPath + "/materials/checkered_wood_4k"));
+    ResourceManager::loadMaterial(assetsPath + "/materials/checkered_wood_4k"));
   planeObj->addTag("checkered plane");
   planeObj->getComponent<Transform>()->rotate({radians(45.f), 0, 0}, WORLD);
 
@@ -89,9 +89,9 @@ int main() {
   // ranges[1].size = sizeof(ColdConstants);
 
   std::vector<Shader> shaders;
-  shaders.emplace_back(ResourceManager::assetsPath + "/shaders/vert0000.spv",
+  shaders.emplace_back(assetsPath + "/shaders/vert0000.spv",
     VK_SHADER_STAGE_VERTEX_BIT);
-  shaders.emplace_back(ResourceManager::assetsPath + "/shaders/cold.spv",
+  shaders.emplace_back(assetsPath + "/shaders/cold.spv",
     VK_SHADER_STAGE_FRAGMENT_BIT);
 
   std::vector<DescriptorSetLayoutType> setLayouts = {DESCRIPTOR_SET_LAYOUT_GLOBAL};

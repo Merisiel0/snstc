@@ -29,7 +29,7 @@ Material::Material(std::string path) {
       completePath.append(mapNames[i]);
       completePath.append(supportedImageExtensions[j]);
       if(std::filesystem::exists(completePath)) {
-        _maps[i] = ResourceManager::loadImage(completePath.c_str());
+        _textures[i] = ResourceManager::loadImage(completePath.c_str());
       }
     }
   }
@@ -45,7 +45,7 @@ Material::Material(std::string path) {
 }
 
 Material::Material(Color color) {
-  _maps[MAP_INDEX_ALBEDO] = ResourceManager::loadImage(1, 1, color);
+  _textures[TEXTURE_ALBEDO] = ResourceManager::loadImage(1, 1, color);
   
   for(int i = 0; i < Swapchain::FRAME_OVERLAP; i++){
     _descriptorSets.push_back(DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_MATERIAL));
@@ -53,18 +53,18 @@ Material::Material(Color color) {
 }
 
 bool Material::hasAMap() {
-  for(int i = 0; i < MapIndex::MAP_INDEX_COUNT; i++) {
-    if(hasMap((MapIndex) i)) { return true; }
+  for(int i = 0; i < TextureType::TEXTURE_TYPE_COUNT; i++) {
+    if(hasMap((TextureType) i)) { return true; }
   }
   return false;
 }
 
-Image& Material::getMap(MapIndex i) { return *_maps[i]; }
+Image& Material::getMap(TextureType i) { return *_textures[i]; }
 
 void Material::updateDescriptorSet(int frameIndex, const Sampler& sampler) {
-  for(int i = 0; i < MAP_INDEX_COUNT; i++) {
-    if(_maps[i]) {
-      _descriptorSets.at(frameIndex)->write(i, getMap((MapIndex) i), sampler);
+  for(int i = 0; i < TEXTURE_TYPE_COUNT; i++) {
+    if(_textures[i]) {
+      _descriptorSets.at(frameIndex)->write(i, getMap((TextureType) i), sampler);
     }
   }
 }

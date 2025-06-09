@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Resource.h"
+#include "graphics/vulkan/VulkanUtils.h"
 #include "utils/Utils.h"
 
 #include <vector>
@@ -7,24 +9,29 @@
 class Buffer;
 class ResourceManager;
 
-class Mesh {
+class Mesh : public Resource<Mesh> {
 private:
-  Mesh(std::string path) {}
-  Mesh(std::vector<Vertex> vertices, std::vector<Index> indices);
+  const Buffer* _vertices;
+  const Buffer* _indices;
+  const VkPrimitiveTopology _primitiveTopology;
 
-  friend class ResourceManager;
-
-  static Mesh* generateCube();
-  static Mesh* generatePlane(vec2 dimensions, vec2 vertexAmounts);
-  static Mesh* generateCone(float radius, float height, int resolution);
-  static Mesh* generateCylinder(float radius, float height, int resolution);
-
-  static Mesh* generateUVSphere(int nbSlices, int nbStacks);
-  static Mesh* generateIcoSphere(int nbDivisions);
+  Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, VkPrimitiveTopology topology);
 
 public:
-  Buffer* vertices;
-  Buffer* indices;
+  const Buffer& getVertices() const;
+  const Buffer& getIndices() const;
+  VkPrimitiveTopology getPrimitiveTopology() const;
+
+  static std::shared_ptr<Mesh> load(std::string path);
+
+  // TODO finish implementing procedural primitives
+  // static Mesh* generateCube();
+  static std::shared_ptr<Mesh> generatePlane(vec2 dimensions, uvec2 vertexAmounts);
+  // static Mesh* generateCone(float radius, float height, int resolution);
+  // static Mesh* generateCylinder(float radius, float height, int resolution);
+
+  // static Mesh* generateUVSphere(int nbSlices, int nbStacks);
+  // static Mesh* generateIcoSphere(int nbDivisions);
 
   ~Mesh();
 };
