@@ -23,14 +23,13 @@ public:
   VkPrimitiveTopology getPrimitiveTopology() const;
 
   static std::shared_ptr<Mesh> load(std::string path);
-
-  // TODO finish implementing procedural primitives
-  // static Mesh* generateCube();
+  
+  static std::shared_ptr<Mesh> generateCube();
   static std::shared_ptr<Mesh> generatePlane(vec2 dimensions, uvec2 vertexAmounts);
-  // static Mesh* generateCone(float radius, float height, int resolution);
-  // static Mesh* generateCylinder(float radius, float height, int resolution);
+  static std::shared_ptr<Mesh> generateCone(float radius, float height, int resolution);
+  static std::shared_ptr<Mesh> generateCylinder(float radius, float height, int resolution);
 
-  // static Mesh* generateUVSphere(int nbSlices, int nbStacks);
+  static std::shared_ptr<Mesh> generateUVSphere(int nbSlices, int nbStacks);
   // static Mesh* generateIcoSphere(int nbDivisions);
 
   ~Mesh();

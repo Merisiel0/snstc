@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VulkanUtils.h"
+#include "resources/Resource.h"
 #include "utils/FunctionQueue.h"
 
 class PipelineLayout;
@@ -35,7 +36,7 @@ public:
   bool operator==(const GraphicsPipelineSettings& other) const;
 };
 
-class GraphicsPipeline {
+class GraphicsPipeline : public Resource<GraphicsPipeline, GraphicsPipelineSettings> {
 private:
   VkPipeline _handle;
   const GraphicsPipelineSettings _settings;
@@ -53,14 +54,12 @@ private:
 
   GraphicsPipelineCreateInfoData getCreateInfo() const;
 
+  GraphicsPipeline(const GraphicsPipelineSettings settings);
+
 public:
   VkPipeline getHandle() const;
 
-  GraphicsPipeline(std::shared_ptr<PipelineLayout> layout,
-    std::vector<std::shared_ptr<Shader>> shaders,
-    VkPrimitiveTopology primitiveTopology,
-    VkPolygonMode polygonMode,
-    bool depthWrite);
+  static std::shared_ptr<GraphicsPipeline> load(const GraphicsPipelineSettings settings);
 
   ~GraphicsPipeline();
 

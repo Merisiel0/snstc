@@ -261,13 +261,18 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo() const {
 
 VkPipeline GraphicsPipeline::getHandle() const { return _handle; }
 
-GraphicsPipeline::GraphicsPipeline(std::shared_ptr<PipelineLayout> layout,
-  std::vector<std::shared_ptr<Shader>> shaders,
-  VkPrimitiveTopology primitiveTopology,
-  VkPolygonMode polygonMode,
-  bool depthWrite) :
-    _settings {
-      GraphicsPipelineSettings(layout, shaders, primitiveTopology, polygonMode, depthWrite)} {
+std::shared_ptr<GraphicsPipeline> GraphicsPipeline::load(const GraphicsPipelineSettings settings) {
+  std::shared_ptr<GraphicsPipeline> sptr = findResource(settings);
+  if(sptr) return sptr;
+
+  sptr = std::make_shared<GraphicsPipeline>(settings);
+
+  addResource(settings, sptr);
+
+  return sptr;
+}
+
+GraphicsPipeline::GraphicsPipeline(const GraphicsPipelineSettings settings) : _settings {settings} {
   GraphicsPipelineCreateInfoData data = getCreateInfo();
 
   VK_CHECK(vkCreateGraphicsPipelines(VulkanHandler::getDevice()->handle, VK_NULL_HANDLE, 1,

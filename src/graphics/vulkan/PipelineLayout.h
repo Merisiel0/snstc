@@ -16,11 +16,34 @@ public:
   PipelineLayoutSettings(std::vector<DescriptorSetLayoutType> _setLayouts,
     std::vector<VkPushConstantRange> _pushConstantRanges);
 
-  std::vector<DescriptorSetLayoutType> getSetLayouts() const;
-  std::vector<VkPushConstantRange> getPushConstantRanges() const;
+  const std::vector<DescriptorSetLayoutType>& getSetLayouts() const;
+  const std::vector<VkPushConstantRange>& getPushConstantRanges() const;
 
   bool operator==(const PipelineLayoutSettings& other) const;
 };
+
+namespace std {
+  template<>
+  struct hash<PipelineLayoutSettings> {
+    std::size_t operator()(const PipelineLayoutSettings& s) const {
+      std::size_t seed = 0;
+      hashCombine(seed, hashVectorUnordered(s.getSetLayouts()));
+      hashCombine(seed, hashVectorUnordered(s.getPushConstantRanges()));
+      return seed;
+    }
+  };
+
+  template<>
+  struct hash<VkPushConstantRange> {
+    std::size_t operator()(const VkPushConstantRange& r) const {
+      std::size_t seed = 0;
+      hashCombine(seed, r.stageFlags);
+      hashCombine(seed, r.offset);
+      hashCombine(seed, r.size);
+      return seed;
+    }
+  };
+} // namespace std
 
 class PipelineLayout : public Resource<PipelineLayout, PipelineLayoutSettings> {
 private:
@@ -58,15 +81,3 @@ public:
 
   bool operator==(const PipelineLayout& other);
 };
-
-namespace std {
-  template<>
-  struct hash<PipelineLayoutSettings> {
-    std::size_t operator()(const PipelineLayoutSettings& s) const {
-      std::size_t seed = 0;
-      hashCombine(seed, hashVectorUnordered(s.getSetLayouts()));
-      hashCombine(seed, hashVectorUnordered(s.getPushConstantRanges()));
-      return seed;
-    }
-  };
-} // namespace std

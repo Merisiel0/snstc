@@ -20,7 +20,6 @@ Frame::Frame() {
   renderFence = std::make_shared<Fence>(true);
 
   globalDescSet = DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_GLOBAL);
-  skyboxDescSet = DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_SKYBOX);
 }
 
 Frame::~Frame() {}

@@ -37,12 +37,12 @@ public:
   ~Resource();
 
   // A resource should never be copied.
-  Resource(const Resource<T,U>& other) = delete;
-  Resource& operator=(const Resource<T,U>& other) = delete;
+  Resource(const Resource<T, U>& other) = delete;
+  Resource& operator=(const Resource<T, U>& other) = delete;
 
   // A resource should never be moved.
-  Resource(Resource<T,U>&& other) = delete;
-  Resource& operator=(Resource<T,U>&& other) = delete;
+  Resource(Resource<T, U>&& other) = delete;
+  Resource& operator=(Resource<T, U>&& other) = delete;
 
   /// @brief Cleans up pointers to expired resources.
   static void cleanupExpired();
@@ -52,7 +52,7 @@ public:
 };
 
 template<typename T, typename U>
-inline std::shared_ptr<T> Resource<T,U>::findResource(U key) {
+inline std::shared_ptr<T> Resource<T, U>::findResource(U key) {
   auto it = _resources.find(key);
   if(it != _resources.end()) {
     if(it->second.expired()) {
@@ -66,28 +66,29 @@ inline std::shared_ptr<T> Resource<T,U>::findResource(U key) {
 }
 
 template<typename T, typename U>
-inline void Resource<T,U>::addResource(U key, std::weak_ptr<T> resource) {
+inline void Resource<T, U>::addResource(U key, std::weak_ptr<T> resource) {
   _resources.insert({key, resource});
 }
 
 template<typename T, typename U>
-inline Resource<T,U>::Resource() {}
+inline Resource<T, U>::Resource() {}
 
 template<typename T, typename U>
-inline Resource<T,U>::~Resource() {
+inline Resource<T, U>::~Resource() {
   _containsExpiredResources = true;
 }
 
 template<typename T, typename U>
-inline void Resource<T,U>::cleanupExpired() {
+inline void Resource<T, U>::cleanupExpired() {
   if(_containsExpiredResources) {
     for(auto it = _resources.begin(); it != _resources.end(); it++) {
       if((*it).second.expired()) { _resources.erase(it); }
     }
+    _containsExpiredResources = false;
   }
 }
 
 template<typename T, typename U>
-inline void Resource<T,U>::cleanup() {
+inline void Resource<T, U>::cleanup() {
   _resources.clear();
 }

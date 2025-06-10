@@ -26,7 +26,6 @@
 #include "VulkanUtils.h"
 #include "graphics/Window.h"
 #include "resources/Material.h"
-#include "resources/ResourceManager.h"
 
 #include <array>
 #include <bitset>

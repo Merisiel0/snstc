@@ -33,51 +33,63 @@ Mesh::~Mesh() {
   delete _indices;
 }
 
-// Mesh* Mesh::generateCube() {
-//   // TODO: actual good procedural cube
-//   std::vector<vec3> positions = {// 0,2,1
-//     {-1.0f, 1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
-//     {1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
+std::shared_ptr<Mesh> Mesh::generateCube() {
+  // generate path
+  std::stringstream ss;
+  ss << _generationPrefix << "cube";
+  std::string path = ss.str();
 
-//     {-1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
-//     {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f},
+  // return mesh if it already exists
+  std::shared_ptr<Mesh> sptr = findResource(path);
+  if(sptr) { return sptr; }
 
-//     {1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
-//     {1.0f, 1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
+  // else generate a new one
+  std::vector<vec3> positions = {{-1.0f, 1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
 
-//     {-1.0f, -1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
-//     {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f},
+    {-1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
+    {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f},
 
-//     {-1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
-//     {-1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, -1.0f},
+    {1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
+    {1.0f, 1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
 
-//     {-1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
-//     {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}};
+    {-1.0f, -1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
+    {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f},
 
-//   std::vector<Vertex> vertices;
-//   for(int i = 0; i < positions.size(); i++) {
-//     Vertex v {};
-//     v.position = positions[i];
-//     vertices.push_back(v);
-//   }
+    {-1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
+    {-1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, -1.0f},
 
-//   // std::vector<Vertex> vertices;
-//   // for(float i = -0.5f; i <= 0.5f; i++) {
-//   //   for(float j = -0.5f; j <= 0.5f; j++) {
-//   //     for(float k = -0.5f; k <= 0.5f; k++) {
-//   //       Vertex v {};
-//   //       v.position = {i, j, k};
-//   //       v.normal = normalize(v.position);
-//   //       vertices.push_back(v);
-//   //     }
-//   //   }
-//   // }
+    {-1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
+    {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}};
 
-//   std::vector<Index> indices = {0, 1, 2, 2, 1, 3, 1, 5, 3, 3, 5, 7, 5, 4, 7, 7, 4, 6, 4, 0, 6, 6, 0,
-//     2, 5, 1, 4, 4, 1, 0, 6, 2, 7, 7, 2, 3};
+  std::vector<Vertex> vertices;
+  for(int i = 0; i < positions.size(); i++) {
+    Vertex v {};
+    v.position = positions[i];
+    vertices.push_back(v);
+  }
 
-//   return new Mesh(vertices, indices);
-// }
+  // std::vector<Vertex> vertices;
+  // for(float i = -0.5f; i <= 0.5f; i++) {
+  //   for(float j = -0.5f; j <= 0.5f; j++) {
+  //     for(float k = -0.5f; k <= 0.5f; k++) {
+  //       Vertex v {};
+  //       v.position = {i, j, k};
+  //       v.normal = normalize(v.position);
+  //       vertices.push_back(v);
+  //     }
+  //   }
+  // }
+
+  std::vector<Index> indices = {0, 1, 2, 2, 1, 3, 1, 5, 3, 3, 5, 7, 5, 4, 7, 7, 4, 6, 4, 0, 6, 6, 0,
+    2, 5, 1, 4, 4, 1, 0, 6, 2, 7, 7, 2, 3};
+
+  sptr = std::make_shared<Mesh>(vertices, indices, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+  
+  addResource(path, sptr);
+
+  return sptr;
+}
 
 std::shared_ptr<Mesh> Mesh::generatePlane(vec2 dimensions, uvec2 vertexAmounts) {
   // generate path
@@ -127,142 +139,181 @@ std::shared_ptr<Mesh> Mesh::generatePlane(vec2 dimensions, uvec2 vertexAmounts) 
   return sptr;
 }
 
-// Mesh* Mesh::generateCone(float radius, float height, int resolution) {
-//   std::vector<Vertex> vertices;
-//   std::vector<Index> indices;
+std::shared_ptr<Mesh> Mesh::generateCone(float radius, float height, int resolution) {
+  // generate path
+  std::stringstream ss;
+  ss << _generationPrefix << "plane-r" << radius << "h" << height << "r" << resolution;
+  std::string path = ss.str();
 
-//   // add vertices subdividing a circle
-//   for(int i = 0; i < resolution; i++) {
-//     float ratio = (float) i / resolution;
-//     float r = ratio * glm::pi<float>() * 2.0f;
-//     float x = std::cos(r) * radius;
-//     float z = std::sin(r) * radius;
+  // return mesh if it already exists
+  std::shared_ptr<Mesh> sptr = findResource(path);
+  if(sptr) { return sptr; }
 
-//     Vertex v {};
-//     v.position = {x, 0, z};
-//     vertices.push_back(v);
-//   }
+  // else generate a new one
+  std::vector<Vertex> vertices;
+  std::vector<Index> indices;
 
-//   // add the tip of the cone
-//   Vertex v {};
-//   v.position = {0, 0, height};
-//   Index tipIndex = (uint32_t) vertices.size();
-//   vertices.push_back(v);
+  // add vertices subdividing a circle
+  for(int i = 0; i < resolution; i++) {
+    float ratio = (float) i / resolution;
+    float r = ratio * glm::pi<float>() * 2.0f;
+    float x = std::cos(r) * radius;
+    float z = std::sin(r) * radius;
 
-//   // add the bottom vertex
-//   v.position = {0, 0, 0};
-//   Index baseCenterIndex = (uint32_t) vertices.size();
-//   vertices.push_back(v);
+    Vertex v {};
+    v.position = {x, 0, z};
+    vertices.push_back(v);
+  }
 
-//   // generate triangular faces on side and bottow
-//   for(int i = 0; i < resolution; i++) {
-//     int ii = (i + 1) % resolution;
-//     indices.insert(indices.begin(), {
-//                                       tipIndex, ii, i, // side face
-//                                       baseCenterIndex, i, ii // bottom face
-//                                     });
-//   }
+  // add the tip of the cone
+  Vertex v {};
+  v.position = {0, 0, height};
+  Index tipIndex = (uint32_t) vertices.size();
+  vertices.push_back(v);
 
-//   return new Mesh(vertices, indices);
-// }
+  // add the bottom vertex
+  v.position = {0, 0, 0};
+  Index baseCenterIndex = (uint32_t) vertices.size();
+  vertices.push_back(v);
 
-// Mesh* Mesh::generateCylinder(float radius, float height, int resolution) {
-//   std::vector<Vertex> vertices;
-//   std::vector<Index> indices;
+  // generate triangular faces on side and bottow
+  for(int i = 0; i < resolution; i++) {
+    int ii = (i + 1) % resolution;
+    indices.insert(indices.begin(), {
+                                      tipIndex, ii, i, // side face
+                                      baseCenterIndex, i, ii // bottom face
+                                    });
+  }
 
-//   // generate vertices
-//   for(size_t i = 0; i < resolution; i++) {
-//     float ratio = (float) i / resolution;
-//     float r = ratio * glm::pi<float>() * 2.0f;
-//     float x = std::cos(r) * radius;
-//     float y = std::sin(r) * radius;
+  sptr = std::make_shared<Mesh>(vertices, indices, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+  addResource(path, sptr);
 
-//     Vertex v {};
-//     v.position = {x, y, 0};
-//     vertices.push_back(v);
-//     v.position = {x, y, height};
-//     vertices.push_back(v);
-//   }
+  return sptr;
+}
 
-//   Vertex v {};
-//   v.position = {0, 0, 0};
-//   Index bottomCenterIndex = (uint32_t) vertices.size();
-//   vertices.push_back(v);
+std::shared_ptr<Mesh> Mesh::generateCylinder(float radius, float height, int resolution) {
+  // generate path
+  std::stringstream ss;
+  ss << _generationPrefix << "plane-r" << radius << "h" << height << "r" << resolution;
+  std::string path = ss.str();
 
-//   v.position = {0, height, 0};
-//   Index topCenterIndex = (uint32_t) vertices.size();
-//   vertices.push_back(v);
+  // return mesh if it already exists
+  std::shared_ptr<Mesh> sptr = findResource(path);
+  if(sptr) { return sptr; }
 
-//   // add triangles
-//   for(int i = 0; i < resolution; i++) {
-//     int ii = i * 2;
-//     int jj = (ii + 2) % (resolution * 2);
-//     int kk = (ii + 3) % (resolution * 2);
-//     int ll = ii + 1;
+  // else generate a new one
+  std::vector<Vertex> vertices;
+  std::vector<Index> indices;
 
-//     indices.insert(indices.begin(), {
-//                                       ii, ll, jj, // side triangles
-//                                       jj, ll, kk, bottomCenterIndex, ii, jj, // bottom triangle
-//                                       topCenterIndex, kk, ll // top triangle
-//                                     });
-//   }
+  // generate vertices
+  for(size_t i = 0; i < resolution; i++) {
+    float ratio = (float) i / resolution;
+    float r = ratio * glm::pi<float>() * 2.0f;
+    float x = std::cos(r) * radius;
+    float y = std::sin(r) * radius;
 
-//   return new Mesh(vertices, indices);
-// }
+    Vertex v {};
+    v.position = {x, y, 0};
+    vertices.push_back(v);
+    v.position = {x, y, height};
+    vertices.push_back(v);
+  }
 
-// Mesh* Mesh::generateUVSphere(int nbSlices, int nbStacks) {
-//   std::vector<Vertex> vertices;
-//   std::vector<Index> indices;
+  Vertex v {};
+  v.position = {0, 0, 0};
+  Index bottomCenterIndex = (uint32_t) vertices.size();
+  vertices.push_back(v);
 
-//   // add top vertex
-//   Vertex v0 {};
-//   v0.position = {0, 1, 0};
-//   vertices.push_back(v0);
+  v.position = {0, height, 0};
+  Index topCenterIndex = (uint32_t) vertices.size();
+  vertices.push_back(v);
 
-//   // generate vertices per stack / slice
-//   for(int i = 0; i < nbStacks - 1; i++) {
-//     double phi = glm::pi<double>() * double(i + 1) / double(nbStacks);
-//     for(int j = 0; j < nbSlices; j++) {
-//       double theta = 2.0 * glm::pi<double>() * double(j) / double(nbSlices);
-//       Vertex v1 {};
-//       v1.position = {std::sin(phi) * std::cos(theta), std::cos(phi),
-//         std::sin(phi) * std::sin(theta)};
-//       vertices.push_back(v1);
-//     }
-//   }
+  // add triangles
+  for(int i = 0; i < resolution; i++) {
+    int ii = i * 2;
+    int jj = (ii + 2) % (resolution * 2);
+    int kk = (ii + 3) % (resolution * 2);
+    int ll = ii + 1;
 
-//   // add bottom vertex
-//   Vertex v1 {};
-//   v1.position = {0, -1, 0};
-//   int v1Index = (int) vertices.size();
-//   vertices.push_back(v1);
+    indices.insert(indices.begin(), {
+                                      ii, ll, jj, // side triangles
+                                      jj, ll, kk, bottomCenterIndex, ii, jj, // bottom triangle
+                                      topCenterIndex, kk, ll // top triangle
+                                    });
+  }
 
-//   // add top / bottom triangles
-//   for(int i = 0; i < nbSlices; ++i) {
-//     auto i0 = i + 1;
-//     auto i1 = (i + 1) % nbSlices + 1;
-//     indices.insert(indices.end(), {0, i1, i0});
+  sptr = std::make_shared<Mesh>(vertices, indices, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+  addResource(path, sptr);
 
-//     i0 = i + nbSlices * (nbStacks - 2) + 1;
-//     i1 = (i + 1) % nbSlices + nbSlices * (nbStacks - 2) + 1;
-//     indices.insert(indices.end(), {v1Index, i0, i1});
-//   }
+  return sptr;
+}
 
-//   // add quads per stack / slice
-//   for(int j = 0; j < nbStacks - 2; j++) {
-//     int j0 = j * nbSlices + 1;
-//     int j1 = (j + 1) * nbSlices + 1;
-//     for(int i = 0; i < nbSlices; i++) {
-//       int i0 = j0 + i;
-//       int i1 = j0 + (i + 1) % nbSlices;
-//       int i2 = j1 + (i + 1) % nbSlices;
-//       int i3 = j1 + i;
-//       indices.insert(indices.end(), {i0, i1, i2, i2, i3, i0});
-//     }
-//   }
+std::shared_ptr<Mesh> Mesh::generateUVSphere(int nbSlices, int nbStacks) {
+  // generate path
+  std::stringstream ss;
+  ss << _generationPrefix << "plane-s" << nbSlices << "s" << nbStacks;
+  std::string path = ss.str();
 
-//   return new Mesh(vertices, indices);
-// }
+  // return mesh if it already exists
+  std::shared_ptr<Mesh> sptr = findResource(path);
+  if(sptr) { return sptr; }
+
+  // else generate a new one
+  std::vector<Vertex> vertices;
+  std::vector<Index> indices;
+
+  // add top vertex
+  Vertex v0 {};
+  v0.position = {0, 1, 0};
+  vertices.push_back(v0);
+
+  // generate vertices per stack / slice
+  for(int i = 0; i < nbStacks - 1; i++) {
+    double phi = glm::pi<double>() * double(i + 1) / double(nbStacks);
+    for(int j = 0; j < nbSlices; j++) {
+      double theta = 2.0 * glm::pi<double>() * double(j) / double(nbSlices);
+      Vertex v1 {};
+      v1.position = {std::sin(phi) * std::cos(theta), std::cos(phi),
+        std::sin(phi) * std::sin(theta)};
+      vertices.push_back(v1);
+    }
+  }
+
+  // add bottom vertex
+  Vertex v1 {};
+  v1.position = {0, -1, 0};
+  int v1Index = (int) vertices.size();
+  vertices.push_back(v1);
+
+  // add top / bottom triangles
+  for(int i = 0; i < nbSlices; ++i) {
+    auto i0 = i + 1;
+    auto i1 = (i + 1) % nbSlices + 1;
+    indices.insert(indices.end(), {0, i1, i0});
+
+    i0 = i + nbSlices * (nbStacks - 2) + 1;
+    i1 = (i + 1) % nbSlices + nbSlices * (nbStacks - 2) + 1;
+    indices.insert(indices.end(), {v1Index, i0, i1});
+  }
+
+  // add quads per stack / slice
+  for(int j = 0; j < nbStacks - 2; j++) {
+    int j0 = j * nbSlices + 1;
+    int j1 = (j + 1) * nbSlices + 1;
+    for(int i = 0; i < nbSlices; i++) {
+      int i0 = j0 + i;
+      int i1 = j0 + (i + 1) % nbSlices;
+      int i2 = j1 + (i + 1) % nbSlices;
+      int i3 = j1 + i;
+      indices.insert(indices.end(), {i0, i1, i2, i2, i3, i0});
+    }
+  }
+
+  sptr = std::make_shared<Mesh>(vertices, indices, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+  addResource(path, sptr);
+
+  return sptr;
+}
 
 // Mesh* Mesh::generateIcoSphere(int nbDivisions) {
 //   std::vector<Vertex> vertices;

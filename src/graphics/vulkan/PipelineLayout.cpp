@@ -9,11 +9,11 @@ PipelineLayoutSettings::PipelineLayoutSettings(std::vector<DescriptorSetLayoutTy
   std::vector<VkPushConstantRange> pushConstantRanges) :
     _setLayouts {setLayouts}, _pushConstantRanges {pushConstantRanges} {}
 
-std::vector<DescriptorSetLayoutType> PipelineLayoutSettings::getSetLayouts() const {
+const std::vector<DescriptorSetLayoutType>& PipelineLayoutSettings::getSetLayouts() const {
   return _setLayouts;
 }
 
-std::vector<VkPushConstantRange> PipelineLayoutSettings::getPushConstantRanges() const {
+const std::vector<VkPushConstantRange>& PipelineLayoutSettings::getPushConstantRanges() const {
   return _pushConstantRanges;
 }
 

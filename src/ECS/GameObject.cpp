@@ -5,7 +5,6 @@
 #include "Components/Transform.h"
 #include "World.h"
 #include "resources/Material.h"
-#include "resources/ResourceManager.h"
 
 using namespace ECS;
 
@@ -196,12 +195,13 @@ GameObject* GameObject::createPrimitive(World* world, GameObjectPrimitives primi
   std::shared_ptr<Mesh> mesh;
   switch(primitive) {
     case PLANE:
-      mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
+      mesh = Mesh::generatePlane({1, 1}, {2, 2});
       obj->addComponent<MeshRenderer>(mesh, material);
       break;
 
     // case CUBE:
     //   mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
+    // // TODO: change to InstanceRenderer
     //   MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
       
     //   mr.setMaxInstanceCount(6);
