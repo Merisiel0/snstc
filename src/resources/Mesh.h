@@ -9,7 +9,7 @@
 class Buffer;
 class ResourceManager;
 
-class Mesh : public Resource<Mesh> {
+class Mesh : public Resource<Mesh, std::string> {
 private:
   const Buffer* _vertices;
   const Buffer* _indices;

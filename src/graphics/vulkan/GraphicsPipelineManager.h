@@ -33,7 +33,7 @@ public:
   /// @brief Gets all pipeline layouts that contains a specific descriptor set layout type.
   /// @param setLayout a descriptor set layout type.
   /// @return a vector of shared pointer to pipeline layouts.
-  static std::vector<std::shared_ptr<PipelineLayout>> getLayoutWithSet(
+  static std::vector<std::shared_ptr<PipelineLayout>> getLayoutsWithSet(
     DescriptorSetLayoutType setLayout);
 
   /// @brief Frees all expired pipeline layouts.

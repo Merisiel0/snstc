@@ -1,6 +1,5 @@
 #include "Material.h"
 
-#include "ResourceManager.h"
 #include "graphics/vulkan/DescriptorManager.h"
 #include "graphics/vulkan/Image.h"
 #include "graphics/vulkan/Sampler.h"
@@ -40,13 +39,14 @@ std::shared_ptr<Material> Material::load(std::string path) {
   std::vector<const char*> supportedImageExtensions = {".png", ".jpg"};
 
   // load textures
+  sptr = std::make_shared<Material>();
   for(int i = 0; i < mapNames.size(); i++) {
     for(int j = 0; j < supportedImageExtensions.size(); j++) {
       std::string completePath = path;
       completePath.append(mapNames[i]);
       completePath.append(supportedImageExtensions[j]);
       if(std::filesystem::exists(completePath)) {
-        sptr->_textures[i] = ResourceManager::loadImage(completePath.c_str());
+        sptr->_textures[i] = Image::load(completePath.c_str());
       }
     }
   }
@@ -83,7 +83,7 @@ std::shared_ptr<Material> Material::load(Color color) {
   // else generate a new one
   sptr = std::make_shared<Material>();
 
-  sptr->_textures[TEXTURE_ALBEDO] = ResourceManager::loadImage(1, 1, color);
+  sptr->_textures[TEXTURE_ALBEDO] = Image::load(1, 1, color);
 
   for(int i = 0; i < Swapchain::FRAME_OVERLAP; i++) {
     sptr->_descriptorSets.push_back(DescriptorManager::allocateSet(DESCRIPTOR_SET_LAYOUT_MATERIAL));

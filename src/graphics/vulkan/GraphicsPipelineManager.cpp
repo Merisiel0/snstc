@@ -50,7 +50,7 @@ std::shared_ptr<GraphicsPipeline> GraphicsPipelineManager::createPipeline(
   return pipeline;
 }
 
-std::vector<std::shared_ptr<PipelineLayout>> GraphicsPipelineManager::getLayoutWithSet(
+std::vector<std::shared_ptr<PipelineLayout>> GraphicsPipelineManager::getLayoutsWithSet(
   DescriptorSetLayoutType setLayout) {
   std::vector<std::shared_ptr<PipelineLayout>> result {};
   for(const auto& layout : _layouts) {

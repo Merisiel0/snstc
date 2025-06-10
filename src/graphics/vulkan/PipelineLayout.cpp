@@ -6,10 +6,8 @@
 #include "VulkanUtils.h"
 
 PipelineLayoutSettings::PipelineLayoutSettings(std::vector<DescriptorSetLayoutType> setLayouts,
-  std::vector<VkPushConstantRange> pushConstantRanges) {
-  _setLayouts = setLayouts;
-  _pushConstantRanges = pushConstantRanges;
-}
+  std::vector<VkPushConstantRange> pushConstantRanges) :
+    _setLayouts {setLayouts}, _pushConstantRanges {pushConstantRanges} {}
 
 std::vector<DescriptorSetLayoutType> PipelineLayoutSettings::getSetLayouts() const {
   return _setLayouts;
@@ -65,12 +63,24 @@ VkPipelineLayoutCreateInfo PipelineLayout::getCreateInfo() const {
   return info;
 }
 
-VkPipelineLayout PipelineLayout::getHandle() const { return _handle; }
+const VkPipelineLayout& PipelineLayout::getHandle() const { return _handle; }
 
-PipelineLayout::PipelineLayout(const std::vector<DescriptorSetLayoutType>& setLayouts,
+std::shared_ptr<PipelineLayout> PipelineLayout::load(
+  const std::vector<DescriptorSetLayoutType>& setLayouts,
   const std::vector<VkPushConstantRange>& pushConstantRanges) {
-  _settings = PipelineLayoutSettings(setLayouts, pushConstantRanges);
+  PipelineLayoutSettings settings = PipelineLayoutSettings(setLayouts, pushConstantRanges);
 
+  std::shared_ptr<PipelineLayout> sptr = findResource(settings);
+  if(sptr) return sptr;
+
+  sptr = std::make_shared<PipelineLayout>(settings);
+
+  addResource(settings, sptr);
+
+  return sptr;
+}
+
+PipelineLayout::PipelineLayout(PipelineLayoutSettings settings) : _settings {settings} {
   VkPipelineLayoutCreateInfo createInfo = getCreateInfo();
   VK_CHECK(
     vkCreatePipelineLayout(VulkanHandler::getDevice()->handle, &createInfo, nullptr, &_handle));
@@ -93,3 +103,5 @@ bool PipelineLayout::hasSetLayout(DescriptorSetLayoutType layout) const {
 
   return false;
 }
+
+bool PipelineLayout::operator==(const PipelineLayout& other) { return _handle == other._handle; }

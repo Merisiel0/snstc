@@ -7,35 +7,50 @@
 #include "VulkanHandler.h"
 
 GraphicsPipelineSettings::GraphicsPipelineSettings(std::shared_ptr<PipelineLayout> layout,
-  const std::vector<Shader>& shaders,
+  std::vector<std::shared_ptr<Shader>> shaders,
   VkPrimitiveTopology primitiveTopology,
   VkPolygonMode polygonMode,
-  bool depthWrite) {
-  _layout = layout;
-  for(const auto& shader : shaders) {
-    _shaderPaths.push_back(shader.getPath());
-  }
-  _primitiveTopology = primitiveTopology;
-  _polygonMode = polygonMode;
-  _depthWrite = depthWrite;
+  bool depthWrite) :
+    _layout {layout},
+    _shaders {shaders},
+    _primitiveTopology {primitiveTopology},
+    _polygonMode {polygonMode},
+    _depthWrite {depthWrite} {}
+
+std::shared_ptr<PipelineLayout> GraphicsPipelineSettings::getLayout() const { return _layout; }
+
+std::vector<std::shared_ptr<Shader>> GraphicsPipelineSettings::getShaders() const {
+  return _shaders;
 }
 
+VkPrimitiveTopology GraphicsPipelineSettings::getPrimitiveTopology() const {
+  return _primitiveTopology;
+}
+
+VkPolygonMode GraphicsPipelineSettings::getPolygonMode() const { return _polygonMode; }
+
+bool GraphicsPipelineSettings::getDepthWrite() const { return _depthWrite; }
+
 bool GraphicsPipelineSettings::operator==(const GraphicsPipelineSettings& other) const {
-  bool shadersMatch = _shaderPaths.size() == other._shaderPaths.size();
+  bool shadersMatch = _shaders.size() == other._shaders.size();
 
   if(!shadersMatch) return false;
 
-  int matchingPaths = 0;
-  for(const auto& path : _shaderPaths) {
-    for(const auto& otherPath : other._shaderPaths) {
-      if(path == otherPath) matchingPaths++;
+  int matchingShaders = 0;
+  for(const auto& shaderA : _shaders) {
+    for(const auto& shaderB : other._shaders) {
+      if(shaderA == shaderB) matchingShaders++;
     }
   }
 
-  if(matchingPaths != _shaderPaths.size()) return false;
+  if(matchingShaders != _shaders.size()) return false;
+
+  bool layoutMatch = _layout == other._layout;
+
+  if(!layoutMatch) return false;
 
   return _primitiveTopology == other._primitiveTopology && _polygonMode == other._polygonMode &&
-         _depthWrite == other._depthWrite && _layout->matchSettings(other._layout->getSettings());
+         _depthWrite == other._depthWrite;
 }
 
 VkPipelineRenderingCreateInfo GraphicsPipeline::getRenderingCreateInfo() const {
@@ -64,13 +79,12 @@ VkPipelineVertexInputStateCreateInfo GraphicsPipeline::getVertexInputState() con
   return state;
 }
 
-VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::getInputAssemblyState(
-  VkPrimitiveTopology primitiveTopology) const {
+VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::getInputAssemblyState() const {
   VkPipelineInputAssemblyStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
   state.pNext = nullptr;
   state.flags = 0;
-  state.topology = primitiveTopology;
+  state.topology = _settings.getPrimitiveTopology();
   state.primitiveRestartEnable = VK_FALSE;
 
   return state;
@@ -99,15 +113,14 @@ VkPipelineViewportStateCreateInfo GraphicsPipeline::getViewportState() const {
   return state;
 }
 
-VkPipelineRasterizationStateCreateInfo GraphicsPipeline::getRasterizationState(
-  VkPolygonMode polygonMode) const {
+VkPipelineRasterizationStateCreateInfo GraphicsPipeline::getRasterizationState() const {
   VkPipelineRasterizationStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
   state.pNext = nullptr;
   state.flags = 0;
   state.depthClampEnable = VK_FALSE;
   state.rasterizerDiscardEnable = VK_FALSE;
-  state.polygonMode = polygonMode;
+  state.polygonMode = _settings.getPolygonMode();
   state.cullMode = VK_CULL_MODE_BACK_BIT;
   state.frontFace = VK_FRONT_FACE_CLOCKWISE;
   state.depthBiasEnable = VK_FALSE;
@@ -134,14 +147,13 @@ VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getMultisampleState() con
   return state;
 }
 
-VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState(
-  bool depthWrite) const {
+VkPipelineDepthStencilStateCreateInfo GraphicsPipeline::getDepthStencilState() const {
   VkPipelineDepthStencilStateCreateInfo state {};
   state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   state.pNext = nullptr;
   state.flags = 0;
   state.depthTestEnable = VK_TRUE;
-  state.depthWriteEnable = (VkBool32) depthWrite;
+  state.depthWriteEnable = (VkBool32) _settings.getDepthWrite();
   state.depthCompareOp = VK_COMPARE_OP_LESS;
   state.depthBoundsTestEnable = VK_FALSE;
   state.stencilTestEnable = VK_FALSE;
@@ -201,22 +213,18 @@ PipelineDynamicStateCreateInfoData GraphicsPipeline::getDynamicState() const {
   return data;
 }
 
-GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(const PipelineLayout& layout,
-  const std::vector<Shader>& shaders,
-  VkPrimitiveTopology primitiveTopology,
-  VkPolygonMode polygonMode,
-  bool depthWrite) const {
+GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo() const {
   GraphicsPipelineCreateInfoData data;
 
   // get necessary informations
   data.rendering = getRenderingCreateInfo();
   data.vertexInput = getVertexInputState();
-  data.inputAssembly = getInputAssemblyState(primitiveTopology);
+  data.inputAssembly = getInputAssemblyState();
   data.tessellation = getTessellationState();
   data.viewport = getViewportState();
-  data.rasterization = getRasterizationState(polygonMode);
+  data.rasterization = getRasterizationState();
   data.multisample = getMultisampleState();
-  data.depthStencil = getDepthStencilState(depthWrite);
+  data.depthStencil = getDepthStencilState();
   data.colorBlend = getColorBlendState();
   data.dynamicState = getDynamicState();
 
@@ -226,8 +234,8 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(const PipelineLay
   data.info.flags = 0;
 
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages {};
-  for(const auto& shader : shaders) {
-    shaderStages.push_back(shader.getStageCreateInfo());
+  for(std::shared_ptr<Shader> shader : _settings.getShaders()) {
+    shaderStages.push_back(shader->getStageCreateInfo());
   }
   data.info.stageCount = (uint32_t) shaderStages.size();
   data.info.pStages = shaderStages.data();
@@ -241,7 +249,7 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(const PipelineLay
   data.info.pDepthStencilState = &data.depthStencil;
   data.info.pColorBlendState = &data.colorBlend.info;
   data.info.pDynamicState = &data.dynamicState.info;
-  data.info.layout = layout.getHandle();
+  data.info.layout = _settings.getLayout()->getHandle();
   ;
   data.info.renderPass = VK_NULL_HANDLE;
   data.info.subpass = 0;
@@ -254,14 +262,13 @@ GraphicsPipelineCreateInfoData GraphicsPipeline::getCreateInfo(const PipelineLay
 VkPipeline GraphicsPipeline::getHandle() const { return _handle; }
 
 GraphicsPipeline::GraphicsPipeline(std::shared_ptr<PipelineLayout> layout,
-  const std::vector<Shader>& shaders,
+  std::vector<std::shared_ptr<Shader>> shaders,
   VkPrimitiveTopology primitiveTopology,
   VkPolygonMode polygonMode,
-  bool depthWrite) {
-  _settings = GraphicsPipelineSettings(layout, shaders, primitiveTopology, polygonMode, depthWrite);
-
-  GraphicsPipelineCreateInfoData data =
-    getCreateInfo(*layout, shaders, primitiveTopology, polygonMode, depthWrite);
+  bool depthWrite) :
+    _settings {
+      GraphicsPipelineSettings(layout, shaders, primitiveTopology, polygonMode, depthWrite)} {
+  GraphicsPipelineCreateInfoData data = getCreateInfo();
 
   VK_CHECK(vkCreateGraphicsPipelines(VulkanHandler::getDevice()->handle, VK_NULL_HANDLE, 1,
     &data.info, nullptr, &_handle));

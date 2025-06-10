@@ -68,7 +68,7 @@ void EventHandler::processEvents() {
         //case SDL_CONTROLLERDEVICEREMAPPED:
         //  break;
 
-        //case SDL_CONTROLLERSTEAMHANDLEUPDATED: // todo: implement when steam is done
+        //case SDL_CONTROLLERSTEAMHANDLEUPDATED: // TODO: implement when steam is done
         //  break;
 
         //case SDL_AUDIODEVICEADDED:

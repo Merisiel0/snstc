@@ -22,7 +22,7 @@ enum TextureType {
   TEXTURE_TYPE_COUNT = 6
 };
 
-class Material : public Resource<Material> {
+class Material : public Resource<Material, std::string> {
 private:
   std::vector<std::shared_ptr<Image>> _textures {TEXTURE_TYPE_COUNT, nullptr};
   std::vector<std::shared_ptr<DescriptorSet>> _descriptorSets;
@@ -32,7 +32,7 @@ private:
 public:
   /// @brief Loads a material from a given path.
   /// @param path a path to a material asset.
-  /// @return a shared pointer to the material.
+  /// @return a shared pointer to the material if the path exists, nullptr otherwise.
   static std::shared_ptr<Material> load(std::string path);
 
   /// @brief Loads a material from a given color.
