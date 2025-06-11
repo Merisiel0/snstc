@@ -3,65 +3,48 @@
 #include "ECS/Components/Transform.h"
 #include "ECS/GameObject.h"
 #include "graphics/vulkan/Buffer.h"
-#include "graphics/vulkan/GraphicsPipelineId.h"
+#include "graphics/vulkan/GraphicsPipeline.h"
 #include "graphics/vulkan/VulkanHandler.h"
 #include "resources/Material.h"
+#include "resources/Mesh.h"
 
-MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-  VkPrimitiveTopology topology, VkCullModeFlags cullMode, VkPolygonMode polygonMode,
-  LightingType lightingType) :
-    mesh {mesh},
-    material {material},
-    _topology {topology},
-    cullMode {cullMode},
-    _polygonMode {polygonMode},
-    _lightingType {lightingType},
-    _pipelineId {GraphicsPipelineId(topology, polygonMode, MESH_LAYOUT_STATIC, lightingType)} {
-  VulkanHandler::loadPipeline(_pipelineId);
-}
-
-MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) :
-    MeshRenderer(mesh, material, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_CULL_MODE_BACK_BIT,
-      VK_POLYGON_MODE_FILL, LIGHTING_TYPE_UNLIT) {}
-
-MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, VkCullModeFlags cullMode,
-  CustomGraphicsPipeline id, VkPrimitiveTopology topology, VkPolygonMode polygonMode,
-  std::vector<VkPushConstantRange> pushConstantRanges, const std::vector<Shader>& shaders,
-  std::vector<DescriptorSetLayoutType> setLayouts) :
-    mesh {mesh},
-    material {nullptr},
-    _topology {topology},
-    cullMode {cullMode},
-    _polygonMode {polygonMode},
-    _lightingType {LIGHTING_TYPE_UNDEFINED},
-    _pipelineId {GraphicsPipelineId(topology, polygonMode, MESH_LAYOUT_STATIC, id)} {
-  VulkanHandler::loadPipeline(_pipelineId, shaders, pushConstantRanges, setLayouts);
-}
+MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh,
+  std::shared_ptr<Material> material,
+  std::shared_ptr<GraphicsPipeline> pipeline) :
+    _mesh {mesh},
+    _material {material},
+    _pipeline {pipeline},
+    _polygonMode {pipeline->getSettings().getPolygonMode()} {}
 
 MeshRenderer::~MeshRenderer() {}
 
-GraphicsPipelineId MeshRenderer::getGraphicsPipelineId() const { return _pipelineId; }
+const Mesh& MeshRenderer::getMesh() const { return *_mesh; }
+
+void MeshRenderer::setMesh(std::shared_ptr<Mesh> mesh) {
+  if(mesh->getPrimitiveTopology() != _mesh->getPrimitiveTopology()) { _dirtyPipeline = true; }
+  _mesh = mesh;
+}
+
+const Material& MeshRenderer::getMaterial() const { return *_material; }
+
+void MeshRenderer::setMaterial(std::shared_ptr<Material> material) {
+  if(material->hasTextures() != _material->hasTextures()) { _dirtyPipeline = true; }
+  _material = material;
+}
 
 VkPolygonMode MeshRenderer::getPolygonMode() const { return _polygonMode; }
 
 void MeshRenderer::setPolygonMode(VkPolygonMode mode) {
-  _polygonMode = mode;
-  _pipelineId.setPolygonMode(mode);
-  VulkanHandler::loadPipeline(_pipelineId);
+  if(mode != _polygonMode) {
+    _polygonMode = mode;
+    _dirtyPipeline = true;
+  }
 }
 
-VkPrimitiveTopology MeshRenderer::getPrimitiveTopology() const { return _topology; }
+VkCullModeFlags MeshRenderer::getCullMode() const { return _cullMode; }
 
-void MeshRenderer::setPrimitiveTopology(VkPrimitiveTopology topology) {
-  _topology = topology;
-  _pipelineId.setPrimitiveTopology(topology);
-  VulkanHandler::loadPipeline(_pipelineId);
-}
+void MeshRenderer::setCullMode(VkCullModeFlags mode) { _cullMode = mode; }
 
-LightingType MeshRenderer::getLightingType() const { return _lightingType; }
+float MeshRenderer::getLineWidth() const { return _lineWidth; }
 
-void MeshRenderer::setLightingType(LightingType type) {
-  _lightingType = type;
-  _pipelineId.setLightingType(type);
-  VulkanHandler::loadPipeline(_pipelineId);
-}
+void MeshRenderer::setLineWidth(float width) { _lineWidth = width; }

@@ -5,6 +5,7 @@
 #include "Components/Transform.h"
 #include "World.h"
 #include "resources/Material.h"
+#include "resources/Mesh.h"
 
 using namespace ECS;
 
@@ -32,9 +33,7 @@ GameObject::~GameObject() {
 
   const ObjectData& data = _registry->get<ObjectData>(_id);
 
-  if(data.tags.size() > 0){
-    std::cout << "Destroyed " << data.tags[0] << std::endl;
-  }
+  if(data.tags.size() > 0) { std::cout << "Destroyed " << data.tags[0] << std::endl; }
 
   // recursively destroy all children
   GameObject* currentChild = data.first;
@@ -175,21 +174,21 @@ void GameObject::removeChild(const GameObject& child) const {
 }
 
 GameObject* GameObject::getChild(uint32_t index) const {
-  ObjectData& data = _registry->get<ObjectData>(_id);
+  const ObjectData& data = _registry->get<ObjectData>(_id);
 
   if(index > data.childCount - 1) return nullptr;
 
-  data = _registry->get<ObjectData>(data.first->_id);
+  ObjectData* current = &_registry->get<ObjectData>(data.first->_id);
 
   for(uint32_t i = 0; i < index - 1; i++) {
-    data = _registry->get<ObjectData>(data.next->_id);
+    current = &_registry->get<ObjectData>(data.next->_id);
   }
 
-  return data.next;
+  return current->next;
 }
 
-GameObject* GameObject::createPrimitive(World* world, GameObjectPrimitives primitive,
-  std::shared_ptr<Material> material) {
+GameObject* GameObject::createPrimitive(
+  World* world, GameObjectPrimitives primitive, std::shared_ptr<Material> material) {
   GameObject* obj = new GameObject(world);
 
   std::shared_ptr<Mesh> mesh;
@@ -199,50 +198,50 @@ GameObject* GameObject::createPrimitive(World* world, GameObjectPrimitives primi
       obj->addComponent<MeshRenderer>(mesh, material);
       break;
 
-    // case CUBE:
-    //   mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
-    // // TODO: change to InstanceRenderer
-    //   MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
-      
-    //   mr.setMaxInstanceCount(6);
+      // case CUBE:
+      //   mesh = ResourceManager::generatePlane({1, 1}, {2, 2});
+      // // TODO: change to InstanceRenderer
+      //   MeshRenderer& mr = obj.addComponent<MeshRenderer>(mesh, material);
 
-    //   // top plane
-    //   InstanceProperties props;
-    //   mat4& mat = props.transform;
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::translate(mat, vec3 {0, 0.5f, 0});
-    //   mr.addInstance(props);
+      //   mr.setMaxInstanceCount(6);
 
-    //   // bottom plane
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::rotate(mat, radians(180.f), vec3{1,0,0});
-    //   mat = glm::translate(mat, {0, 0.5f, 0});
-    //   mr.addInstance(props);
+      //   // top plane
+      //   InstanceProperties props;
+      //   mat4& mat = props.transform;
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::translate(mat, vec3 {0, 0.5f, 0});
+      //   mr.addInstance(props);
 
-    //   // right plane
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::rotate(mat, radians(90.f), vec3{0,0,1});
-    //   mat = glm::translate(mat, {0, 0.5f, 0});
-    //   mr.addInstance(props);
+      //   // bottom plane
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::rotate(mat, radians(180.f), vec3{1,0,0});
+      //   mat = glm::translate(mat, {0, 0.5f, 0});
+      //   mr.addInstance(props);
 
-    //   // left plane
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::rotate(mat, radians(-90.f), vec3{0,0,1});
-    //   mat = glm::translate(mat, {0, 0.5f, 0});
-    //   mr.addInstance(props);
+      //   // right plane
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::rotate(mat, radians(90.f), vec3{0,0,1});
+      //   mat = glm::translate(mat, {0, 0.5f, 0});
+      //   mr.addInstance(props);
 
-    //   // front plane
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::rotate(mat, radians(90.f), vec3{1,0,0});
-    //   mat = glm::translate(mat, {0, 0.5f, 0});
-    //   mr.addInstance(props);
+      //   // left plane
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::rotate(mat, radians(-90.f), vec3{0,0,1});
+      //   mat = glm::translate(mat, {0, 0.5f, 0});
+      //   mr.addInstance(props);
 
-    //   // back plane
-    //   mat = glm::identity<mat4>();
-    //   mat = glm::rotate(mat, radians(-90.f), vec3{1,0,0});
-    //   mat = glm::translate(mat, {0, 0.5f, 0});
-    //   mr.addInstance(props);
-    //   break;
+      //   // front plane
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::rotate(mat, radians(90.f), vec3{1,0,0});
+      //   mat = glm::translate(mat, {0, 0.5f, 0});
+      //   mr.addInstance(props);
+
+      //   // back plane
+      //   mat = glm::identity<mat4>();
+      //   mat = glm::rotate(mat, radians(-90.f), vec3{1,0,0});
+      //   mat = glm::translate(mat, {0, 0.5f, 0});
+      //   mr.addInstance(props);
+      //   break;
   }
 
   return obj;

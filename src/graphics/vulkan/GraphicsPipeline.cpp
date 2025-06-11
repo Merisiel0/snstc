@@ -283,6 +283,8 @@ GraphicsPipeline::~GraphicsPipeline() {
   vkDestroyPipeline(VulkanHandler::getDevice()->handle, _handle, nullptr);
 }
 
+const GraphicsPipelineSettings& GraphicsPipeline::getSettings() const { return _settings; }
+
 bool GraphicsPipeline::matchSettings(const GraphicsPipelineSettings& settings) const {
   return _settings == settings;
 }

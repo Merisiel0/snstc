@@ -63,5 +63,6 @@ public:
 
   ~GraphicsPipeline();
 
+  const GraphicsPipelineSettings& getSettings() const;
   bool matchSettings(const GraphicsPipelineSettings& settings) const;
 };

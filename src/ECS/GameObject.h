@@ -236,8 +236,8 @@ public:
 
   /// @brief Creates a GameObject primitive.
   /// @return a GameObject.
-  static GameObject* createPrimitive(World* world, GameObjectPrimitives primitive,
-    std::shared_ptr<Material> material);
+  static GameObject* createPrimitive(
+    World* world, GameObjectPrimitives primitive, std::shared_ptr<Material> material);
 
   // static GameObject find();
   // static GameObject findWithTag();
